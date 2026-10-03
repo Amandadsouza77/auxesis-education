@@ -18,7 +18,7 @@
     {
       "key": "how-tutoring-works-003",
       "label": "P: Starting tutoring should be straightforward. When you enquire, tell me what the ",
-      "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I arrange a free phone conversation with the parent. If it sounds as though I may be able to help, I then arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+      "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I arrange a phone conversation with the parent. If it sounds as though I may be able to help, I arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
     },
     {
       "key": "how-tutoring-works-004",
@@ -47,8 +47,8 @@
     },
     {
       "key": "how-tutoring-works-009",
-      "label": "P: I arrange a free phone conversation with the parent.",
-      "text": "I arrange a free phone conversation with the parent."
+      "label": "P: I arrange a phone conversation with the parent.",
+      "text": "I arrange a phone conversation with the parent."
     },
     {
       "key": "how-tutoring-works-010",
@@ -62,8 +62,8 @@
     },
     {
       "key": "how-tutoring-works-012",
-      "label": "P: If it sounds as though I may be able to help, I then arrange a free Meet & Greet",
-      "text": "If it sounds as though I may be able to help, I then arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+      "label": "P: If it sounds as though I may be able to help, I arrange a Meet & Greet",
+      "text": "If it sounds as though I may be able to help, I arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
     },
     {
       "key": "how-tutoring-works-013",
@@ -78,7 +78,7 @@
     {
       "key": "how-tutoring-works-015",
       "label": "P: There is no pressure to decide during that meeting. Take time afterwards and mes",
-      "text": "There is no pressure to decide during that meeting. Take time afterwards and message me if you would like to proceed. I then confirm the practical arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
+      "text": "There is no pressure to decide during that meeting. Take time and message me if you would like to proceed. I confirm the arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
     },
     {
       "key": "how-tutoring-works-035",
@@ -93,7 +93,7 @@
     {
       "key": "how-tutoring-works-037",
       "label": "P: Once tutoring is confirmed, the student receives access to their private Auxesis Portal.",
-      "text": "Once tutoring is confirmed, the student receives access to their private Auxesis Portal. This becomes their central place for tutoring, bringing together upcoming lessons, lesson information, resources, assignments and progress in one place."
+      "text": "Once tutoring is confirmed, the student receives access to their private Auxesis Portal. This becomes their central place for upcoming lessons, lesson information, resources, assignments and progress."
     },
     {
       "key": "how-tutoring-works-038",
@@ -128,12 +128,12 @@
     {
       "key": "how-tutoring-works-019",
       "label": "P: Sessions are live and one-to-one on Google Meet. This is an active learning sess",
-      "text": "Sessions are live and one-to-one on Google Meet. This is an active learning session. Students explain ideas, answer questions and work through problems with me throughout the session. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring."
+      "text": "Sessions are live and one-to-one on Google Meet. Students explain ideas, answer questions and work through problems with me throughout the session. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a microphone and camera. Cameras are expected to stay on during tutoring."
     },
     {
       "key": "how-tutoring-works-020",
       "label": "P: Each student has their own Google Drive folder, shared with the student and me a",
-      "text": "Each student has their own Google Drive folder, shared with the student and me as editors. The folder provides an organised place for tutoring resources and any school materials the student wants to use. Parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted."
+      "text": "Each student has their own Google Drive folder, shared with the student and me as editors. The folder holds tutoring resources and any school materials the student wants to use. Parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted."
     },
     {
       "key": "how-tutoring-works-021",
@@ -158,7 +158,7 @@
     {
       "key": "how-tutoring-works-025",
       "label": "P: Students can send me a quick question through Google Chat if they get stuck. I a",
-      "text": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
+      "text": "Students can send me a quick question through Google Chat if they get stuck. I can answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
     },
     {
       "key": "how-tutoring-works-026",
@@ -178,7 +178,7 @@
     {
       "key": "how-tutoring-works-029",
       "label": "P: Send an enquiry with the subject, programme and kind of support you are looking ",
-      "text": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The initial parent conversation and Meet & Greet are free."
+      "text": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The parent conversation and Meet & Greet are free."
     },
     {
       "key": "how-tutoring-works-030",
