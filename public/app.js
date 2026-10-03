@@ -38,7 +38,7 @@ if(enquiry){
     }
   }).catch(()=>{});
 }
-const forms=[['enquiry-form','enquiry-status','enquiry','Thank you. Your enquiry has been received. Amanda will be in touch to discuss the next step, usually within 24–48 hours.'],['review-form','review-status','review','Thank you. Your review has been received and will be checked before anything is published.']];
+const forms=[['enquiry-form','enquiry-status','enquiry','Thank you. Your enquiry has been received. Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.'],['review-form','review-status','review','Thank you. Your review has been received and will be checked before anything is published.']];
 let turnstileLoad;
 function loadTurnstile(){
   if(!turnstileLoad)turnstileLoad=new Promise((resolve,reject)=>{if(window.turnstile)return resolve(window.turnstile);const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.onload=()=>resolve(window.turnstile);script.onerror=reject;document.head.append(script)});
