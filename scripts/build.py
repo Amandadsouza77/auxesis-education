@@ -34,6 +34,28 @@ def render(template, data, defaults):
         return defaults[key]['raw'] if value == defaults[key]['text'] else e(value).replace('\n', '<br>')
     return re.sub(r'%%COPY:([^%]+)%%', replace, template)
 
+def visual_grouping(html):
+    html = html.replace('<p>Less memorising. More understanding.</p>', '<p class="learning-statement"><span>Less memorising.</span> <span>More understanding.</span></p>')
+    phrases = {
+        'Understand more.<br>Think independently.': '<span class="hero-line">Understand more.</span> <span class="hero-line">Think independently.</span>',
+        '<h1>Why Auxesis exists</h1>': '<h1 class="compact-title">Why Auxesis exists</h1>',
+        'Science, by programme.': 'Science, <span class="keep-together">by programme.</span>',
+        'Strong foundations matter.': 'Strong <span class="keep-together">foundations matter.</span>',
+        'Biology, education and professional certification.': 'Biology, education and <span class="keep-together">professional certification.</span>',
+        'Live, one-to-one sessions.': 'Live, <span class="keep-together">one-to-one sessions.</span>',
+        'Share your experience.': 'Share <span class="keep-together">your experience.</span>',
+        '<h2>Parent conversation</h2>': '<h2><span class="keep-together">Parent conversation</span></h2>',
+        '<h1>Information used only for tutoring and related administration.</h1>': '<h1 class="privacy-title">Information used only for tutoring and <span class="keep-together">related administration.</span></h1>',
+    }
+    # Restrict grouping to headings; metadata and body copy are not changed.
+    import re
+    def group_heading(match):
+        value = match.group(0)
+        for original, grouped in phrases.items():
+            value = value.replace(original, grouped)
+        return value
+    return re.sub(r'<h[123]\b[^>]*>.*?</h[123]>', group_heading, html)
+
 def build():
     settings=read('content/settings.json'); defaults=read('templates/default-copy.json'); routes=read('templates/routes.json')
     site_url=validate_url(settings['site_url']) if settings['site_url'] else ''
@@ -59,8 +81,8 @@ def build():
         doc=doc.replace('%%COMPONENT:cta%%',shared['cta']).replace('%%VERIFY_URL%%',e(rec['verification_url']))
         for group,cards in groups.items(): doc=doc.replace('%%CARDS:'+group+'%%',cards)
         # Active navigation comes from the requested route, exactly as in the original shell.
-        if route['route'] in ['/subjects-programmes/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/recommendations/']:
-            doc=doc.replace('href="'+route['route']+'">','href="'+route['route']+'" aria-current="page">')
+        if route['route'] in ['/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/subjects-programmes/','/recommendations/','/enquire/']:
+            doc=re.sub(r'(<nav id="main-navigation"[^>]*>.*?href="'+re.escape(route['route'])+r'")>',r'\1 aria-current="page">',doc,count=1,flags=re.S)
         if logo!='/assets/logo.png': doc=doc.replace('src="/assets/logo.png"',f'src="{e(logo)}"')
         if portrait:
             doc=re.sub(r'<figure class="portrait-placeholder".*?</figure>',f'<figure class="portrait-placeholder"><img class="amanda-photo" src="{e(portrait)}" alt="{e(settings["portrait_alt"])}"></figure>',doc,flags=re.S)
@@ -79,9 +101,10 @@ def build():
         doc=doc.replace('aria-label="Relationship to Auxesis" required','aria-label="Relationship to Auxesis" name="relationship" required maxlength="200"')
         doc=doc.replace('aria-label="Preferred public name or identification"','aria-label="Preferred public name or identification" name="public_name" maxlength="200"')
         doc=doc.replace('<input type="checkbox" required> Permission to publish','<input type="checkbox" name="consent" required> Permission to publish')
-        doc=re.sub(r'(<form[^>]*id="(?:enquiry-form|review-form)"[^>]*>)',r'\1<div class="bot-field" aria-hidden="true"><label>Leave empty<input name="website" tabindex="-1" autocomplete="off"></label></div>',doc)
+        doc=re.sub(r'(<form[^>]*id="(?:enquiry-form|review-form)"[^>]*>)',r'\1<div class="bot-field" hidden aria-hidden="true"><label>Leave empty<input name="website" tabindex="-1" autocomplete="off"></label></div>',doc)
         # Original programme links use short aliases; normalize them in app.js without rewriting content.
         if re.search(r'%%[A-Z_]+',doc): raise ValueError('Unresolved template in '+route['name'])
+        doc=visual_grouping(doc)
         out=target/route['path'];out.parent.mkdir(parents=True,exist_ok=True);out.write_text(doc,encoding='utf-8')
     config={'turnstileSiteKey':settings.get('turnstile_site_key','')}
     (target/'site-config.js').write_text('window.AUXESIS='+json.dumps(config)+';\n')
