@@ -8,3 +8,86 @@
 
 /* Keep contact choices compact and aligned on mobile. */
 .contact-method label{display:inline-flex;align-items:center;gap:.5rem}.contact-method input[type="radio"]{width:1rem;height:1rem;min-height:0;margin:0;padding:0;flex:none}.field-hint{font-size:.8rem;font-weight:400;line-height:1.4}.delivery-note{padding:1rem;border-left:3px solid var(--teal-companion);background:rgba(214,201,184,.35)}.delivery-note a{font-weight:700}.check span{min-width:0}
+
+
+/* Shared consistency rules */
+:root{--teal-dark:#006B67;--surface-radius:.35rem;--control-height:3rem}
+.header{z-index:100;background:var(--alabaster);border-bottom:1px solid var(--line)}
+.nav-wrap{min-height:5rem}
+.header .brand img{display:block;max-width:100%;height:auto;object-fit:contain}
+.menu-toggle{min-height:44px;padding:.6rem 1rem;border:1px solid var(--midnight-violet);border-radius:var(--surface-radius);font:700 .95rem/1.2 var(--sans)}
+.button{min-height:var(--control-height);padding:.75rem 1.25rem;border:1px solid var(--teal-dark);border-radius:var(--surface-radius);background:var(--teal-dark);color:var(--alabaster);font:700 .95rem/1.2 var(--sans);letter-spacing:.01em;transition:filter .18s ease,transform .18s ease}
+.button:hover{filter:brightness(.94);transform:translateY(-1px)}
+.button:focus-visible{outline:3px solid var(--midnight-violet);outline-offset:3px}
+.button.secondary{background:transparent;border:1px solid currentColor;color:inherit}
+.button.secondary:hover{background:rgba(214,201,184,.28);filter:none;transform:none}
+.home-hero .button:not(.secondary),.page-hero .button:not(.secondary),.section.dark .button:not(.secondary),.footer .button:not(.secondary){background:var(--teal-companion);border-color:var(--teal-companion);color:var(--midnight-violet)}
+.home-hero .button:not(.secondary):focus-visible,.page-hero .button:not(.secondary):focus-visible,.section.dark .button:not(.secondary):focus-visible,.footer .button:not(.secondary):focus-visible{outline-color:var(--alabaster)}
+.cta-band{padding:clamp(3.5rem,7vw,5.4rem) 0;background:var(--teal-companion);color:var(--midnight-violet)}
+.cta-band .button:not(.secondary){background:var(--midnight-violet);border-color:var(--midnight-violet);color:var(--alabaster);white-space:nowrap}
+.cta-band .button:not(.secondary):focus-visible{outline-color:var(--midnight-violet)}
+.cta-inner{gap:clamp(1.5rem,4vw,4rem)}
+.actions{gap:.85rem}
+.page-navigation{align-items:center;gap:1.5rem}
+.page-navigation a{display:inline-flex;align-items:center;min-height:44px}
+h1,h2,h3{margin-block-start:0;line-height:1.1}
+h1{margin-block-end:1.25rem}
+h2{margin-block-end:1rem}
+h3{margin-block-end:.75rem}
+.process-list h2{font-size:clamp(2rem,3.5vw,3.55rem)}
+.section-heading{margin-block-end:2.5rem}
+.recommendation-grid{gap:1.5rem}
+.recommendation-card{padding:2rem;border:1px solid var(--line);border-top:3px solid var(--peacock-teal);border-radius:var(--surface-radius);box-shadow:0 8px 24px rgba(41,33,60,.08)}
+.recommendation-card .eyebrow{margin-block-end:1rem}
+.programme-cards{gap:1.25rem}
+.programme-cards article{padding:1.9rem;border-radius:var(--surface-radius)}
+.programme-cards article h3{margin-block-end:.85rem}
+.subject-panel,.testimonial-placeholder{border-radius:var(--surface-radius)}
+.review-form,.enquiry-form{padding:2.25rem;border:1px solid var(--line);border-radius:var(--surface-radius);box-shadow:0 8px 24px rgba(41,33,60,.08)}
+.required-note{margin:0 0 1.15rem;font-size:.9rem;font-weight:700}
+.required-marker{display:inline-block;margin-left:.12em;font-weight:800}
+.field{min-width:0;gap:.5rem;font-size:.95rem;line-height:1.4}
+.review-form .field{margin:0 0 1.1rem}
+.field input:not([type=checkbox]):not([type=radio]),.field select,.field textarea{display:block;width:100%;min-width:0;min-height:var(--control-height);margin:0;padding:.72rem .8rem;border:1px solid rgba(41,33,60,.42);border-radius:.25rem;background:#fff;color:var(--midnight-violet);font:400 1rem/1.4 var(--sans)}
+.field textarea{min-height:8rem;resize:vertical}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:3px solid var(--teal-companion);outline-offset:2px;border-color:var(--midnight-violet)}
+.field input:user-invalid,.field select:user-invalid,.field textarea:user-invalid{border-color:#9b2c2c}
+.field-hint{font-size:.82rem}
+.contact-method{min-width:0}
+.contact-method label{display:inline-flex;align-items:center;gap:.5rem;min-height:2.5rem}
+.contact-method input[type=radio],.check input[type=checkbox]{width:1rem;height:1rem;min-height:1rem;margin:0;flex:none}
+.check{align-items:flex-start;gap:.65rem;line-height:1.45}
+.review-form>.button,.enquiry-form>.button{width:100%}
+.form-note{border-radius:.2rem;line-height:1.5}
+.bot-field[hidden],[hidden]{display:none!important}
+@media(max-width:1320px){
+ .nav-wrap{min-height:4.5rem;gap:1rem}
+ .menu-toggle{display:block;margin-left:auto}
+ .main-navigation{display:none;position:absolute;z-index:101;top:100%;left:0;right:0;max-height:min(80vh,42rem);overflow:auto;flex-direction:column;align-items:stretch;gap:0;padding:1rem 5% 1.25rem;background:var(--alabaster);border-bottom:1px solid var(--line);box-shadow:0 12px 20px rgba(41,33,60,.08)}
+ .main-navigation.is-open{display:flex}
+ .main-navigation>a:not(.button),.portal-reserved{display:flex;align-items:center;min-height:44px;padding:.65rem 0;font-size:1rem}
+ .main-navigation .button{width:100%;margin:.8rem 0 0}
+}
+@media(max-width:900px){
+ .header{background:var(--alabaster)}
+ .nav-wrap{min-height:4.5rem;padding:.4rem 0}
+ .brand{width:155px}
+ .header .brand img{width:100%;height:auto;max-height:3.25rem}
+ .main-navigation{background:var(--alabaster)}
+ .cta-inner{align-items:flex-start;flex-direction:column;gap:1.4rem}
+ .cta-band .button:not(.secondary){width:100%}
+ .programme-cards{gap:1.5rem}
+ .programme-cards article{padding:1.6rem}
+}
+@media(max-width:560px){
+ .brand{width:145px}
+ .menu-toggle{min-height:44px;padding:.55rem .85rem}
+ .cta-band{padding:3.75rem 0}
+ .programme-cards{gap:1.6rem}
+ .programme-cards article{padding:1.4rem}
+ .section.dark#ib{padding-block:4.75rem}
+ .review-form,.enquiry-form{padding:1.25rem}
+ .form-grid{gap:1rem}
+ .programme-nav{padding-block:1.5rem}
+ .page-navigation{padding-block:1.5rem 3rem}
+}

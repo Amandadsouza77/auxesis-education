@@ -59,8 +59,8 @@ def build():
         doc=doc.replace('%%COMPONENT:cta%%',shared['cta']).replace('%%VERIFY_URL%%',e(rec['verification_url']))
         for group,cards in groups.items(): doc=doc.replace('%%CARDS:'+group+'%%',cards)
         # Active navigation comes from the requested route, exactly as in the original shell.
-        if route['route'] in ['/subjects-programmes/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/recommendations/']:
-            doc=doc.replace('href="'+route['route']+'">','href="'+route['route']+'" aria-current="page">')
+        if route['route'] in ['/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/subjects-programmes/','/recommendations/','/enquire/']:
+            doc=re.sub(r'(<nav id="main-navigation"[^>]*>.*?href="'+re.escape(route['route'])+r'")>',r'\1 aria-current="page">',doc,count=1,flags=re.S)
         if logo!='/assets/logo.png': doc=doc.replace('src="/assets/logo.png"',f'src="{e(logo)}"')
         if portrait:
             doc=re.sub(r'<figure class="portrait-placeholder".*?</figure>',f'<figure class="portrait-placeholder"><img class="amanda-photo" src="{e(portrait)}" alt="{e(settings["portrait_alt"])}"></figure>',doc,flags=re.S)
@@ -79,7 +79,7 @@ def build():
         doc=doc.replace('aria-label="Relationship to Auxesis" required','aria-label="Relationship to Auxesis" name="relationship" required maxlength="200"')
         doc=doc.replace('aria-label="Preferred public name or identification"','aria-label="Preferred public name or identification" name="public_name" maxlength="200"')
         doc=doc.replace('<input type="checkbox" required> Permission to publish','<input type="checkbox" name="consent" required> Permission to publish')
-        doc=re.sub(r'(<form[^>]*id="(?:enquiry-form|review-form)"[^>]*>)',r'\1<div class="bot-field" aria-hidden="true"><label>Leave empty<input name="website" tabindex="-1" autocomplete="off"></label></div>',doc)
+        doc=re.sub(r'(<form[^>]*id="(?:enquiry-form|review-form)"[^>]*>)',r'\1<div class="bot-field" hidden aria-hidden="true"><label>Leave empty<input name="website" tabindex="-1" autocomplete="off"></label></div>',doc)
         # Original programme links use short aliases; normalize them in app.js without rewriting content.
         if re.search(r'%%[A-Z_]+',doc): raise ValueError('Unresolved template in '+route['name'])
         out=target/route['path'];out.parent.mkdir(parents=True,exist_ok=True);out.write_text(doc,encoding='utf-8')
