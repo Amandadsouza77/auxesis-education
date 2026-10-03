@@ -1,0 +1,89 @@
+{
+  "blocks": [
+    {
+      "key": "footer-000",
+      "label": "P: One-to-one online science tutoring built around the individual student.",
+      "text": "One-to-one online science tutoring built around the individual student."
+    },
+    {
+      "key": "footer-001",
+      "label": "P: Based in Ontario, Canada. Working with students internationally.",
+      "text": "Based in Ontario, Canada. Working with students internationally."
+    },
+    {
+      "key": "footer-002",
+      "label": "H2: Explore",
+      "text": "Explore"
+    },
+    {
+      "key": "footer-003",
+      "label": "A: Subjects & Programmes",
+      "text": "Subjects & Programmes"
+    },
+    {
+      "key": "footer-004",
+      "label": "A: About Auxesis",
+      "text": "About Auxesis"
+    },
+    {
+      "key": "footer-005",
+      "label": "A: About Amanda",
+      "text": "About Amanda"
+    },
+    {
+      "key": "footer-006",
+      "label": "A: How Tutoring Works",
+      "text": "How Tutoring Works"
+    },
+    {
+      "key": "footer-007",
+      "label": "A: Recommendations & Reviews",
+      "text": "Recommendations & Reviews"
+    },
+    {
+      "key": "footer-008",
+      "label": "A: Tutoring Policies",
+      "text": "Tutoring Policies"
+    },
+    {
+      "key": "footer-009",
+      "label": "A: Privacy & Consent",
+      "text": "Privacy & Consent"
+    },
+    {
+      "key": "footer-010",
+      "label": "A: Frequently Asked Questions",
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "key": "footer-011",
+      "label": "A: Enquire",
+      "text": "Enquire"
+    },
+    {
+      "key": "footer-012",
+      "label": "H2: Start here",
+      "text": "Start here"
+    },
+    {
+      "key": "footer-013",
+      "label": "P: Tell me what the student is studying, what they would like to achieve and where ",
+      "text": "Tell me what the student is studying, what they would like to achieve and where support would help."
+    },
+    {
+      "key": "footer-014",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "footer-015",
+      "label": "SPAN: © 2026 Auxesis Education",
+      "text": "© 2026 Auxesis Education"
+    },
+    {
+      "key": "footer-016",
+      "label": "A: Back to top",
+      "text": "Back to top"
+    }
+  ]
+}

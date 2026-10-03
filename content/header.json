@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "key": "header-000",
+      "label": "A: Skip to content",
+      "text": "Skip to content"
+    },
+    {
+      "key": "header-001",
+      "label": "BUTTON: Menu",
+      "text": "Menu"
+    },
+    {
+      "key": "header-002",
+      "label": "A: Subjects & Programmes",
+      "text": "Subjects & Programmes"
+    },
+    {
+      "key": "header-003",
+      "label": "A: About Auxesis",
+      "text": "About Auxesis"
+    },
+    {
+      "key": "header-004",
+      "label": "A: About Amanda",
+      "text": "About Amanda"
+    },
+    {
+      "key": "header-005",
+      "label": "A: How Tutoring Works",
+      "text": "How Tutoring Works"
+    },
+    {
+      "key": "header-006",
+      "label": "A: Recommendations & Reviews",
+      "text": "Recommendations & Reviews"
+    },
+    {
+      "key": "header-007",
+      "label": "SPAN: Portal / Sign in",
+      "text": "Portal / Sign in"
+    },
+    {
+      "key": "header-008",
+      "label": "A: Enquire",
+      "text": "Enquire"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "404",
+    "route": "/404.html",
+    "path": "404.html"
+  },
+  {
+    "name": "about-amanda",
+    "route": "/about-amanda/",
+    "path": "about-amanda/index.html"
+  },
+  {
+    "name": "about-auxesis",
+    "route": "/about-auxesis/",
+    "path": "about-auxesis/index.html"
+  },
+  {
+    "name": "enquire",
+    "route": "/enquire/",
+    "path": "enquire/index.html"
+  },
+  {
+    "name": "faq",
+    "route": "/faq/",
+    "path": "faq/index.html"
+  },
+  {
+    "name": "how-tutoring-works",
+    "route": "/how-tutoring-works/",
+    "path": "how-tutoring-works/index.html"
+  },
+  {
+    "name": "home",
+    "route": "/",
+    "path": "index.html"
+  },
+  {
+    "name": "privacy-consent",
+    "route": "/privacy-consent/",
+    "path": "privacy-consent/index.html"
+  },
+  {
+    "name": "recommendations",
+    "route": "/recommendations/",
+    "path": "recommendations/index.html"
+  },
+  {
+    "name": "subjects-programmes",
+    "route": "/subjects-programmes/",
+    "path": "subjects-programmes/index.html"
+  },
+  {
+    "name": "tutoring-policies",
+    "route": "/tutoring-policies/",
+    "path": "tutoring-policies/index.html"
+  }
+]

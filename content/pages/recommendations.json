@@ -1,0 +1,116 @@
+{
+  "blocks": [
+    {
+      "key": "recommendations-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "recommendations-001",
+      "label": "P: Recommendations & Reviews",
+      "text": "Recommendations & Reviews"
+    },
+    {
+      "key": "recommendations-002",
+      "label": "H1: What students, parents and colleagues say about working with Amanda.",
+      "text": "What students, parents and colleagues say about working with Amanda."
+    },
+    {
+      "key": "recommendations-003",
+      "label": "P: These recommendations come from parents, former students and colleagues who have",
+      "text": "These recommendations come from parents, former students and colleagues who have worked with me in tutoring and school settings. The excerpts below retain their original wording and are attributed to the people who published them on LinkedIn."
+    },
+    {
+      "key": "recommendations-004",
+      "label": "A: Read recommendations on Amanda’s LinkedIn profile",
+      "text": "Read recommendations on Amanda’s LinkedIn profile"
+    },
+    {
+      "key": "recommendations-005",
+      "label": "P: From parents",
+      "text": "From parents"
+    },
+    {
+      "key": "recommendations-006",
+      "label": "H2: Experiences of IB tutoring, understanding and progress.",
+      "text": "Experiences of IB tutoring, understanding and progress."
+    },
+    {
+      "key": "recommendations-007",
+      "label": "P: From former students",
+      "text": "From former students"
+    },
+    {
+      "key": "recommendations-008",
+      "label": "H2: Reflections on confidence, independence and learning Biology.",
+      "text": "Reflections on confidence, independence and learning Biology."
+    },
+    {
+      "key": "recommendations-009",
+      "label": "P: From colleagues",
+      "text": "From colleagues"
+    },
+    {
+      "key": "recommendations-010",
+      "label": "H2: Perspectives from working together in science education.",
+      "text": "Perspectives from working together in science education."
+    },
+    {
+      "key": "recommendations-011",
+      "label": "P: These are individual experiences. The references to grades describe those famili",
+      "text": "These are individual experiences. The references to grades describe those families’ experiences; they are not promises of a particular result. Read the complete recommendations on LinkedIn for their full context."
+    },
+    {
+      "key": "recommendations-012",
+      "label": "A: Read recommendations on Amanda’s LinkedIn profile",
+      "text": "Read recommendations on Amanda’s LinkedIn profile"
+    },
+    {
+      "key": "recommendations-013",
+      "label": "P: Submit a review",
+      "text": "Submit a review"
+    },
+    {
+      "key": "recommendations-014",
+      "label": "H2: Share your experience.",
+      "text": "Share your experience."
+    },
+    {
+      "key": "recommendations-015",
+      "label": "P: If you have worked with Auxesis Education and would like to share your experienc",
+      "text": "If you have worked with Auxesis Education and would like to share your experience, you can submit a review here. All submissions are reviewed before anything is published."
+    },
+    {
+      "key": "recommendations-016",
+      "label": "P: Review text",
+      "text": "Review text"
+    },
+    {
+      "key": "recommendations-017",
+      "label": "P: Relationship to Auxesis",
+      "text": "Relationship to Auxesis"
+    },
+    {
+      "key": "recommendations-018",
+      "label": "P: Preferred public name or identification",
+      "text": "Preferred public name or identification"
+    },
+    {
+      "key": "recommendations-019",
+      "label": "BUTTON: Submit a review",
+      "text": "Submit a review"
+    },
+    {
+      "key": "recommendations-020",
+      "label": "A: Previous: How Tutoring Works",
+      "text": "Previous: How Tutoring Works"
+    },
+    {
+      "key": "recommendations-021",
+      "label": "A: Next: Enquire",
+      "text": "Next: Enquire"
+    }
+  ],
+  "title": "Recommendations & Reviews | Auxesis Education",
+  "description": "Read recommendations from students, parents and colleagues who have worked with Amanda D’Souza, or submit your own review."
+}

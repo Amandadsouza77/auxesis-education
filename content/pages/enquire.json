@@ -1,0 +1,81 @@
+{
+  "blocks": [
+    {
+      "key": "enquire-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "enquire-001",
+      "label": "P: Enquire",
+      "text": "Enquire"
+    },
+    {
+      "key": "enquire-002",
+      "label": "H1: Tell me a little about the student.",
+      "text": "Tell me a little about the student."
+    },
+    {
+      "key": "enquire-003",
+      "label": "P: Tell me a little about the student, what they are studying and where support wou",
+      "text": "Tell me a little about the student, what they are studying and where support would help. I will get in touch to talk through the situation, answer your questions and see whether I am the right person to help."
+    },
+    {
+      "key": "enquire-004",
+      "label": "P: What happens next",
+      "text": "What happens next"
+    },
+    {
+      "key": "enquire-005",
+      "label": "H2: Start with a conversation.",
+      "text": "Start with a conversation."
+    },
+    {
+      "key": "enquire-006",
+      "label": "P: I will arrange a free phone conversation with the parent first. If it makes sens",
+      "text": "I will arrange a free phone conversation with the parent first. If it makes sense to continue, we will set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. After that, take time to decide. If you would like to proceed, message me and we will arrange the first session."
+    },
+    {
+      "key": "enquire-007",
+      "label": "P: Based in Ontario, Canada, and working online with students in Canada and interna",
+      "text": "Based in Ontario, Canada, and working online with students in Canada and internationally."
+    },
+    {
+      "key": "enquire-008",
+      "label": "A: How Tutoring Works",
+      "text": "How Tutoring Works"
+    },
+    {
+      "key": "enquire-009",
+      "label": "P: Enquiry form",
+      "text": "Enquiry form"
+    },
+    {
+      "key": "enquire-010",
+      "label": "LEGEND: Preferred contact method — required",
+      "text": "Preferred contact method — required"
+    },
+    {
+      "key": "enquire-011",
+      "label": "P: Please share only the information that will help us discuss tutoring. I do not n",
+      "text": "Please share only the information that will help us discuss tutoring. I do not need the student’s school name or detailed medical information."
+    },
+    {
+      "key": "enquire-012",
+      "label": "A: Privacy & Consent information",
+      "text": "Privacy & Consent information"
+    },
+    {
+      "key": "enquire-013",
+      "label": "BUTTON: Send enquiry",
+      "text": "Send enquiry"
+    },
+    {
+      "key": "enquire-014",
+      "label": "A: Previous: Recommendations & Reviews",
+      "text": "Previous: Recommendations & Reviews"
+    }
+  ],
+  "title": "Enquire About Tutoring | Auxesis Education",
+  "description": "Tell Amanda what the student is studying and where support would help. Start with a free parent conversation and student-and-parent Meet & Greet."
+}

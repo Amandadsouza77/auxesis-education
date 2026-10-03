@@ -1,0 +1,181 @@
+{
+  "blocks": [
+    {
+      "key": "how-tutoring-works-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "how-tutoring-works-001",
+      "label": "P: How Tutoring Works",
+      "text": "How Tutoring Works"
+    },
+    {
+      "key": "how-tutoring-works-002",
+      "label": "H1: From enquiry to first lesson",
+      "text": "From enquiry to first lesson"
+    },
+    {
+      "key": "how-tutoring-works-003",
+      "label": "P: Starting tutoring should be straightforward. When you enquire, tell me what the ",
+      "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, we then set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+    },
+    {
+      "key": "how-tutoring-works-004",
+      "label": "SPAN: 01",
+      "text": "01"
+    },
+    {
+      "key": "how-tutoring-works-005",
+      "label": "H2: Enquiry",
+      "text": "Enquiry"
+    },
+    {
+      "key": "how-tutoring-works-006",
+      "label": "P: Tell me what the student is studying, what they need help with now, what they wo",
+      "text": "Tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times."
+    },
+    {
+      "key": "how-tutoring-works-007",
+      "label": "SPAN: 02",
+      "text": "02"
+    },
+    {
+      "key": "how-tutoring-works-008",
+      "label": "H2: Parent conversation",
+      "text": "Parent conversation"
+    },
+    {
+      "key": "how-tutoring-works-009",
+      "label": "P: I first arrange a free phone conversation with the parent.",
+      "text": "I first arrange a free phone conversation with the parent."
+    },
+    {
+      "key": "how-tutoring-works-010",
+      "label": "SPAN: 03",
+      "text": "03"
+    },
+    {
+      "key": "how-tutoring-works-011",
+      "label": "H2: Meet & Greet",
+      "text": "Meet & Greet"
+    },
+    {
+      "key": "how-tutoring-works-012",
+      "label": "P: If it sounds as though I may be able to help, we then set up a free Meet & Greet",
+      "text": "If it sounds as though I may be able to help, we then set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+    },
+    {
+      "key": "how-tutoring-works-013",
+      "label": "SPAN: 04",
+      "text": "04"
+    },
+    {
+      "key": "how-tutoring-works-014",
+      "label": "H2: Decision and first lesson",
+      "text": "Decision and first lesson"
+    },
+    {
+      "key": "how-tutoring-works-015",
+      "label": "P: There is no pressure to decide during that meeting. Take time afterward and mess",
+      "text": "There is no pressure to decide during that meeting. Take time afterward and message me if you would like to proceed. We then agree the practical arrangements, choose the first session date and decide what to tackle first. The first paid session is a proper lesson, not another consultation. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
+    },
+    {
+      "key": "how-tutoring-works-016",
+      "label": "P: SMART goals. Clear next steps.",
+      "text": "SMART goals. Clear next steps."
+    },
+    {
+      "key": "how-tutoring-works-017",
+      "label": "P: How we work online",
+      "text": "How we work online"
+    },
+    {
+      "key": "how-tutoring-works-018",
+      "label": "H2: Live, one-to-one sessions.",
+      "text": "Live, one-to-one sessions."
+    },
+    {
+      "key": "how-tutoring-works-019",
+      "label": "P: Sessions are live and one-to-one on Google Meet. They are not lectures: students",
+      "text": "Sessions are live and one-to-one on Google Meet. They are not lectures: students will be explaining ideas, answering questions and working through problems with me. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring."
+    },
+    {
+      "key": "how-tutoring-works-020",
+      "label": "P: Each student has their own Google Drive folder, shared with the student and me a",
+      "text": "Each student has their own Google Drive folder, shared with the student and me as editors. This is where we keep tutoring resources and any school materials the student wants to use. Students are responsible for keeping the folder reasonably organised, and parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted."
+    },
+    {
+      "key": "how-tutoring-works-021",
+      "label": "P: Students contact me through Google Chat between sessions. After enrolment, paren",
+      "text": "Students contact me through Google Chat between sessions. After enrolment, parents may also choose to communicate through WhatsApp; I do not require WhatsApp as part of the tutoring setup. I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
+    },
+    {
+      "key": "how-tutoring-works-022",
+      "label": "P: Making the sessions useful",
+      "text": "Making the sessions useful"
+    },
+    {
+      "key": "how-tutoring-works-023",
+      "label": "P: Whenever possible, students should tell me at least 48 hours before a session wh",
+      "text": "Whenever possible, students should tell me at least 48 hours before a session what they want to work on. That might be learning new content, clearing up something from class, preparing for a test, working through an assignment or doing exam-style questions. If we are using school materials, please upload them to the student’s Google Drive folder in advance. If there is nothing specific to send, I can prepare suitable resources."
+    },
+    {
+      "key": "how-tutoring-works-024",
+      "label": "P: I do not give homework simply for the sake of giving homework. If extra practice",
+      "text": "I do not give homework simply for the sake of giving homework. If extra practice would be useful, I can provide it or suggest what to work on, but completing it is the student’s responsibility. I am not going to chase them for every piece of work. If practice has not been completed, there is no punishment; we simply start the next session from where the student actually is."
+    },
+    {
+      "key": "how-tutoring-works-025",
+      "label": "P: Students can send me a quick question through Google Chat if they get stuck. I a",
+      "text": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session, but anything that needs a proper explanation, substantial review or extended help belongs in a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
+    },
+    {
+      "key": "how-tutoring-works-026",
+      "label": "P: I keep parents informed about what we are working on, how things are progressing",
+      "text": "I keep parents informed about what we are working on, how things are progressing and anything I think they should know. Some families want more frequent updates than others, so communication is adapted accordingly."
+    },
+    {
+      "key": "how-tutoring-works-027",
+      "label": "P: Fees",
+      "text": "Fees"
+    },
+    {
+      "key": "how-tutoring-works-028",
+      "label": "H2: Confirmed before you decide whether to proceed.",
+      "text": "Confirmed before you decide whether to proceed."
+    },
+    {
+      "key": "how-tutoring-works-029",
+      "label": "P: Send an enquiry with the subject, programme and kind of support you are looking ",
+      "text": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The initial parent conversation and Meet & Greet are free."
+    },
+    {
+      "key": "how-tutoring-works-030",
+      "label": "A: Enquire About a Meet & Greet",
+      "text": "Enquire About a Meet & Greet"
+    },
+    {
+      "key": "how-tutoring-works-031",
+      "label": "A: Tutoring Policies",
+      "text": "Tutoring Policies"
+    },
+    {
+      "key": "how-tutoring-works-032",
+      "label": "A: Frequently Asked Questions",
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "key": "how-tutoring-works-033",
+      "label": "A: Previous: About Amanda",
+      "text": "Previous: About Amanda"
+    },
+    {
+      "key": "how-tutoring-works-034",
+      "label": "A: Next: Recommendations & Reviews",
+      "text": "Next: Recommendations & Reviews"
+    }
+  ],
+  "title": "How Tutoring Works | Auxesis Education",
+  "description": "Find out how tutoring starts, how online sessions work, what students should prepare and how communication and scheduling are handled."
+}

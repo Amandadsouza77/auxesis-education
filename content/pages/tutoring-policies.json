@@ -1,0 +1,66 @@
+{
+  "blocks": [
+    {
+      "key": "tutoring-policies-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "tutoring-policies-001",
+      "label": "P: Tutoring Policies",
+      "text": "Tutoring Policies"
+    },
+    {
+      "key": "tutoring-policies-002",
+      "label": "H1: Clear arrangements make tutoring easier for everyone.",
+      "text": "Clear arrangements make tutoring easier for everyone."
+    },
+    {
+      "key": "tutoring-policies-003",
+      "label": "P: A few clear arrangements make tutoring easier for everyone. Please read through ",
+      "text": "A few clear arrangements make tutoring easier for everyone. Please read through the policies before regular sessions begin and ask if anything is unclear."
+    },
+    {
+      "key": "tutoring-policies-004",
+      "label": "P: Payment",
+      "text": "Payment"
+    },
+    {
+      "key": "tutoring-policies-005",
+      "label": "P: Regular tutoring is billed in monthly blocks. Payment for the next block is due ",
+      "text": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first scheduled session, and new students pay for their first block before tutoring begins. If a session is rescheduled, the dates of future invoices do not move with it. Your rate, currency and any separately charged marking or feedback will always be confirmed in advance. Payment can be made by PayPal or bank transfer."
+    },
+    {
+      "key": "tutoring-policies-006",
+      "label": "P: Cancellations and rescheduling",
+      "text": "Cancellations and rescheduling"
+    },
+    {
+      "key": "tutoring-policies-007",
+      "label": "P: If you give at least 7 days’ notice, a session can be cancelled without charge. ",
+      "text": "If you give at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, the session can be rescheduled instead. The replacement session must take place within four weeks of the original date, at a mutually convenient time and subject to availability. If it is not used within those four weeks, it expires. Cancellations with less than 12 hours’ notice are charged and cannot be made up. The same applies to no-shows."
+    },
+    {
+      "key": "tutoring-policies-008",
+      "label": "P: Academic integrity",
+      "text": "Academic integrity"
+    },
+    {
+      "key": "tutoring-policies-009",
+      "label": "P: I am happy to support students with assessed work, but the work must remain thei",
+      "text": "I am happy to support students with assessed work, but the work must remain theirs. I can help them understand the task, ask questions that make them think, point out places where the reasoning or explanation is unclear and help them decide what needs more attention. I will not write or rewrite work for submission, complete take-home tests or assignments, choose a statistical test for a student, carry out their analysis or give step-by-step instructions that effectively do the assessed work for them. The thinking, decisions and final work stay with the student and must meet the academic-integrity requirements of their school or examination board."
+    },
+    {
+      "key": "tutoring-policies-010",
+      "label": "P: Working together",
+      "text": "Working together"
+    },
+    {
+      "key": "tutoring-policies-011",
+      "label": "P: Tutoring works best when the student is actively involved. I expect students to ",
+      "text": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, but the student still has to do the learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study, and I cannot promise a particular grade. What I can promise is honest feedback about where the student is now, the progress they are making and what needs to happen next."
+    }
+  ],
+  "title": "Tutoring Policies | Auxesis Education",
+  "description": "Read the payment, cancellation, academic-integrity and working-together arrangements for Auxesis Education tutoring."
+}

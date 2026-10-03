@@ -1,0 +1,21 @@
+{
+  "blocks": [
+    {
+      "key": "404-000",
+      "label": "H1: Page not found",
+      "text": "Page not found"
+    },
+    {
+      "key": "404-001",
+      "label": "P: The page you are looking for is not here.",
+      "text": "The page you are looking for is not here."
+    },
+    {
+      "key": "404-002",
+      "label": "A: Home",
+      "text": "Home"
+    }
+  ],
+  "title": "Page not found | Auxesis Education",
+  "description": "Page not found."
+}

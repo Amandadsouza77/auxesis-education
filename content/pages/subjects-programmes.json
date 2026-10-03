@@ -1,0 +1,216 @@
+{
+  "blocks": [
+    {
+      "key": "subjects-programmes-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "subjects-programmes-001",
+      "label": "P: Subjects & Programmes",
+      "text": "Subjects & Programmes"
+    },
+    {
+      "key": "subjects-programmes-002",
+      "label": "H1: Science, by programme.",
+      "text": "Science, by programme."
+    },
+    {
+      "key": "subjects-programmes-003",
+      "label": "P: Tutoring works best when it connects directly with the course a student is actua",
+      "text": "Tutoring works best when it connects directly with the course a student is actually taking. I use the student’s curriculum, classroom work and upcoming assessments as the context, rather than creating a separate science course alongside school. The balance will be different for every student: one may need to rebuild foundations, another may need to prepare for an exam, and another may understand the content well but need much more precision in the way they apply and communicate it."
+    },
+    {
+      "key": "subjects-programmes-004",
+      "label": "P: Less memorising. More understanding.",
+      "text": "Less memorising. More understanding."
+    },
+    {
+      "key": "subjects-programmes-005",
+      "label": "A: IB Diploma",
+      "text": "IB Diploma"
+    },
+    {
+      "key": "subjects-programmes-006",
+      "label": "A: AS & A-Level Biology",
+      "text": "AS & A-Level Biology"
+    },
+    {
+      "key": "subjects-programmes-007",
+      "label": "A: GCSE / IGCSE Science",
+      "text": "GCSE / IGCSE Science"
+    },
+    {
+      "key": "subjects-programmes-008",
+      "label": "A: IB Middle Years Programme Science",
+      "text": "IB Middle Years Programme Science"
+    },
+    {
+      "key": "subjects-programmes-009",
+      "label": "A: Ontario Secondary Science",
+      "text": "Ontario Secondary Science"
+    },
+    {
+      "key": "subjects-programmes-010",
+      "label": "P: IB Diploma",
+      "text": "IB Diploma"
+    },
+    {
+      "key": "subjects-programmes-011",
+      "label": "H2: Biology, Chemistry and Environmental Systems and Societies.",
+      "text": "Biology, Chemistry and Environmental Systems and Societies."
+    },
+    {
+      "key": "subjects-programmes-012",
+      "label": "H3: Biology — Standard & Higher Level",
+      "text": "Biology — Standard & Higher Level"
+    },
+    {
+      "key": "subjects-programmes-013",
+      "label": "P: We work on understanding how biological ideas connect, interpreting data, evalua",
+      "text": "We work on understanding how biological ideas connect, interpreting data, evaluating investigations and applying knowledge in unfamiliar contexts. I also provide ethical guidance for Biology Internal Assessments and Extended Essays."
+    },
+    {
+      "key": "subjects-programmes-014",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-015",
+      "label": "H3: Chemistry — Standard & Higher Level",
+      "text": "Chemistry — Standard & Higher Level"
+    },
+    {
+      "key": "subjects-programmes-016",
+      "label": "P: Students work on making sense of the models behind the chemistry, not simply com",
+      "text": "Students work on making sense of the models behind the chemistry, not simply completing calculations, and on connecting explanations, evidence and chemical reasoning. Ethical guidance is also available for Chemistry Internal Assessments."
+    },
+    {
+      "key": "subjects-programmes-017",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-018",
+      "label": "H3: Environmental Systems and Societies",
+      "text": "Environmental Systems and Societies"
+    },
+    {
+      "key": "subjects-programmes-019",
+      "label": "P: ESS brings science, people and environmental decision-making together. We work o",
+      "text": "ESS brings science, people and environmental decision-making together. We work on interpreting information, seeing connections between systems and perspectives, and building responses that are supported by evidence."
+    },
+    {
+      "key": "subjects-programmes-020",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-021",
+      "label": "P: AS & A-Level Biology",
+      "text": "AS & A-Level Biology"
+    },
+    {
+      "key": "subjects-programmes-022",
+      "label": "H2: Support follows the student’s examination board and course.",
+      "text": "Support follows the student’s examination board and course."
+    },
+    {
+      "key": "subjects-programmes-023",
+      "label": "P: We work on the detail students need to know, practical and data-handling skills,",
+      "text": "We work on the detail students need to know, practical and data-handling skills, and the ability to apply biological ideas and explain them clearly."
+    },
+    {
+      "key": "subjects-programmes-024",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-025",
+      "label": "P: GCSE / IGCSE Science",
+      "text": "GCSE / IGCSE Science"
+    },
+    {
+      "key": "subjects-programmes-026",
+      "label": "H2: Strong foundations matter.",
+      "text": "Strong foundations matter."
+    },
+    {
+      "key": "subjects-programmes-027",
+      "label": "P: Support is available for Biology and Chemistry, including the Biology and Chemis",
+      "text": "Support is available for Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science. We work from the student’s specification and school course, clearing up difficult ideas and using questions to make sure the understanding still holds when it has to be applied. Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability."
+    },
+    {
+      "key": "subjects-programmes-028",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-029",
+      "label": "P: IB Middle Years Programme Science",
+      "text": "IB Middle Years Programme Science"
+    },
+    {
+      "key": "subjects-programmes-030",
+      "label": "H2: Built around the student’s own units.",
+      "text": "Built around the student’s own units."
+    },
+    {
+      "key": "subjects-programmes-031",
+      "label": "P: MYP Science can look quite different from one school to another, so tutoring is ",
+      "text": "MYP Science can look quite different from one school to another, so tutoring is built around the student’s own units, school curriculum and assessment expectations. We use the science they are learning in school to strengthen understanding, inquiry, reasoning and communication. The aim is not simply to finish the current unit, but to help the student become better at thinking scientifically."
+    },
+    {
+      "key": "subjects-programmes-032",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-033",
+      "label": "P: Ontario Secondary Science",
+      "text": "Ontario Secondary Science"
+    },
+    {
+      "key": "subjects-programmes-034",
+      "label": "H2: Support within the course a student is taking at school.",
+      "text": "Support within the course a student is taking at school."
+    },
+    {
+      "key": "subjects-programmes-035",
+      "label": "P: Ontario students are supported within the course they are taking at school. I wo",
+      "text": "Ontario students are supported within the course they are taking at school. I work with Grade 9–10 Science and senior Biology and Chemistry, using class materials, teacher expectations and upcoming assessments to decide what to focus on. Sometimes that means strengthening the foundations needed for senior science; at other times it means working through demanding Biology or Chemistry concepts, calculations and explanations at the level the course requires."
+    },
+    {
+      "key": "subjects-programmes-036",
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
+    },
+    {
+      "key": "subjects-programmes-037",
+      "label": "P: Across all programmes",
+      "text": "Across all programmes"
+    },
+    {
+      "key": "subjects-programmes-038",
+      "label": "H2: What support can include",
+      "text": "What support can include"
+    },
+    {
+      "key": "subjects-programmes-039",
+      "label": "P: Tutoring can include learning new or difficult content, practising questions, pr",
+      "text": "Tutoring can include learning new or difficult content, practising questions, preparing for assessments and improving study approaches. Students who have changed schools or curricula may also need to rebuild particular foundations. We deal with what is actually getting in the way without treating a current gap as a limit on what the student can ultimately achieve."
+    },
+    {
+      "key": "subjects-programmes-040",
+      "label": "A: Previous: Home",
+      "text": "Previous: Home"
+    },
+    {
+      "key": "subjects-programmes-041",
+      "label": "A: Next: About Auxesis",
+      "text": "Next: About Auxesis"
+    }
+  ],
+  "title": "Subjects & Programmes | Auxesis Education",
+  "description": "Online science tutoring for IB Biology, Chemistry and ESS, MYP Science, GCSE/IGCSE science, AS/A-Level Biology and Ontario secondary science."
+}

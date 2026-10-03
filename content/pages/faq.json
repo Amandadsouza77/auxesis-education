@@ -1,0 +1,106 @@
+{
+  "blocks": [
+    {
+      "key": "faq-000",
+      "label": "A: Back to Home",
+      "text": "Back to Home"
+    },
+    {
+      "key": "faq-001",
+      "label": "P: Frequently Asked Questions",
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "key": "faq-002",
+      "label": "H1: Practical questions, clearly answered.",
+      "text": "Practical questions, clearly answered."
+    },
+    {
+      "key": "faq-003",
+      "label": "P: If anything is unclear, send an enquiry and I can confirm whether I can help.",
+      "text": "If anything is unclear, send an enquiry and I can confirm whether I can help."
+    },
+    {
+      "key": "faq-004",
+      "label": "SUMMARY: Which curricula and subjects do you support?",
+      "text": "Which curricula and subjects do you support?"
+    },
+    {
+      "key": "faq-005",
+      "label": "P: I support IB Diploma Biology, Chemistry and Environmental Systems and Societies;",
+      "text": "I support IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; GCSE/IGCSE Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science; AS/A-Level Biology; and Ontario secondary science. If your course is not listed, send the examination board or programme with your enquiry and I can confirm whether I can help."
+    },
+    {
+      "key": "faq-006",
+      "label": "SUMMARY: What does an online session involve?",
+      "text": "What does an online session involve?"
+    },
+    {
+      "key": "faq-007",
+      "label": "P: Sessions are live and one-to-one. The student will be answering questions, expla",
+      "text": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than simply listening. I adjust the explanation and level of support as needed, and we keep resources together in a shared Google Drive folder."
+    },
+    {
+      "key": "faq-008",
+      "label": "SUMMARY: How are sessions scheduled across time zones?",
+      "text": "How are sessions scheduled across time zones?"
+    },
+    {
+      "key": "faq-009",
+      "label": "P: Sessions are arranged by appointment around the student’s time zone. When you en",
+      "text": "Sessions are arranged by appointment around the student’s time zone. When you enquire, send your country, time zone and preferred times. We will make sure the agreed time is clear locally and account for daylight-saving changes when they affect the schedule."
+    },
+    {
+      "key": "faq-010",
+      "label": "SUMMARY: How often should sessions take place?",
+      "text": "How often should sessions take place?"
+    },
+    {
+      "key": "faq-011",
+      "label": "P: There is no single schedule that suits every student. Some benefit from regular ",
+      "text": "There is no single schedule that suits every student. Some benefit from regular weekly support; others need extra help around a particular assessment or period of the course. We will look at the student’s goals, current understanding, independent study and available time and decide what is realistic and useful."
+    },
+    {
+      "key": "faq-012",
+      "label": "SUMMARY: What should a student prepare?",
+      "text": "What should a student prepare?"
+    },
+    {
+      "key": "faq-013",
+      "label": "P: Whenever possible, tell me at least 48 hours before the session what you want to",
+      "text": "Whenever possible, tell me at least 48 hours before the session what you want to focus on. Upload any school materials you want to use to your Google Drive folder in advance. If you do not have anything specific to send, I can prepare suitable resources."
+    },
+    {
+      "key": "faq-014",
+      "label": "SUMMARY: How are progress updates shared?",
+      "text": "How are progress updates shared?"
+    },
+    {
+      "key": "faq-015",
+      "label": "P: Updates are adapted to the family rather than following a fixed schedule. Parent",
+      "text": "Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
+    },
+    {
+      "key": "faq-016",
+      "label": "SUMMARY: How do payments and missed sessions work?",
+      "text": "How do payments and missed sessions work?"
+    },
+    {
+      "key": "faq-017",
+      "label": "P: Regular tutoring is billed in monthly blocks. Payment for the next block is due ",
+      "text": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first session, and new students pay their first block before tutoring begins. Payment can be made by PayPal or bank transfer. A session can be cancelled without charge with at least 7 days’ notice. With at least 12 hours’ notice but less than 7 days, it can be rescheduled within four weeks, subject to availability. Cancellations with less than 12 hours’ notice and no-shows are charged and cannot be made up."
+    },
+    {
+      "key": "faq-018",
+      "label": "SUMMARY: What guidance is available for assessed work?",
+      "text": "What guidance is available for assessed work?"
+    },
+    {
+      "key": "faq-019",
+      "label": "P: I can help a student understand an assessed task, ask questions that move their ",
+      "text": "I can help a student understand an assessed task, ask questions that move their thinking forward and point out places where their reasoning or communication is unclear. The student makes the decisions and produces the final work. I do not write, rewrite or complete assessed work for them."
+    }
+  ],
+  "title": "Frequently Asked Questions | Auxesis Education",
+  "description": "Answers about curricula, online lessons, time zones, preparation, payments, missed sessions and assessed work."
+}
