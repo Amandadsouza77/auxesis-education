@@ -17,8 +17,8 @@
     },
     {
       "key": "privacy-consent-003",
-      "label": "P: Auxesis Education only collects information that is needed to respond to an enqu",
-      "text": "Auxesis Education only collects information that is needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resources and attachments, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
+      "label": "P: Auxesis Education collects only the information needed to respond to an enqu",
+      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resources and attachments, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
     },
     {
       "key": "privacy-consent-004",
@@ -28,7 +28,7 @@
     {
       "key": "privacy-consent-005",
       "label": "P: Personal information is used only for tutoring and related administration. It is",
-      "text": "Personal information is used only for tutoring and related administration. It is not added to a marketing mailing list, sold or shared for marketing. Information is kept only for as long as it is reasonably needed for tutoring and the administration connected with it."
+      "text": "Personal information is used only for tutoring and related administration. It is not added to a marketing mailing list, sold or shared for marketing. Information is kept only for as long as needed for tutoring and the administration connected with it."
     },
     {
       "key": "privacy-consent-006",
