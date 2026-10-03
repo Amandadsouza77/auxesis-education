@@ -112,8 +112,8 @@
     "text": "Let’s talk about the next step."
   },
   "cta-002": {
-    "raw": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. We can start with a conversation and decide from there whether Auxesis feels like the right fit.",
-    "text": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. We can start with a conversation and decide from there whether Auxesis feels like the right fit."
+    "raw": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+    "text": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit."
   },
   "cta-003": {
     "raw": "Enquire About Tutoring",
@@ -140,8 +140,8 @@
     "text": "About Amanda"
   },
   "about-amanda-002": {
-    "raw": "More than 25 years in science education",
-    "text": "More than 25 years in science education"
+    "raw": "More than 25 years in science education.",
+    "text": "More than 25 years in science education."
   },
   "about-amanda-003": {
     "raw": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam. I spent about 20 years living and working internationally, teaching students from many different backgrounds and working within very different school systems. That has given me a broad view of education, but it has also shown me something very practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability.",
@@ -200,8 +200,8 @@
     "text": "About Auxesis"
   },
   "about-auxesis-002": {
-    "raw": "Why Auxesis exists",
-    "text": "Why Auxesis exists"
+    "raw": "Why Auxesis exists.",
+    "text": "Why Auxesis exists."
   },
   "about-auxesis-003": {
     "raw": "Auxesis Education grew from a simple idea: tutoring should help a student become more capable, not more dependent. I want students to understand the science they are studying, but I also want them to become better at learning it. That means learning how to question an idea, make connections, recognise a gap, choose a useful strategy and work out what to do when the answer is not immediately obvious.",
@@ -220,8 +220,8 @@
     "text": "Growth is the thread running through the business."
   },
   "about-auxesis-007": {
-    "raw": "The name Auxesis means growth, and that is the thread running through the business. Growth can mean moving from a fail to a pass, but it can just as easily mean turning a 6 into a 7, becoming more precise in exam answers, trusting yourself enough to attempt a difficult question or no longer needing somebody beside you for every step. The starting points and ambitions may be different; the aim is meaningful progress.",
-    "text": "The name Auxesis means growth, and that is the thread running through the business. Growth can mean moving from a fail to a pass, but it can just as easily mean turning a 6 into a 7, becoming more precise in exam answers, trusting yourself enough to attempt a difficult question or no longer needing somebody beside you for every step. The starting points and ambitions may be different; the aim is meaningful progress."
+    "raw": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress.",
+    "text": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress."
   },
   "about-auxesis-008": {
     "raw": "What that looks like in practice",
@@ -235,10 +235,6 @@
     "raw": "I also do not take “that makes sense” as the end point. It is a good start, but understanding has to survive when the example changes. Can the student explain the idea in their own words? Can they recognise when it applies? Can they use it in an unfamiliar situation? That is where we begin to see whether the learning belongs to the student rather than to the explanation they have just heard.",
     "text": "I also do not take “that makes sense” as the end point. It is a good start, but understanding has to survive when the example changes. Can the student explain the idea in their own words? Can they recognise when it applies? Can they use it in an unfamiliar situation? That is where we begin to see whether the learning belongs to the student rather than to the explanation they have just heard."
   },
-  "about-auxesis-011": {
-    "raw": "FAIL = First Attempt In Learning.",
-    "text": "FAIL = First Attempt In Learning."
-  },
   "about-auxesis-012": {
     "raw": "High expectations and strong support",
     "text": "High expectations and strong support"
@@ -248,16 +244,16 @@
     "text": "Mistakes are useful because they show us where to look next."
   },
   "about-auxesis-014": {
-    "raw": "High expectations and strong support belong together. Students need to be able to say, “I don’t understand,” without feeling embarrassed, and they deserve honest feedback about what needs work. Mistakes are useful because they show us where to look next. Sometimes I will break a problem into smaller steps or give a prompt or keyword; at other times I will deliberately step back and let the student wrestle with it for longer. The amount of support should change as the learner changes.",
-    "text": "High expectations and strong support belong together. Students need to be able to say, “I don’t understand,” without feeling embarrassed, and they deserve honest feedback about what needs work. Mistakes are useful because they show us where to look next. Sometimes I will break a problem into smaller steps or give a prompt or keyword; at other times I will deliberately step back and let the student wrestle with it for longer. The amount of support should change as the learner changes."
+    "raw": "High expectations and strong support belong together. Students need to be able to say, “I don’t understand,” without feeling embarrassed, and they deserve honest feedback about what needs work. Mistakes are useful because they show us where to look next. Sometimes I will break a problem into smaller steps or give a prompt or keyword; at other times I will deliberately step back and give the student more time to work through it independently. The amount of support should change as the learner changes.",
+    "text": "High expectations and strong support belong together. Students need to be able to say, “I don’t understand,” without feeling embarrassed, and they deserve honest feedback about what needs work. Mistakes are useful because they show us where to look next. Sometimes I will break a problem into smaller steps or give a prompt or keyword; at other times I will deliberately step back and give the student more time to work through it independently. The amount of support should change as the learner changes."
   },
   "about-auxesis-015": {
     "raw": "The bigger goal",
     "text": "The bigger goal"
   },
   "about-auxesis-016": {
-    "raw": "I guide the learning, parents provide support and structure, and the student still has to do the thinking. That balance matters. Independence does not mean never asking for help; it means recognising when help is useful, using it well and gradually becoming more able to make decisions for yourself.",
-    "text": "I guide the learning, parents provide support and structure, and the student still has to do the thinking. That balance matters. Independence does not mean never asking for help; it means recognising when help is useful, using it well and gradually becoming more able to make decisions for yourself."
+    "raw": "I guide the learning, parents provide support and structure, and the student remains actively responsible for their learning. That balance matters. Independence does not mean never asking for help; it means recognising when help is useful, using it well and gradually becoming more able to make decisions for yourself.",
+    "text": "I guide the learning, parents provide support and structure, and the student remains actively responsible for their learning. That balance matters. Independence does not mean never asking for help; it means recognising when help is useful, using it well and gradually becoming more able to make decisions for yourself."
   },
   "about-auxesis-017": {
     "raw": "My vision for Auxesis is therefore bigger than improving a mark, although marks matter and academic goals are taken seriously. I want students to leave tutoring better able to question, think, set goals and direct their own learning. Those are skills they can carry into another science course, university and situations well beyond school.",
@@ -304,8 +300,8 @@
     "text": "Start with a conversation."
   },
   "enquire-006": {
-    "raw": "I will arrange a free phone conversation with the parent first. If it makes sense to continue, we will set up a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. After that, take time to decide. If you would like to proceed, message me and we will arrange the first session.",
-    "text": "I will arrange a free phone conversation with the parent first. If it makes sense to continue, we will set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. After that, take time to decide. If you would like to proceed, message me and we will arrange the first session."
+    "raw": "I will arrange a free phone conversation with the parent first. If it makes sense to continue, I will arrange a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. After that, take time to decide. If you would like to proceed, message me and I will arrange the first session. Once tutoring is confirmed, Auxesis provides access to the private Auxesis Portal.",
+    "text": "I will arrange a free phone conversation with the parent first. If it makes sense to continue, I will arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. After that, take time to decide. If you would like to proceed, message me and I will arrange the first session. Once tutoring is confirmed, Auxesis provides access to the private Auxesis Portal."
   },
   "enquire-007": {
     "raw": "Based in Ontario, Canada, and working online with students in Canada and internationally.",
@@ -324,8 +320,8 @@
     "text": "Preferred contact method — required"
   },
   "enquire-011": {
-    "raw": "Please share only the information that will help us discuss tutoring. I do not need the student’s school name or detailed medical information.",
-    "text": "Please share only the information that will help us discuss tutoring. I do not need the student’s school name or detailed medical information."
+    "raw": "Please share only the information that will help me discuss tutoring with you. I do not need the student’s school name or detailed medical information.",
+    "text": "Please share only the information that will help me discuss tutoring with you. I do not need the student’s school name or detailed medical information."
   },
   "enquire-012": {
     "raw": "Privacy &amp; Consent information",
@@ -360,24 +356,24 @@
     "text": "Which curricula and subjects do you support?"
   },
   "faq-005": {
-    "raw": "I support IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; GCSE/IGCSE Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science; AS/A-Level Biology; and Ontario secondary science. If your course is not listed, send the examination board or programme with your enquiry and I can confirm whether I can help.",
-    "text": "I support IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; GCSE/IGCSE Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science; AS/A-Level Biology; and Ontario secondary science. If your course is not listed, send the examination board or programme with your enquiry and I can confirm whether I can help."
+    "raw": "I support IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; GCSE and IGCSE Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science; AS and A-Level Biology; and Ontario secondary science. If your course is not listed, send the examination board or programme with your enquiry and I can confirm whether I can help.",
+    "text": "I support IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; GCSE and IGCSE Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science; AS and A-Level Biology; and Ontario secondary science. If your course is not listed, send the examination board or programme with your enquiry and I can confirm whether I can help."
   },
   "faq-006": {
     "raw": "What does an online session involve?",
     "text": "What does an online session involve?"
   },
   "faq-007": {
-    "raw": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than simply listening. I adjust the explanation and level of support as needed, and we keep resources together in a shared Google Drive folder.",
-    "text": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than simply listening. I adjust the explanation and level of support as needed, and we keep resources together in a shared Google Drive folder."
+    "raw": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than simply listening. I adjust the explanation and level of support as needed. Lesson information and resources are kept together in the private Auxesis Portal.",
+    "text": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than simply listening. I adjust the explanation and level of support as needed. Lesson information and resources are kept together in the private Auxesis Portal."
   },
   "faq-008": {
     "raw": "How are sessions scheduled across time zones?",
     "text": "How are sessions scheduled across time zones?"
   },
   "faq-009": {
-    "raw": "Sessions are arranged by appointment around the student’s time zone. When you enquire, send your country, time zone and preferred times. We will make sure the agreed time is clear locally and account for daylight-saving changes when they affect the schedule.",
-    "text": "Sessions are arranged by appointment around the student’s time zone. When you enquire, send your country, time zone and preferred times. We will make sure the agreed time is clear locally and account for daylight-saving changes when they affect the schedule."
+    "raw": "Sessions are arranged by appointment around the student’s time zone. When you enquire, send your country, time zone and preferred times. I will make sure the agreed time is clear locally and account for daylight-saving changes when they affect the schedule.",
+    "text": "Sessions are arranged by appointment around the student’s time zone. When you enquire, send your country, time zone and preferred times. I will make sure the agreed time is clear locally and account for daylight-saving changes when they affect the schedule."
   },
   "faq-010": {
     "raw": "How often should sessions take place?",
@@ -400,8 +396,8 @@
     "text": "How are progress updates shared?"
   },
   "faq-015": {
-    "raw": "Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays.",
-    "text": "Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
+    "raw": "Lesson notes and next steps are available in the private Auxesis Portal. I can also publish monthly progress reports for parents and guardians there. Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays.",
+    "text": "Lesson notes and next steps are available in the private Auxesis Portal. I can also publish monthly progress reports for parents and guardians there. Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
   },
   "faq-016": {
     "raw": "How do payments and missed sessions work?",
@@ -428,12 +424,12 @@
     "text": "How Tutoring Works"
   },
   "how-tutoring-works-002": {
-    "raw": "From enquiry to first lesson",
-    "text": "From enquiry to first lesson"
+    "raw": "From enquiry to first lesson.",
+    "text": "From enquiry to first lesson."
   },
   "how-tutoring-works-003": {
-    "raw": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, we then set up a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
-    "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, we then set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+    "raw": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, I then arrange a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
+    "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, I then arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
   },
   "how-tutoring-works-004": {
     "raw": "01",
@@ -468,8 +464,8 @@
     "text": "Meet & Greet"
   },
   "how-tutoring-works-012": {
-    "raw": "If it sounds as though I may be able to help, we then set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
-    "text": "If it sounds as though I may be able to help, we then set up a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+    "raw": "If it sounds as though I may be able to help, I then arrange a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
+    "text": "If it sounds as though I may be able to help, I then arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
   },
   "how-tutoring-works-013": {
     "raw": "04",
@@ -480,8 +476,8 @@
     "text": "Decision and first lesson"
   },
   "how-tutoring-works-015": {
-    "raw": "There is no pressure to decide during that meeting. Take time afterward and message me if you would like to proceed. We then agree the practical arrangements, choose the first session date and decide what to tackle first. The first paid session is a proper lesson, not another consultation. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand.",
-    "text": "There is no pressure to decide during that meeting. Take time afterward and message me if you would like to proceed. We then agree the practical arrangements, choose the first session date and decide what to tackle first. The first paid session is a proper lesson, not another consultation. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
+    "raw": "There is no pressure to decide during that meeting. Take time afterwards and message me if you would like to proceed. I then confirm the practical arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand.",
+    "text": "There is no pressure to decide during that meeting. Take time afterwards and message me if you would like to proceed. I then confirm the practical arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
   },
   "how-tutoring-works-035": {
     "raw": "05",
@@ -520,12 +516,12 @@
     "text": "Live, one-to-one sessions."
   },
   "how-tutoring-works-019": {
-    "raw": "Sessions are live and one-to-one on Google Meet. They are not lectures: students will be explaining ideas, answering questions and working through problems with me. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring.",
-    "text": "Sessions are live and one-to-one on Google Meet. They are not lectures: students will be explaining ideas, answering questions and working through problems with me. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring."
+    "raw": "Sessions are live and one-to-one on Google Meet. This is an active learning session. Students explain ideas, answer questions and work through problems with me throughout the session. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring.",
+    "text": "Sessions are live and one-to-one on Google Meet. This is an active learning session. Students explain ideas, answer questions and work through problems with me throughout the session. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a working microphone and camera. Cameras are expected to stay on during tutoring."
   },
   "how-tutoring-works-020": {
-    "raw": "Each student has their own Google Drive folder, shared with the student and me as editors. This is where we keep tutoring resources and any school materials the student wants to use. Students are responsible for keeping the folder reasonably organised, and parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted.",
-    "text": "Each student has their own Google Drive folder, shared with the student and me as editors. This is where we keep tutoring resources and any school materials the student wants to use. Students are responsible for keeping the folder reasonably organised, and parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted."
+    "raw": "Each student has their own Google Drive folder, shared with the student and me as editors. The folder provides an organised place for tutoring resources and any school materials the student wants to use. Parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted.",
+    "text": "Each student has their own Google Drive folder, shared with the student and me as editors. The folder provides an organised place for tutoring resources and any school materials the student wants to use. Parents can request access if they have a Gmail account. The folder remains available while tutoring is active and for one month after tutoring ends, so students should download or copy anything they want to keep before it is deleted."
   },
   "how-tutoring-works-021": {
     "raw": "Students contact me through Google Chat between sessions. After enrolment, parents may also choose to communicate through WhatsApp; I do not require WhatsApp as part of the tutoring setup. I normally reply within 24 hours on business days, excluding Canadian statutory holidays.",
@@ -540,12 +536,12 @@
     "text": "Whenever possible, students should tell me at least 48 hours before a session what they want to work on. That might be learning new content, clearing up something from class, preparing for a test, working through an assignment or doing exam-style questions. If we are using school materials, please upload them to the student’s Google Drive folder in advance. If there is nothing specific to send, I can prepare suitable resources."
   },
   "how-tutoring-works-024": {
-    "raw": "I do not give homework simply for the sake of giving homework. If extra practice would be useful, I can provide it or suggest what to work on, but completing it is the student’s responsibility. I am not going to chase them for every piece of work. If practice has not been completed, there is no punishment; we simply start the next session from where the student actually is.",
-    "text": "I do not give homework simply for the sake of giving homework. If extra practice would be useful, I can provide it or suggest what to work on, but completing it is the student’s responsibility. I am not going to chase them for every piece of work. If practice has not been completed, there is no punishment; we simply start the next session from where the student actually is."
+    "raw": "I suggest additional practice when it will genuinely support the student’s learning. Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is.",
+    "text": "I suggest additional practice when it will genuinely support the student’s learning. Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is."
   },
   "how-tutoring-works-025": {
-    "raw": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session, but anything that needs a proper explanation, substantial review or extended help belongs in a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately.",
-    "text": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session, but anything that needs a proper explanation, substantial review or extended help belongs in a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
+    "raw": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately.",
+    "text": "Students can send me a quick question through Google Chat if they get stuck. I am often happy to answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
   },
   "how-tutoring-works-026": {
     "raw": "I keep parents informed about what we are working on, how things are progressing and anything I think they should know. Some families want more frequent updates than others, so communication is adapted accordingly.",
@@ -656,16 +652,16 @@
     "text": "Science, understood."
   },
   "home-018": {
-    "raw": "Some students come because science has become confusing and they need help finding their footing again. Others are doing well but want to push further, prepare for demanding exams or work toward competitive university goals. Wherever the starting point, the first job is to work out what the student actually understands, where things are breaking down and what will make the biggest difference next.",
-    "text": "Some students come because science has become confusing and they need help finding their footing again. Others are doing well but want to push further, prepare for demanding exams or work toward competitive university goals. Wherever the starting point, the first job is to work out what the student actually understands, where things are breaking down and what will make the biggest difference next."
+    "raw": "Some students come because science has become confusing and they need help finding their footing again. Others are doing well but want to push further, prepare for demanding exams or work towards competitive university goals. Wherever the starting point, the first job is to work out what the student actually understands, where things are breaking down and what will make the biggest difference next.",
+    "text": "Some students come because science has become confusing and they need help finding their footing again. Others are doing well but want to push further, prepare for demanding exams or work towards competitive university goals. Wherever the starting point, the first job is to work out what the student actually understands, where things are breaking down and what will make the biggest difference next."
   },
   "home-019": {
     "raw": "That might mean going back and repairing a gap that has been causing problems for months. It might mean learning how to turn good subject knowledge into a precise exam answer, or developing the confidence to tackle an unfamiliar problem without immediately looking for help. I keep expectations high, but I do not expect every student to reach them by exactly the same route.",
     "text": "That might mean going back and repairing a gap that has been causing problems for months. It might mean learning how to turn good subject knowledge into a precise exam answer, or developing the confidence to tackle an unfamiliar problem without immediately looking for help. I keep expectations high, but I do not expect every student to reach them by exactly the same route."
   },
   "home-020": {
-    "raw": "The curriculum tells us where the student needs to get to; the student helps determine how we get there. Sessions focus on understanding the science well enough to explain it, connect it and use it. Over time, I want students to recognise their own gaps, ask better questions and make more decisions about how to move forward. Good tutoring should make the student stronger and the tutor less necessary. Our goal is to make you not need us.",
-    "text": "The curriculum tells us where the student needs to get to; the student helps determine how we get there. Sessions focus on understanding the science well enough to explain it, connect it and use it. Over time, I want students to recognise their own gaps, ask better questions and make more decisions about how to move forward. Good tutoring should make the student stronger and the tutor less necessary. Our goal is to make you not need us."
+    "raw": "The curriculum tells us where the student needs to get to; the student helps determine how we get there. Sessions focus on understanding the science well enough to explain it, connect it and use it. Over time, I want students to recognise their own gaps, ask better questions and make more decisions about how to move forward. Good tutoring should make the student stronger and the tutor less necessary.",
+    "text": "The curriculum tells us where the student needs to get to; the student helps determine how we get there. Sessions focus on understanding the science well enough to explain it, connect it and use it. Over time, I want students to recognise their own gaps, ask better questions and make more decisions about how to move forward. Good tutoring should make the student stronger and the tutor less necessary."
   },
   "home-021": {
     "raw": "Less memorising. More understanding.",
@@ -676,8 +672,8 @@
     "text": "Getting started"
   },
   "home-023": {
-    "raw": "We start with a conversation rather than a commitment.",
-    "text": "We start with a conversation rather than a commitment."
+    "raw": "Tutoring starts with a conversation rather than a commitment.",
+    "text": "Tutoring starts with a conversation rather than a commitment."
   },
   "home-024": {
     "raw": "How tutoring works",
@@ -688,8 +684,8 @@
     "text": "Tell me what the student is studying, what is happening at the moment and where you think support would help. I arrange a free phone conversation with the parent and, if it sounds as though I may be able to help, a free Meet & Greet with the student and parent together. It usually lasts about 20 minutes and gives everyone a chance to ask questions and get a sense of how I work."
   },
   "home-026": {
-    "raw": "There is no pressure to decide during the Meet &amp; Greet. Go away, think about it and message me if you would like to continue. We then arrange the first lesson and begin with the student’s immediate priorities. The plan becomes more specific as I get to know the student and see how they learn.",
-    "text": "There is no pressure to decide during the Meet & Greet. Go away, think about it and message me if you would like to continue. We then arrange the first lesson and begin with the student’s immediate priorities. The plan becomes more specific as I get to know the student and see how they learn."
+    "raw": "There is no pressure to decide during the Meet &amp; Greet. Take some time to think about it, and message me if you’d like to move forward. I then arrange the first lesson, and we begin with the student’s immediate priorities. The plan becomes more specific as I get to know the student and see how they learn. The private Auxesis Portal keeps lesson information and resources organised between lessons. Access is provided by Auxesis after tutoring is confirmed.",
+    "text": "There is no pressure to decide during the Meet & Greet. Take some time to think about it, and message me if you’d like to move forward. I then arrange the first lesson, and we begin with the student’s immediate priorities. The plan becomes more specific as I get to know the student and see how they learn. The private Auxesis Portal keeps lesson information and resources organised between lessons. Access is provided by Auxesis after tutoring is confirmed."
   },
   "home-027": {
     "raw": "About Amanda",
@@ -996,8 +992,8 @@
     "text": "Across all programmes"
   },
   "subjects-programmes-038": {
-    "raw": "What support can include",
-    "text": "What support can include"
+    "raw": "What support can include.",
+    "text": "What support can include."
   },
   "subjects-programmes-039": {
     "raw": "Tutoring can include learning new or difficult content, practising questions, preparing for assessments and improving study approaches. Students who have changed schools or curricula may also need to rebuild particular foundations. We deal with what is actually getting in the way without treating a current gap as a limit on what the student can ultimately achieve.",
@@ -1048,15 +1044,15 @@
     "text": "Academic integrity"
   },
   "tutoring-policies-009": {
-    "raw": "I am happy to support students with assessed work, but the work must remain theirs. I can help them understand the task, ask questions that make them think, point out places where the reasoning or explanation is unclear and help them decide what needs more attention. I will not write or rewrite work for submission, complete take-home tests or assignments, choose a statistical test for a student, carry out their analysis or give step-by-step instructions that effectively do the assessed work for them. The thinking, decisions and final work stay with the student and must meet the academic-integrity requirements of their school or examination board.",
-    "text": "I am happy to support students with assessed work, but the work must remain theirs. I can help them understand the task, ask questions that make them think, point out places where the reasoning or explanation is unclear and help them decide what needs more attention. I will not write or rewrite work for submission, complete take-home tests or assignments, choose a statistical test for a student, carry out their analysis or give step-by-step instructions that effectively do the assessed work for them. The thinking, decisions and final work stay with the student and must meet the academic-integrity requirements of their school or examination board."
+    "raw": "Our role is to guide the student’s thinking without taking over assessed work. We help students understand the task, examine their reasoning and identify areas for further attention, while decisions, analysis and final submitted work remain the student’s own. The work must meet the academic-integrity requirements of their school or examination board.",
+    "text": "Our role is to guide the student’s thinking without taking over assessed work. We help students understand the task, examine their reasoning and identify areas for further attention, while decisions, analysis and final submitted work remain the student’s own. The work must meet the academic-integrity requirements of their school or examination board."
   },
   "tutoring-policies-010": {
     "raw": "Working together",
     "text": "Working together"
   },
   "tutoring-policies-011": {
-    "raw": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, but the student still has to do the learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study, and I cannot promise a particular grade. What I can promise is honest feedback about where the student is now, the progress they are making and what needs to happen next.",
-    "text": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, but the student still has to do the learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study, and I cannot promise a particular grade. What I can promise is honest feedback about where the student is now, the progress they are making and what needs to happen next."
+    "raw": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, while the student remains actively responsible for their learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study. While specific achievement cannot be guaranteed, I provide honest feedback about the student’s current understanding, the progress they are making and the most useful next steps.",
+    "text": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, while the student remains actively responsible for their learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study. While specific achievement cannot be guaranteed, I provide honest feedback about the student’s current understanding, the progress they are making and the most useful next steps."
   }
 }

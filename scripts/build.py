@@ -38,7 +38,7 @@ def visual_grouping(html):
     html = html.replace('<p>Less memorising. More understanding.</p>', '<p class="learning-statement"><span>Less memorising.</span> <span>More understanding.</span></p>')
     phrases = {
         'Understand more.<br>Think independently.': '<span class="hero-line">Understand more.</span> <span class="hero-line">Think independently.</span>',
-        '<h1>Why Auxesis exists</h1>': '<h1 class="compact-title">Why Auxesis exists</h1>',
+        '<h1>Why Auxesis exists.</h1>': '<h1 class="compact-title">Why Auxesis exists.</h1>',
         'Science, by programme.': 'Science, <span class="keep-together">by programme.</span>',
         'Strong foundations matter.': 'Strong <span class="keep-together">foundations matter.</span>',
         'Biology, education and professional certification.': 'Biology, education and <span class="keep-together">professional certification.</span>',
