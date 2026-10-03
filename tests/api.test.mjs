@@ -3,9 +3,30 @@ import assert from 'node:assert/strict';
 import {submit} from '../lib/server.js';
 import {onRequestGet as auth} from '../functions/api/auth.js';
 import {onRequestGet as callback} from '../functions/api/callback.js';
+import {onRequestGet as enquiryConfig} from '../functions/api/enquiry.js';
 const env={SITE_URL:'https://example.com',RESEND_API_KEY:'test-only',EMAIL_FROM:'Auxesis <forms@example.com>',ENQUIRY_TO:'owner@example.com',TURNSTILE_SECRET_KEY:'test-only',GITHUB_CLIENT_ID:'client',GITHUB_CLIENT_SECRET:'test-only',GITHUB_REPOSITORY:'owner/site'};
-const valid={name:'Parent',email:'parent@example.net',country:'Canada',timezone:'Eastern Time',year:'Grade 11',programme:'IB Diploma',subject:'Biology',support:'Help with data analysis.',contact:'Email',consent:true,turnstile_token:'test-token'};
+const valid={name:'Parent',email:'parent@example.net',country:'Canada',timezone:'GMT -4',year:'Grade 11',programme:'IB Diploma',subject:'Biology',support:'Help with data analysis.',contact:'Email',consent:true,turnstile_token:'test-token'};
 function request(data,origin='https://example.com'){return new Request('https://example.com/api/enquiry',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(data)});}
+test('reports delivery availability without exposing credentials',async()=>{
+  assert.deepEqual(await enquiryConfig({env:{}}).json(),{ready:false});
+  assert.deepEqual(await enquiryConfig({env}).json(),{ready:true});
+});
+test('requires details for each Other choice and validates GMT offsets and calling codes',async()=>{
+  for(const key of ['year','programme','subject'])assert.equal((await submit(request({...valid,[key]:'Other'}),env,'enquiry')).status,400);
+  for(const timezone of ['Eastern Time','GMT +15','GMT -13','GMT +5.1'])assert.equal((await submit(request({...valid,timezone}),env,'enquiry')).status,400);
+  assert.equal((await submit(request({...valid,contact:'Phone',phone:'5550100'}),env,'enquiry')).status,400);
+  assert.equal((await submit(request({...valid,contact:'Phone',phone_country_code:'+44'}),env,'enquiry')).status,400);
+});
+test('delivers free-text countries, fractional GMT offsets, Other details and full phone numbers',async t=>{
+  let sent;
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.includes('siteverify'))return Response.json({success:true,hostname:'example.com',action:'enquiry'});
+    sent=JSON.parse(options.body);return Response.json({id:'mock'});
+  });
+  const data={...valid,country:'India',timezone:'GMT +5.5',year:'Other',other_year:'Year 13',programme:'Other',other_programme:'International science',subject:'Other',other_subject:'Combined science',contact:'Phone',phone_country_code:'+91',phone:'5550100'};
+  assert.equal((await submit(request(data),env,'enquiry')).status,200);
+  for(const value of ['India','GMT +5.5','Year 13','International science','Combined science','+91 5550100'])assert.ok(sent.text.includes(value));
+});
 test('rejects cross-origin submissions, missing consent and invalid emails',async()=>{
   assert.equal((await submit(request(valid,'https://attacker.example'),env,'enquiry')).status,403);
   assert.equal((await submit(request({...valid,consent:false}),env,'enquiry')).status,400);

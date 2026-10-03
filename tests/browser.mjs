@@ -20,9 +20,10 @@ try{
     if(width<900){await page.goto('http://localhost:8080/');await page.getByRole('button',{name:'Menu',exact:true}).click();await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'About Amanda',exact:true}).click();assert.ok(page.url().endsWith('/about-amanda/'));}
   }
   await page.goto('http://localhost:8080/enquire/?programme=AS%20%26%20A-Level&subject=Biology');assert.equal(await page.locator('[name=programme]').inputValue(),'AS / A-Level');assert.equal(await page.locator('.phone-field').isVisible(),false);await page.locator('input[name=contact][value=Phone]').check();assert.equal(await page.locator('.phone-field').isVisible(),true);
-  await page.route('**/api/enquiry',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true})}));
+  await page.route('**/api/enquiry',route=>route.request().method()==='GET'?route.fulfill({status:404,body:''}):route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true})}));
   for(const [name,value] of Object.entries({name:'Test parent',email:'parent@example.com',support:'Exam preparation'}))await page.locator('[name='+name+']').fill(value);
-  for(const [name,value] of Object.entries({country:'Canada',timezone:'Eastern Time',year:'Grade 11'}))await page.locator('[name='+name+']').selectOption(value);
+  await page.locator('[name=country]').fill('Canada');
+  for(const [name,value] of Object.entries({timezone:'GMT -4',year:'Grade 11'}))await page.locator('[name='+name+']').selectOption(value);
   await page.locator('[name=consent]').check();await page.getByRole('button',{name:'Send enquiry'}).click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('has been received'));
   assert.deepEqual(errors,[]);console.log('PASS: responsive routes, logo, menu, conditional fields, aliases and mocked submission.');
 }finally{await browser.close()}
