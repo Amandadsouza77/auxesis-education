@@ -17,8 +17,8 @@
     },
     {
       "key": "tutoring-policies-003",
-      "label": "P: A few clear arrangements make tutoring easier for everyone. Please read through ",
-      "text": "A few clear arrangements make tutoring easier for everyone. Please read through the policies before regular sessions begin and ask if anything is unclear."
+      "label": "P: Please read through ",
+      "text": "Please read through the policies before regular sessions begin and ask if anything is unclear."
     },
     {
       "key": "tutoring-policies-004",
@@ -28,7 +28,7 @@
     {
       "key": "tutoring-policies-005",
       "label": "P: Regular tutoring is billed in monthly blocks. Payment for the next block is due ",
-      "text": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first scheduled session, and new students pay for their first block before tutoring begins. If a session is rescheduled, the dates of future invoices do not move with it. Your rate, currency and any separately charged marking or feedback will always be confirmed in advance. Payment can be made by PayPal or bank transfer."
+      "text": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first session, and new students pay for their first block before tutoring begins. If a session is rescheduled, the dates of future invoices do not move with it. Your rate, currency and any separately charged marking or feedback will always be confirmed in advance. Payment can be made by PayPal or bank transfer."
     },
     {
       "key": "tutoring-policies-006",
@@ -38,7 +38,7 @@
     {
       "key": "tutoring-policies-007",
       "label": "P: If you give at least 7 days’ notice, a session can be cancelled without charge. ",
-      "text": "If you give at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, the session can be rescheduled instead. The replacement session must take place within four weeks of the original date, at a mutually convenient time and subject to availability. If it is not used within those four weeks, it expires. Cancellations with less than 12 hours’ notice are charged and cannot be made up. The same applies to no-shows."
+      "text": "If you give at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, the session can be rescheduled instead. The replacement session must take place within four weeks of the original date, at a mutually convenient available time. If it is not used within those four weeks, it expires. Cancellations with less than 12 hours’ notice are charged and cannot be made up. The same applies to no-shows."
     },
     {
       "key": "tutoring-policies-008",
@@ -58,7 +58,7 @@
     {
       "key": "tutoring-policies-011",
       "label": "P: Tutoring works best when the student is actively involved. I expect students to ",
-      "text": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, while the student remains actively responsible for their learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study. While specific achievement cannot be guaranteed, I provide honest feedback about the student’s current understanding, the progress they are making and the most useful next steps."
+      "text": "Tutoring works best when the student is actively involved. I expect students to attempt tasks, answer and ask questions, and tell me when they need help. Parents can support the process with encouragement and practical organisation, while the student remains responsible for their learning. I can provide additional practice when it is useful, but tutoring does not replace school or independent study. I provide honest feedback about the student’s current understanding, the progress they are making and the most useful next steps."
     }
   ],
   "title": "Tutoring Policies | Auxesis Education",
