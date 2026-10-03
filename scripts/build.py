@@ -68,6 +68,8 @@ def build():
             address=settings['public_email']
             if not re.fullmatch(r'[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+',address): raise ValueError('Enter a valid public email.')
             doc=doc.replace('[PLACEHOLDER: Public Auxesis Education business email address.]',f'<a href="mailto:{e(address)}">{e(address)}</a>')
+        else:
+            doc=doc.replace('[PLACEHOLDER: Public Auxesis Education business email address.]',f'<a href="{e(rec["verification_url"])}">Contact Amanda on LinkedIn</a>')
         if production:
             doc=doc.replace('<div class="prototype-banner">Private website prototype · No analytics or advertising trackers</div>','')
             doc=doc.replace('<meta name="robots" content="noindex,nofollow">','<meta name="robots" content="index,follow">' if route['name']!='404' else '<meta name="robots" content="noindex">')
