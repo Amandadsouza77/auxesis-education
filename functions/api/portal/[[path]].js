@@ -8,7 +8,7 @@ const cookies=request=>Object.fromEntries((request.headers.get('Cookie')||'').sp
 const cookie=(name,value,age)=>`${name}=${value}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${age}`;
 async function digest(value){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function random(){return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-async function remote(request,route,body,token){const headers={'Content-Type':'application/json'};if(token)headers['x-auxesis-session']=token;headers['x-auxesis-client']=await digest(request.headers.get('CF-Connecting-IP')||'unknown');return fetch(SERVICE+'/_api/portal/'+route,{method:body===undefined?'GET':'POST',headers,body:body===undefined?undefined:JSON.stringify(body),redirect:'manual'});}
+async function remote(request,route,body,token){const headers={'Content-Type':'application/json'};if(token)headers['x-auxesis-session']=token;for(const name of ['x-auxesis-preview-role','x-auxesis-preview-student'])if(request.headers.has(name))headers[name]=request.headers.get(name);headers['x-auxesis-client']=await digest(request.headers.get('CF-Connecting-IP')||'unknown');return fetch(SERVICE+'/_api/portal/'+route,{method:body===undefined?'GET':'POST',headers,body:body===undefined?undefined:JSON.stringify(body),redirect:'manual'});}
 export async function onRequest(context){const request=context.request,url=new URL(request.url),route=(Array.isArray(context.params.path)?context.params.path:[]).join('/'),jar=cookies(request);try{
  if(!['GET','POST'].includes(request.method))return json({error:'Method not allowed.'},405);
  if(request.method==='POST'&&(request.headers.get('Origin')!==SITE||request.headers.get('Content-Type')?.split(';')[0]!=='application/json'))return json({error:'Please submit this change from your Auxesis Portal.'},403);
@@ -20,3 +20,4 @@ export async function onRequest(context){const request=context.request,url=new U
  let body;if(request.method==='POST'){const raw=await request.text();if(raw.length>150000)return json({error:'This request is too large.'},413);body=JSON.parse(raw);}
  const r=await remote(request,route,body,jar[SESSION]),data=await r.json(),response=json(data,r.status);if(route==='logout'||r.status===401)response.headers.append('Set-Cookie',cookie(SESSION,'',0));return response;
  }catch{return json({error:'The portal could not complete this request. Please try again.'},503);}}
+
