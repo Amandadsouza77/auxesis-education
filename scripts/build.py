@@ -106,6 +106,8 @@ def build():
         if re.search(r'%%[A-Z_]+',doc): raise ValueError('Unresolved template in '+route['name'])
         doc=visual_grouping(doc)
         out=target/route['path'];out.parent.mkdir(parents=True,exist_ok=True);out.write_text(doc,encoding='utf-8')
+    from build_portal import build_portal
+    build_portal(ROOT,target)
     config={'turnstileSiteKey':settings.get('turnstile_site_key','')}
     (target/'site-config.js').write_text('window.AUXESIS='+json.dumps(config)+';\n')
     for file in target.rglob('*.html'):
