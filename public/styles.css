@@ -91,3 +91,97 @@ h3{margin-block-end:.75rem}
  .programme-nav{padding-block:1.5rem}
  .page-navigation{padding-block:1.5rem 3rem}
 }
+
+
+/* Visual refinements only: retain the approved copy, palette and typefaces. */
+.header{background:var(--alabaster);z-index:100}
+p{margin:0 0 1.1rem}
+h1,h2,h3,.statement-band p,.statement{ text-wrap:balance }
+p,blockquote,li,.field,.check{ text-wrap:pretty }
+.eyebrow:before{flex-shrink:0}
+.section{padding-block:4.5rem}
+.home-hero{padding-block:5.5rem 5rem}
+.page-hero{padding-block:3.25rem}
+.page-hero h1{max-width:20ch;font-size:clamp(2.6rem,5.2vw,5rem)}
+.home-hero h1{font-size:clamp(2.6rem,4.8vw,4.5rem)}
+.hero-line{display:block;white-space:nowrap}
+.keep-together{white-space:nowrap}
+.credentials-panel h2{font-size:clamp(1.6rem,2.45vw,2.2rem)}
+.back-link{margin-bottom:1.5rem}
+.home-hero-grid{gap:4rem}
+.editorial-grid,.amanda-preview,.programme-feature,.curriculum-row,.credentials-panel,.review-layout,.enquiry-layout{gap:4rem}
+.section-heading{gap:1.25rem 2rem;margin-bottom:2rem}
+.section-heading>div{min-width:0}
+.section-heading>.text-link{flex-shrink:0;max-width:18rem;text-wrap:balance}
+.reading-column>:last-child,.editorial-grid>div>:last-child,.curriculum-row>div>:last-child,.credentials-panel>div>:last-child,.amanda-preview>div>:last-child,.enquiry-aside>:last-child,.cta-inner>div>:last-child{margin-bottom:0}
+.statement-band{padding-block:2.5rem}
+.statement-band p{line-height:1.14}
+.learning-statement span{display:block}
+.programme-nav{padding-block:1.5rem}
+.process-list article{padding-block:1.6rem}
+.process-list article>div>:last-child{margin-bottom:0}
+.process-list h2 .keep-together{font:inherit;color:inherit}
+.programme-cards article>:last-child{margin-bottom:0}
+.recommendation-grid{align-items:start}
+.recommendation-card blockquote{margin-bottom:1.25rem}
+.recommendation-card figcaption{padding-top:1rem}
+.cta-band{padding-block:3.75rem}
+.cta-inner{gap:2rem 3rem}
+.page-navigation{padding-block:1.5rem 2.25rem;align-items:center}
+.page-navigation a{max-width:48%;text-wrap:balance}
+.page-navigation a:last-child{text-align:right}
+.footer{padding-top:3.5rem}
+.footer-grid{gap:3rem}
+.footer-bottom{margin-top:2rem}
+.form-status:empty{min-height:0;margin:0!important}
+@media(max-width:1120px){
+ .section{padding-block:3.75rem}
+ .home-hero-grid,.editorial-grid,.amanda-preview,.programme-feature,.curriculum-row,.credentials-panel,.review-layout,.enquiry-layout{gap:3rem}
+}
+@media(max-width:900px){
+ .section{padding-block:3.25rem}
+ .home-hero{padding-block:3.5rem}
+ .page-hero{padding-block:2.75rem}
+ .home-hero-grid{gap:2rem}
+ .editorial-grid,.amanda-preview,.programme-feature,.curriculum-row,.credentials-panel,.review-layout,.enquiry-layout{gap:1.75rem}
+ .section-heading{gap:1rem;margin-bottom:1.75rem}
+ .section-heading>.text-link{max-width:100%}
+ .cta-band{padding-block:3rem}
+ .cta-inner{gap:1.5rem}
+ .footer-grid{gap:2rem}
+}
+@media(max-width:560px){
+ body{font-size:1rem}
+ h1{font-size:clamp(2.55rem,10.5vw,3.1rem)}
+ .home-hero h1{font-size:clamp(1.85rem,8.2vw,2.3rem)}
+ h2{font-size:clamp(1.9rem,8vw,2.25rem);line-height:1.13}
+ .page-hero h1{font-size:clamp(2.45rem,10vw,3.1rem)}
+ .page-hero h1.compact-title{font-size:clamp(1.8rem,7.8vw,2.25rem)}
+ .page-hero h1.privacy-title{font-size:clamp(1.75rem,7.6vw,2rem)}
+ .credentials-panel h2{font-size:1.6rem}
+ .section,.section.dark#ib{padding-block:2.75rem}
+ .home-hero{padding-block:3rem}
+ .page-hero{padding-block:2.5rem}
+ .back-link{margin-bottom:1.25rem}
+ .statement-band{padding-block:2rem}
+ .statement-band p{font-size:clamp(1.85rem,7.4vw,2.2rem);letter-spacing:-.025em}
+ .home-hero-grid,.editorial-grid,.amanda-preview,.programme-feature,.curriculum-row,.credentials-panel,.review-layout,.enquiry-layout{gap:1.5rem}
+ .section-heading{gap:.85rem;margin-bottom:1.5rem}
+ .actions{margin-top:1.5rem}
+ .programme-nav{padding-block:1.25rem}
+ .programme-cards{gap:1rem}
+ .process-list article{grid-template-columns:2.4rem minmax(0,1fr);gap:1rem;padding-block:1.4rem}
+ .process-list article>span{font-size:2.1rem;line-height:1.2}
+ .process-list h2{font-size:clamp(1.4rem,6.3vw,1.6rem)}
+ .recommendation-card{padding:1.3rem}
+ .recommendation-card blockquote{margin-bottom:1.1rem}
+ .cta-band{padding-block:2.75rem}
+ .page-navigation{gap:1rem;padding-block:1.25rem 1.75rem}
+ .footer{padding-top:2.75rem}
+ .footer-grid{gap:1.75rem}
+ .footer .brand{margin-bottom:1.25rem}
+}
+@media(max-width:350px){
+ h2{font-size:1.75rem}
+ .page-hero h1:not(.compact-title):not(.privacy-title){font-size:2.1rem}
+}
