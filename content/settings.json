@@ -6,6 +6,6 @@
   "portrait": "",
   "portrait_alt": "Amanda D’Souza",
   "logo": "/assets/logo.png",
-  "production": false,
+  "production": true,
   "form_delivery": "portal"
 }
