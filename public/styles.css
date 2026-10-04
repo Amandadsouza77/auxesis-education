@@ -207,3 +207,7 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
  h2{font-size:1.75rem}
  .page-hero h1:not(.compact-title):not(.privacy-title){font-size:2.1rem}
 }
+
+/* Keep in-page destinations clear of the sticky public header. */
+body#top main [id]{scroll-margin-top:6.5rem}
+.review-form .delivery-note{font-weight:400;margin-bottom:1.25rem}

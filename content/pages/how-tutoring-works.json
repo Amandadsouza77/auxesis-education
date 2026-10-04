@@ -182,8 +182,8 @@
     },
     {
       "key": "how-tutoring-works-030",
-      "label": "A: Enquire About a Meet & Greet",
-      "text": "Enquire About a Meet & Greet"
+      "label": "A: Enquire About Tutoring",
+      "text": "Enquire About Tutoring"
     },
     {
       "key": "how-tutoring-works-031",
@@ -204,6 +204,26 @@
       "key": "how-tutoring-works-034",
       "label": "A: Next: Subjects & Programmes",
       "text": "Next: Subjects & Programmes"
+    },
+    {
+      "key": "how-tutoring-works-041",
+      "label": "A: Getting started",
+      "text": "Getting started"
+    },
+    {
+      "key": "how-tutoring-works-042",
+      "label": "A: Sessions",
+      "text": "Sessions"
+    },
+    {
+      "key": "how-tutoring-works-043",
+      "label": "A: Preparation & support",
+      "text": "Preparation & support"
+    },
+    {
+      "key": "how-tutoring-works-044",
+      "label": "A: Fees & policies",
+      "text": "Fees & policies"
     }
   ],
   "title": "How Tutoring Works | Auxesis Education",
