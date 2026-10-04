@@ -11,7 +11,7 @@ if(enquiry){
       const input=field.querySelector('input');input.disabled=!show;input.required=show;
     });
     const phone=enquiry.querySelector('input[name="contact"]:checked')?.value==='Phone';
-    enquiry.querySelectorAll('.phone-field').forEach(field=>{field.hidden=!phone;field.querySelector('input').disabled=!phone});
+    enquiry.querySelectorAll('.phone-field').forEach(field=>{field.hidden=!phone;field.querySelector('input,select').disabled=!phone});
     const codeRequired=phone&&!!enquiry.elements.phone.value.trim();
     const numberRequired=phone&&!!enquiry.elements.phone_country_code.value.trim();
     enquiry.elements.phone_country_code.required=codeRequired;
