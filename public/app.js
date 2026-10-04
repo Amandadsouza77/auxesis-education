@@ -4,6 +4,23 @@ menuButton?.addEventListener('click',()=>{const open=menuButton.getAttribute('ar
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu?.classList.contains('is-open')){menu.classList.remove('is-open');menuButton?.setAttribute('aria-expanded','false');if(menuButton)menuButton.textContent='Menu';menuButton?.focus()}});
 const enquiry=document.querySelector('#enquiry-form');
 if(enquiry){
+  const timezone=enquiry.elements.namedItem('timezone');
+  if(timezone?.dataset.examples){
+    try{
+      const examples=new Map();
+      const now=new Date();
+      for(const [place,zone] of JSON.parse(timezone.dataset.examples)){
+        const offset=new Intl.DateTimeFormat('en-GB',{timeZone:zone,timeZoneName:'longOffset'}).formatToParts(now).find(part=>part.type==='timeZoneName').value;
+        const value=/^GMT(?:[+−-]00:00)?$/.test(offset)?'UTC±00:00':offset.replace('GMT','UTC').replace('-','−');
+        if(!examples.has(value))examples.set(value,[]);
+        examples.get(value).push(place);
+      }
+      for(const option of timezone.options)if(option.value){
+        const places=examples.get(option.value);
+        option.textContent=option.value+(places?' — '+places.join(' / '):'');
+      }
+    }catch{ /* UTC offsets remain usable when regional formatting is unavailable. */ }
+  }
   const update=()=>{
     enquiry.querySelectorAll('[data-other-for]').forEach(field=>{
       const show=enquiry.elements.namedItem(field.dataset.otherFor).value==='Other';
@@ -40,6 +57,28 @@ function formUnavailable(form,kind,temporary=false){
 }
 const forms=[['enquiry-form','enquiry-status','enquiry','Thank you. Your enquiry has been received. Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.'],['review-form','review-status','review','Thank you. Your review has been received and will be checked before anything is published.']];
 let turnstileLoad;
+function markFormErrors(form,status,focus=false){
+  form.querySelectorAll('.field-error').forEach(error=>error.remove());
+  const controls=[...form.elements].filter(control=>control.willValidate);
+  for(const control of controls)control.setCustomValidity(control.required&&typeof control.value==='string'&&!control.value.trim()&&!['checkbox','radio'].includes(control.type)?'Please complete this field.':'');
+  for(const control of form.elements){
+    control.removeAttribute('aria-invalid');
+    const descriptions=(control.getAttribute('aria-describedby')||'').split(' ').filter(id=>id&&!id.startsWith(form.id+'-error-'));
+    if(descriptions.length)control.setAttribute('aria-describedby',descriptions.join(' '));else control.removeAttribute('aria-describedby');
+  }
+  const invalid=controls.filter(control=>!control.validity.valid);
+  invalid.forEach((control,index)=>{
+    const error=document.createElement('span');error.id=form.id+'-error-'+index;error.className='field-error';
+    error.textContent=control.validity.typeMismatch?'Enter a valid email address.':control.type==='checkbox'?'Please confirm this before submitting.':control.tagName==='SELECT'?'Please choose an option.':'Please complete this field.';
+    control.setAttribute('aria-invalid','true');
+    control.setAttribute('aria-describedby',((control.getAttribute('aria-describedby')||'')+' '+error.id).trim());
+    const label=control.closest('label');
+    if(label?.classList.contains('check'))label.after(error);else (label||control.parentElement).append(error);
+  });
+  status.textContent=invalid.length?'Please check the highlighted fields.':'';
+  if(focus)invalid[0]?.focus();
+  return invalid.length===0;
+}
 function loadTurnstile(){
   if(!turnstileLoad)turnstileLoad=new Promise((resolve,reject)=>{if(window.turnstile)return resolve(window.turnstile);const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.onload=()=>resolve(window.turnstile);script.onerror=reject;document.head.append(script)});
   return turnstileLoad;
@@ -47,6 +86,8 @@ function loadTurnstile(){
 for(const [id,statusId,kind,success] of forms){
   const form=document.getElementById(id);if(!form)continue;
   const status=document.getElementById(statusId);let widget,token='';
+  form.noValidate=true;
+  for(const event of ['input','change'])form.addEventListener(event,()=>{if(form.dataset.validationAttempted)markFormErrors(form,status)});
   if(!window.AUXESIS?.turnstileSiteKey)formUnavailable(form,kind);
   else fetch('/api/enquiry',{headers:{accept:'application/json'}}).then(response=>{
     if(!response.ok)throw new Error('Availability check failed');return response.json();
@@ -57,7 +98,9 @@ for(const [id,statusId,kind,success] of forms){
   }
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(form.dataset.sending||form.dataset.deliveryUnavailable)return;
-    if(!form.checkValidity()){status.textContent=kind==='enquiry'&&form.elements.email.value&&!form.elements.email.validity.valid?'Please enter a valid email address.':'Please complete the required fields before submitting.';form.reportValidity();return;}
+    form.dataset.validationAttempted='true';
+    if(!markFormErrors(form,status,true))return;
+    delete form.dataset.validationAttempted;
     const data=Object.fromEntries(new FormData(form));data.consent=!!form.elements.consent.checked;data.turnstile_token=token;
     const submit=form.querySelector('button[type="submit"]');form.dataset.sending='true';submit.disabled=true;status.textContent='Sending…';
     try{const response=await fetch('/api/'+kind,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});let result;try{result=await response.json()}catch{throw new Error('Your submission could not be sent. Please try again.')}if(!response.ok||!result.ok)throw new Error(result.error||'Your submission could not be sent. Please try again.');status.textContent=success;form.reset();}
