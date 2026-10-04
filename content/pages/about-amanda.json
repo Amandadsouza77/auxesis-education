@@ -18,7 +18,7 @@
     {
       "key": "about-amanda-003",
       "label": "P: I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my ",
-      "text": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam. I spent about 20 years living and working internationally, teaching students from many backgrounds and working within different school systems. That has given me a broad view of education and shown me something practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability."
+      "text": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam."
     },
     {
       "key": "about-amanda-004",
@@ -28,7 +28,7 @@
     {
       "key": "about-amanda-005",
       "label": "P: Over the years I have taught IB Diploma Biology, Chemistry and Environmental Sys",
-      "text": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science. I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring. Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions."
+      "text": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science."
     },
     {
       "key": "about-amanda-006",
@@ -42,8 +42,8 @@
     },
     {
       "key": "about-amanda-008",
-      "label": "P: My academic background is in Biology. I completed my Bachelor of Science in ",
-      "text": "My academic background is in Biology. I completed my Bachelor of Science in Biology at the University of Western Ontario in London, Ontario, in 2000. I then moved to Australia for teacher training, completing a Diploma of Education at the University of Wollongong in New South Wales in 2002. I am an Ontario Certified Teacher (OCT #496538), hold Qualified Teacher Status in England, and have completed Guidance and Career Education Additional Qualification Parts 1 and 2."
+      "label": "P: My academic background is in Biology.",
+      "text": "My academic background is in Biology."
     },
     {
       "key": "about-amanda-009",
@@ -79,6 +79,71 @@
       "key": "about-amanda-015",
       "label": "A: See current subjects and programmes",
       "text": "See current subjects and programmes"
+    },
+    {
+      "key": "about-amanda-016",
+      "label": "H2: International education",
+      "text": "International education"
+    },
+    {
+      "key": "about-amanda-017",
+      "label": "P: I spent about 20 years living and working internationally, teaching students fro",
+      "text": "I spent about 20 years living and working internationally, teaching students from many backgrounds and working within different school systems. That has given me a broad view of education and shown me something practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability."
+    },
+    {
+      "key": "about-amanda-018",
+      "label": "P: I have also led science departments in Vietnam and Barbados and worked in curric",
+      "text": "I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring."
+    },
+    {
+      "key": "about-amanda-019",
+      "label": "H3: IB Biology assessment experience",
+      "text": "IB Biology assessment experience"
+    },
+    {
+      "key": "about-amanda-020",
+      "label": "P: Since 2013, I have worked as an IB Biology Assistant Examiner, with experience a",
+      "text": "Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions."
+    },
+    {
+      "key": "about-amanda-021",
+      "label": "H2: Curriculum and leadership experience",
+      "text": "Curriculum and leadership experience"
+    },
+    {
+      "key": "about-amanda-022",
+      "label": "H3: Academic qualifications",
+      "text": "Academic qualifications"
+    },
+    {
+      "key": "about-amanda-023",
+      "label": "LI: Bachelor of Science in Biology — University of Western Ontario, London, Ontario ",
+      "text": "Bachelor of Science in Biology — University of Western Ontario, London, Ontario (2000)"
+    },
+    {
+      "key": "about-amanda-024",
+      "label": "LI: Graduate Diploma in Education — University of Wollongong, New South Wales, Austr",
+      "text": "Graduate Diploma in Education — University of Wollongong, New South Wales, Australia (2002)"
+    },
+    {
+      "key": "about-amanda-025",
+      "label": "H3: Professional credentials",
+      "text": "Professional credentials"
+    },
+    {
+      "key": "about-amanda-026",
+      "label": "LI: Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualificat",
+      "text": "Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry"
+    },
+    {
+      "key": "about-amanda-027",
+      "label": "LI: Qualified Teacher Status in England",
+      "text": "Qualified Teacher Status in England"
+    },
+    {
+      "key": "about-amanda-028",
+      "label": "LI: Guidance and Career Education Additional Qualification Parts 1 and 2",
+      "text": "Guidance and Career Education Additional Qualification Parts 1 and 2"
     }
   ],
   "title": "About Amanda D’Souza | Auxesis Education",
