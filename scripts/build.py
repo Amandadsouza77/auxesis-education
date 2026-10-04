@@ -22,7 +22,8 @@ def recommendation_cards(items, short=False):
     cards=[]
     for item in items:
         quote=item.get('short_quote',item['quote']) if short else item['quote']
-        cards.append(f'<figure class="recommendation-card"><p class="eyebrow">{e(item["topic"])}</p><blockquote><p>“{e(quote)}”</p></blockquote><figcaption><strong>{e(item["name"])}</strong><span>{e(item["relationship"])}</span><span class="recommendation-source">LinkedIn recommendation · <time datetime="{e(item["date"])}">{e(item["display_date"])}</time></span></figcaption></figure>')
+        quote_html=re.sub(r'(\S+\s+\S+)$',r'<span class="keep-together">\1</span>',e(quote))
+        cards.append(f'<figure class="recommendation-card"><p class="eyebrow">{e(item["topic"])}</p><blockquote><p>“{quote_html}”</p></blockquote><figcaption><strong>{e(item["name"])}</strong><span>{e(item["relationship"])}</span><span class="recommendation-source">LinkedIn recommendation · <time datetime="{e(item["date"])}">{e(item["display_date"])}</time></span></figcaption></figure>')
     return '<div class="recommendation-grid'+(' home-recommendations' if short else '')+'">'+''.join(cards)+'</div>'
 def render(template, data, defaults):
     values = {b['key']: b['text'] for b in data['blocks']}
@@ -35,10 +36,15 @@ def render(template, data, defaults):
     return re.sub(r'%%COPY:([^%]+)%%', replace, template)
 
 def visual_grouping(html):
+    html=html.replace('<p class="eyebrow">Online science tutoring</p>', '<p class="eyebrow">Online <span class="keep-together">science tutoring</span></p>')
+    # Keep the final pair of words together in paragraphs with confirmed narrow-screen orphans.
+    html=re.sub(r'(<p(?: class="form-note")?>(?:Students work on|MYP Science|There is no pressure|Please share only)[^<]*?)(\S+\s+\S+)(</p>)',r'\1<span class="keep-together">\2</span>\3',html)
     html = html.replace('<p>Less memorising. More understanding.</p>', '<p class="learning-statement"><span>Less memorising.</span> <span>More understanding.</span></p>')
     phrases = {
         'Understand more.<br>Think independently.': '<span class="hero-line">Understand more.</span> <span class="hero-line">Think independently.</span>',
+        '<h1>What students, parents and colleagues say about working with Amanda.</h1>': '<h1 class="recommendations-title">What students, parents and colleagues say about working with Amanda.</h1>',
         '<h1>Why Auxesis exists.</h1>': '<h1 class="compact-title">Why Auxesis exists.</h1>',
+        'Auxesis means growth.': 'Auxesis <span class="keep-together">means growth.</span>',
         'Science, by programme.': 'Science, <span class="keep-together">by programme.</span>',
         'Strong foundations matter.': 'Strong <span class="keep-together">foundations matter.</span>',
         'Biology, education and professional certification.': 'Biology, education and <span class="keep-together">professional certification.</span>',
@@ -48,7 +54,6 @@ def visual_grouping(html):
         '<h1>Information used only for tutoring and related administration.</h1>': '<h1 class="privacy-title">Information used only for tutoring and <span class="keep-together">related administration.</span></h1>',
     }
     # Restrict grouping to headings; metadata and body copy are not changed.
-    import re
     def group_heading(match):
         value = match.group(0)
         for original, grouped in phrases.items():
