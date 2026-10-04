@@ -99,6 +99,16 @@ p{margin:0 0 1.1rem}
 h1,h2,h3,.statement-band p,.statement{ text-wrap:balance }
 p,blockquote,li,.field,.check{ text-wrap:pretty }
 .eyebrow:before{flex-shrink:0}
+.eyebrow{display:block;position:relative;padding-left:2.7rem;text-wrap:balance}
+.eyebrow:before{display:block;position:absolute;left:0;top:.75em}
+.main-navigation>a:not(.button){display:inline-flex;align-items:center;min-height:44px}
+.back-link{display:inline-flex;align-items:center;min-height:44px}
+.button{max-width:100%;text-wrap:balance}
+.home-hero-grid>*,.editorial-grid>*,.amanda-preview>*,.programme-feature>*,.curriculum-row>*,.credentials-panel>*,.review-layout>*,.enquiry-layout>*{min-width:0}
+.form-grid>.field{justify-content:flex-end}
+.check input[type=checkbox]{margin-top:.2rem}
+.faq-list summary:after{flex:none}
+.faq-list summary::-webkit-details-marker{display:none}
 .section{padding-block:4.5rem}
 .home-hero{padding-block:5.5rem 5rem}
 .page-hero{padding-block:3.25rem}
@@ -114,6 +124,7 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 .section-heading>div{min-width:0}
 .section-heading>.text-link{flex-shrink:0;max-width:18rem;text-wrap:balance}
 .reading-column>:last-child,.editorial-grid>div>:last-child,.curriculum-row>div>:last-child,.credentials-panel>div>:last-child,.amanda-preview>div>:last-child,.enquiry-aside>:last-child,.cta-inner>div>:last-child{margin-bottom:0}
+.fees-panel>:last-child,.page-hero .wrap>:last-child{margin-bottom:0}
 .statement-band{padding-block:2.5rem}
 .statement-band p{line-height:1.14}
 .learning-statement span{display:block}
@@ -123,6 +134,7 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 .process-list h2 .keep-together{font:inherit;color:inherit}
 .programme-cards article>:last-child{margin-bottom:0}
 .recommendation-grid{align-items:start}
+.recommendation-grid.home-recommendations{align-items:stretch}
 .recommendation-card blockquote{margin-bottom:1.25rem}
 .recommendation-card figcaption{padding-top:1rem}
 .cta-band{padding-block:3.75rem}
@@ -133,6 +145,8 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 .footer{padding-top:3.5rem}
 .footer-grid{gap:3rem}
 .footer-bottom{margin-top:2rem}
+.section.recommendations-intro{padding-bottom:1rem}
+.section.recommendations-note{padding-top:2rem}
 .form-status:empty{min-height:0;margin:0!important}
 @media(max-width:1120px){
  .section{padding-block:3.75rem}
@@ -149,6 +163,10 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
  .cta-band{padding-block:3rem}
  .cta-inner{gap:1.5rem}
  .footer-grid{gap:2rem}
+ .footer nav{gap:.1rem;align-items:stretch}
+ .footer nav a{display:flex;align-items:center;min-height:44px;padding:.4rem 0}
+ .footer-bottom a{display:inline-flex;align-items:center;min-height:44px}
+ .contact-method label{min-height:44px;padding-block:.35rem}
 }
 @media(max-width:560px){
  body{font-size:1rem}
@@ -158,6 +176,9 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
  .page-hero h1{font-size:clamp(2.45rem,10vw,3.1rem)}
  .page-hero h1.compact-title{font-size:clamp(1.8rem,7.8vw,2.25rem)}
  .page-hero h1.privacy-title{font-size:clamp(1.75rem,7.6vw,2rem)}
+ .page-hero h1.recommendations-title{font-size:clamp(1.9rem,8.4vw,2.3rem)}
+ .page-hero .back-link{margin-bottom:.5rem}
+ .subject-panel .eyebrow{font-size:.7rem;letter-spacing:.12em}
  .credentials-panel h2{font-size:1.6rem}
  .section,.section.dark#ib{padding-block:2.75rem}
  .home-hero{padding-block:3rem}
