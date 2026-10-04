@@ -151,9 +151,8 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 .form-status:empty{min-height:0;margin:0!important}
 .field [aria-invalid="true"]{border:2px solid #9b2c2c}
 .check input[aria-invalid="true"]{outline:2px solid #9b2c2c;outline-offset:3px}
-.field-error{display:block;color:#ffd1c9;font-size:.9rem;line-height:1.4;grid-column:1/-1}
-.field .field-error{color:#ffd1c9}
-.review-form .field-error{color:#9b2c2c}
+.field-error{display:block;color:#9b2c2c;font-size:.9rem;line-height:1.4;grid-column:1/-1}
+.review-form .check{min-height:44px;align-items:center}
 @media(max-width:1120px){
  .section{padding-block:3.75rem}
  .home-hero-grid,.editorial-grid,.amanda-preview,.programme-feature,.curriculum-row,.credentials-panel,.review-layout,.enquiry-layout{gap:3rem}

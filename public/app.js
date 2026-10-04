@@ -60,6 +60,7 @@ let turnstileLoad;
 function markFormErrors(form,status,focus=false){
   form.querySelectorAll('.field-error').forEach(error=>error.remove());
   const controls=[...form.elements].filter(control=>control.willValidate);
+  for(const control of controls)control.setCustomValidity(control.required&&typeof control.value==='string'&&!control.value.trim()&&!['checkbox','radio'].includes(control.type)?'Please complete this field.':'');
   for(const control of form.elements){
     control.removeAttribute('aria-invalid');
     const descriptions=(control.getAttribute('aria-describedby')||'').split(' ').filter(id=>id&&!id.startsWith(form.id+'-error-'));
