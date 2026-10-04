@@ -17,8 +17,8 @@
     },
     {
       "key": "how-tutoring-works-003",
-      "label": "P: Starting tutoring should be straightforward. When you enquire, tell me what the ",
-      "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I arrange a phone conversation with the parent. If it sounds as though I may be able to help, I arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+      "label": "P: Tutoring begins with an enquiry, a parent conversation and a Meet & Greet before",
+      "text": "Tutoring begins with an enquiry, a parent conversation and a Meet & Greet before you decide whether to proceed."
     },
     {
       "key": "how-tutoring-works-004",
@@ -107,8 +107,8 @@
     },
     {
       "key": "how-tutoring-works-040",
-      "label": "P: From there, tutoring develops with the student.",
-      "text": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence. The portal keeps everything organised between lessons so that each session can build on the last."
+      "label": "P: From there, tutoring develops with the student. Lessons respond to what they nee",
+      "text": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence."
     },
     {
       "key": "how-tutoring-works-016",
@@ -224,6 +224,11 @@
       "key": "how-tutoring-works-044",
       "label": "A: Fees & policies",
       "text": "Fees & policies"
+    },
+    {
+      "key": "how-tutoring-works-045",
+      "label": "H2: Communication with students and parents",
+      "text": "Communication with students and parents"
     }
   ],
   "title": "How Tutoring Works | Auxesis Education",
