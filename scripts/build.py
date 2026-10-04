@@ -38,7 +38,7 @@ def render(template, data, defaults):
 def visual_grouping(html):
     html=html.replace('<p class="eyebrow">Online science tutoring</p>', '<p class="eyebrow">Online <span class="keep-together">science tutoring</span></p>')
     # Keep the final pair of words together in paragraphs with confirmed narrow-screen orphans.
-    html=re.sub(r'(<p(?: class="form-note")?>(?:Students work on|MYP Science|There is no pressure|Share a little)[^<]*?)(\S+\s+\S+)(</p>)',r'\1<span class="keep-together">\2</span>\3',html)
+    html=re.sub(r'(<p(?: class="form-note")?>(?:Students work on|MYP Science|There is no pressure|Share a little|From there, tutoring develops)[^<]*?)(\S+\s+\S+)(</p>)',r'\1<span class="keep-together">\2</span>\3',html)
     html = html.replace('<p>Less memorising. More understanding.</p>', '<p class="learning-statement"><span>Less memorising.</span> <span>More understanding.</span></p>')
     phrases = {
         'Understand more.<br>Think independently.': '<span class="hero-line">Understand more.</span> <span class="hero-line">Think independently.</span>',
