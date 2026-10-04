@@ -113,7 +113,7 @@ def build():
         out=target/route['path'];out.parent.mkdir(parents=True,exist_ok=True);out.write_text(doc,encoding='utf-8')
     from build_portal import build_portal
     build_portal(ROOT,target)
-    config={'turnstileSiteKey':settings.get('turnstile_site_key','')}
+    config={'turnstileSiteKey':settings.get('turnstile_site_key',''),'formDelivery':settings.get('form_delivery','resend')}
     (target/'site-config.js').write_text('window.AUXESIS='+json.dumps(config)+';\n')
     for file in target.rglob('*.html'):
         if 'admin' not in file.parts: file.write_text(file.read_text().replace('<script defer src="/app.js">','<script defer src="/site-config.js"></script><script defer src="/app.js">'))

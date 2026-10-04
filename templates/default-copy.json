@@ -1170,5 +1170,9 @@
   "faq-023": {
     "text": "Read the academic-integrity policy",
     "raw": "Read the academic-integrity policy"
+  },
+  "privacy-consent-007": {
+    "raw": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable.",
+    "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
   }
 }

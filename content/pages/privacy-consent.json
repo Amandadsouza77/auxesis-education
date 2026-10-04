@@ -18,7 +18,7 @@
     {
       "key": "privacy-consent-003",
       "label": "P: Auxesis Education collects only the information needed to respond to an enqu",
-      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resources and attachments, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
+      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resources and attachments, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
     },
     {
       "key": "privacy-consent-004",
@@ -34,6 +34,11 @@
       "key": "privacy-consent-006",
       "label": "P: Auxesis Education does not record tutoring sessions. Students may choose to reco",
       "text": "Auxesis Education does not record tutoring sessions. Students may choose to record their own sessions, but those recordings are for their personal educational use only. The Auxesis Education website does not currently use analytics or advertising trackers."
+    },
+    {
+      "key": "privacy-consent-007",
+      "label": "P: Website submissions and delivery",
+      "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
     }
   ],
   "title": "Privacy & Consent | Auxesis Education",

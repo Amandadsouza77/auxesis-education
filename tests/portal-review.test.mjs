@@ -7,7 +7,7 @@ import {onRequest} from '../functions/api/portal/[[path]].js';
 const source=fs.readFileSync(new URL('../public/portal.js',import.meta.url),'utf8');
 const fixture=process.env.PORTAL_REVIEW_FIXTURE_PATH?JSON.parse(fs.readFileSync(process.env.PORTAL_REVIEW_FIXTURE_PATH,'utf8')):null;
 function screen(data){
- const root={innerHTML:'',addEventListener(){}};
+ const root={innerHTML:'',querySelectorAll(){return [];},addEventListener(){}};
  const location={origin:'https://auxesis-education.pages.dev',pathname:'/portal/students/',search:'',hash:''};
  const move=url=>{const p=new URL(url,location.origin);location.pathname=p.pathname;location.search=p.search;};
  const document={getElementById:id=>id==='portal-app'?root:null,querySelector:q=>q==='h1'?{textContent:'Portal'}:null,querySelectorAll:()=>[]};

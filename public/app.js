@@ -85,14 +85,16 @@ function loadTurnstile(){
 }
 for(const [id,statusId,kind,success] of forms){
   const form=document.getElementById(id);if(!form)continue;
-  const status=document.getElementById(statusId);let widget,token='';
+  const status=document.getElementById(statusId);let widget,token='',formCheck;const portalDelivery=window.AUXESIS?.formDelivery==='portal';
+  async function refreshFormCheck(){const r=await fetch('/api/enquiry?delivery=portal&kind='+kind,{headers:{accept:'application/json'}});const config=await r.json();if(!r.ok||!config.ready||!config.token)throw new Error(config.error||'Availability check failed');return {...config,receivedAt:Date.now()};}
   form.noValidate=true;
   for(const event of ['input','change'])form.addEventListener(event,()=>{if(form.dataset.validationAttempted)markFormErrors(form,status)});
-  if(!window.AUXESIS?.turnstileSiteKey)formUnavailable(form,kind);
+  if(portalDelivery){const button=form.querySelector('button[type="submit"]');button.disabled=true;refreshFormCheck().then(config=>{formCheck=config;button.disabled=false;}).catch(()=>formUnavailable(form,kind,true));}
+  else if(!window.AUXESIS?.turnstileSiteKey)formUnavailable(form,kind);
   else fetch('/api/enquiry',{headers:{accept:'application/json'}}).then(response=>{
     if(!response.ok)throw new Error('Availability check failed');return response.json();
   }).then(config=>{if(!config?.ready)formUnavailable(form,kind);}).catch(()=>formUnavailable(form,kind,true));
-  if(window.AUXESIS?.turnstileSiteKey){
+  if(!portalDelivery&&window.AUXESIS?.turnstileSiteKey){
     const container=document.createElement('div');container.className='spam-check';form.insertBefore(container,form.querySelector('button[type="submit"]'));
     loadTurnstile().then(api=>{widget=api.render(container,{sitekey:window.AUXESIS.turnstileSiteKey,action:kind,callback:value=>token=value,'expired-callback':()=>token='','error-callback':()=>{token='';status.textContent='Spam protection could not load. Please refresh and try again.'}})}).catch(()=>status.textContent='Spam protection could not load. Please refresh and try again.');
   }
@@ -103,8 +105,8 @@ for(const [id,statusId,kind,success] of forms){
     delete form.dataset.validationAttempted;
     const data=Object.fromEntries(new FormData(form));data.consent=!!form.elements.consent.checked;data.turnstile_token=token;
     const submit=form.querySelector('button[type="submit"]');form.dataset.sending='true';submit.disabled=true;status.textContent='Sending…';
-    try{const response=await fetch('/api/'+kind,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});let result;try{result=await response.json()}catch{throw new Error('Your submission could not be sent. Please try again.')}if(!response.ok||!result.ok)throw new Error(result.error||'Your submission could not be sent. Please try again.');status.textContent=success;form.reset();}
+    try{if(portalDelivery){if(!formCheck||Date.now()-formCheck.receivedAt>1700000)formCheck=await refreshFormCheck();const wait=Math.max(0,formCheck.notBefore-(Date.now()-formCheck.receivedAt));if(wait)await new Promise(resolve=>setTimeout(resolve,wait));data.form_token=formCheck.token;}const response=await fetch('/api/'+kind+(portalDelivery?'?delivery=portal':''),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});let result;try{result=await response.json()}catch{throw new Error('Your submission could not be sent. Please try again.')}if(!response.ok||!result.ok)throw new Error(result.error||'Your submission could not be sent. Please try again.');status.textContent=success;form.reset();form.querySelectorAll('.field-error').forEach(el=>el.remove());for(const control of form.elements)control.removeAttribute('aria-invalid');}
     catch(error){status.textContent=error.message||'Your submission could not be sent. Please try again.';}
-    finally{delete form.dataset.sending;submit.disabled=form.dataset.deliveryUnavailable==='true';token='';if(widget!==undefined)window.turnstile.reset(widget);}
+    finally{delete form.dataset.sending;submit.disabled=form.dataset.deliveryUnavailable==='true';token='';if(widget!==undefined)window.turnstile.reset(widget);if(portalDelivery){formCheck=null;refreshFormCheck().then(config=>formCheck=config).catch(()=>{});}}
   });
 }
