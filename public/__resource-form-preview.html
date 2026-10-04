@@ -1,4 +1,4 @@
-(() => {
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Resource form presentation preview</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/portal.css"><div style="padding:.5rem 3%;background:#fff;font:14px Arial">Resource form preview · synthetic account · no changes are saved</div><div id="portal-app"></div><script>window.fetch=async()=>{throw new Error('Preview only; no changes are saved.')};</script><script>(() => {
 'use strict';
 const root=document.getElementById('portal-app');
 if(!root)return;
@@ -181,6 +181,7 @@ root.addEventListener('submit',onSubmit);
 root.addEventListener('change',event=>{if(event.target.id==='child'){activeChild=event.target.value;selectOnboarding();render();}if(event.target.matches('[data-resource-select]'))updateResourceOtherFields(event.target.form);});
 window.addEventListener('popstate',()=>refresh().catch(()=>render()));
 setInterval(()=>document.querySelectorAll('[data-countdown]').forEach(el=>el.textContent=countdown(el.dataset.countdown)),60000);
-initialise();
+db=empty();me={id:'presentation-preview',name:'Test administrator',role:'admin'};db.me=me;db.entitled=true;root.innerHTML=manageResources();
 })();
 
+</script></html>

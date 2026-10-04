@@ -57,8 +57,8 @@
     },
     {
       "key": "enquire-011",
-      "label": "P: Please share only the information that will help me discuss tutoring with you. I",
-      "text": "Please share only the information that will help me discuss tutoring with you. I do not need the student’s school name or detailed medical information."
+      "label": "P: Share a little about the student’s learning goals and where support would help.",
+      "text": "Share a little about the student’s learning goals and where support would help. There’s no need to include their school name or detailed medical information."
     },
     {
       "key": "enquire-012",
