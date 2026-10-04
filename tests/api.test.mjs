@@ -27,6 +27,17 @@ test('delivers free-text countries, fractional GMT offsets, Other details and fu
   assert.equal((await submit(request(data),env,'enquiry')).status,200);
   for(const value of ['India','GMT +5.5','Year 13','International science','Combined science','+91 5550100'])assert.ok(sent.text.includes(value));
 });
+test('accepts free-form phone numbers without digit-count or field-length restrictions',async t=>{
+  const sent=[];
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.includes('siteverify'))return Response.json({success:true,hostname:'example.com',action:'enquiry'});
+    sent.push(JSON.parse(options.body));return Response.json({id:'mock'});
+  });
+  for(const phone of ['7','020 7946 0958','(416) 555-0123 ext. 9','Please call 01234 567890, extension 12345678901234567890']){
+    assert.equal((await submit(request({...valid,contact:'Phone',phone_country_code:'+44',phone}),env,'enquiry')).status,200);
+    assert.ok(sent.at(-1).text.includes('+44 '+phone));
+  }
+});
 test('rejects cross-origin submissions, missing consent and invalid emails',async()=>{
   assert.equal((await submit(request(valid,'https://attacker.example'),env,'enquiry')).status,403);
   assert.equal((await submit(request({...valid,consent:false}),env,'enquiry')).status,400);
