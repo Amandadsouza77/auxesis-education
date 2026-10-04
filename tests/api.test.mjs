@@ -38,6 +38,18 @@ test('accepts free-form phone numbers without digit-count or field-length restri
     assert.ok(sent.at(-1).text.includes('+44 '+phone));
   }
 });
+test('delivers UTC offsets from the current public enquiry dropdown',async t=>{
+  const sent=[];
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.includes('siteverify'))return Response.json({success:true,hostname:'example.com',action:'enquiry'});
+    sent.push(JSON.parse(options.body));return Response.json({id:'mock'});
+  });
+  for(const timezone of ['UTC−12:00','UTC−04:00','UTC±00:00','UTC+05:30','UTC+05:45','UTC+13:45','UTC+14:00']){
+    assert.equal((await submit(request({...valid,timezone}),env,'enquiry')).status,200);
+    assert.ok(sent.at(-1).text.includes(timezone));
+  }
+  for(const timezone of ['UTC+14:15','UTC−12:15','UTC+05:10','UTC±01:00'])assert.equal((await submit(request({...valid,timezone}),env,'enquiry')).status,400);
+});
 test('rejects cross-origin submissions, missing consent and invalid emails',async()=>{
   assert.equal((await submit(request(valid,'https://attacker.example'),env,'enquiry')).status,403);
   assert.equal((await submit(request({...valid,consent:false}),env,'enquiry')).status,400);
