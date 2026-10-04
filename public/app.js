@@ -50,7 +50,7 @@ if(enquiry){
 }
 function formUnavailable(form,kind,temporary=false){
   const note=form.querySelector('.delivery-note');
-  if(note){if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please ';note.hidden=false;}
+  if(note){if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please email Amanda at ';note.hidden=false;}
   form.dataset.deliveryUnavailable='true';
   const button=form.querySelector('button[type="submit"]');button.disabled=true;
   button.textContent=temporary?'Form temporarily unavailable':kind==='enquiry'?'Online enquiries coming soon':'Online reviews coming soon';
