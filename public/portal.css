@@ -15,3 +15,9 @@
 .import-review li{margin:.4rem 0}
 @media(max-width:760px){.review-banner{align-items:flex-start;flex-direction:column}.review-banner .button-row{flex-wrap:wrap}}
 @media print{.review-banner,.import-review{display:none}}
+
+/* Errors stay beside the controls while values are retained. */
+.portal-field [aria-invalid="true"],.check-label input[aria-invalid="true"]{border:2px solid #a02b36;outline-offset:2px}
+.field-error{display:block;color:#a02b36;font-size:.88rem;line-height:1.4;margin-top:.35rem}
+.required-marker{color:#a02b36}
+.portal-field select{max-width:100%;min-width:0}

@@ -2,9 +2,10 @@
   "site_url": "https://auxesis-education.pages.dev",
   "github_repository": "Amandadsouza77/auxesis-education",
   "github_branch": "main",
-  "public_email": "",
+  "public_email": "adsouza35@gmail.com",
   "portrait": "",
   "portrait_alt": "Amanda D’Souza",
   "logo": "/assets/logo.png",
-  "production": false
+  "production": false,
+  "form_delivery": "portal"
 }
