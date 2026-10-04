@@ -144,16 +144,16 @@
     "text": "More than 25 years in science education."
   },
   "about-amanda-003": {
-    "raw": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam. I spent about 20 years living and working internationally, teaching students from many different backgrounds and working within very different school systems. That has given me a broad view of education, but it has also shown me something very practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability.",
-    "text": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam. I spent about 20 years living and working internationally, teaching students from many different backgrounds and working within very different school systems. That has given me a broad view of education, but it has also shown me something very practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability."
+    "text": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam.",
+    "raw": "I’m Amanda D’Souza. I have been teaching science for more than 25 years, and my career has taken me through Canada, Japan, Australia, England, Egypt, Barbados, Qatar and Vietnam."
   },
   "about-amanda-004": {
     "raw": "Experience",
     "text": "Experience"
   },
   "about-amanda-005": {
-    "raw": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science. I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring. Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions.",
-    "text": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science. I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring. Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions."
+    "text": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science.",
+    "raw": "Over the years I have taught IB Diploma Biology, Chemistry and Environmental Systems and Societies; IB MYP Science; the International Middle Years Curriculum; GCSE and IGCSE Biology and Chemistry, including Combined and Coordinated Science; AS and A-Level Biology; and Ontario secondary science."
   },
   "about-amanda-006": {
     "raw": "Qualifications",
@@ -164,8 +164,8 @@
     "text": "Biology, education and professional certification."
   },
   "about-amanda-008": {
-    "raw": "My own academic background is in Biology. I completed my Bachelor of Science in Biology at the University of Western Ontario in London, Ontario, in 2000. I then moved to Australia for teacher training, completing a Diploma of Education at the University of Wollongong in New South Wales in 2002. I am an Ontario Certified Teacher (OCT #496538), hold Qualified Teacher Status in England, and have completed Guidance and Career Education Additional Qualification Parts 1 and 2.",
-    "text": "My own academic background is in Biology. I completed my Bachelor of Science in Biology at the University of Western Ontario in London, Ontario, in 2000. I then moved to Australia for teacher training, completing a Diploma of Education at the University of Wollongong in New South Wales in 2002. I am an Ontario Certified Teacher (OCT #496538), hold Qualified Teacher Status in England, and have completed Guidance and Career Education Additional Qualification Parts 1 and 2."
+    "text": "My academic background is in Biology.",
+    "raw": "My academic background is in Biology."
   },
   "about-amanda-009": {
     "raw": "The relationship is still personal",
@@ -428,8 +428,8 @@
     "text": "From enquiry to first lesson."
   },
   "how-tutoring-works-003": {
-    "raw": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, I then arrange a free Meet &amp; Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
-    "text": "Starting tutoring should be straightforward. When you enquire, tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times. I first arrange a free phone conversation with the parent. If it sounds as though I may be able to help, I then arrange a free Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+    "text": "Tutoring begins with an enquiry, a parent conversation and a Meet & Greet before you decide whether to proceed.",
+    "raw": "Tutoring begins with an enquiry, a parent conversation and a Meet &amp; Greet before you decide whether to proceed."
   },
   "how-tutoring-works-004": {
     "raw": "01",
@@ -500,8 +500,8 @@
     "text": "Ongoing tutoring"
   },
   "how-tutoring-works-040": {
-    "raw": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence. The portal keeps everything organised between lessons so that each session can build on the last.",
-    "text": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence. The portal keeps everything organised between lessons so that each session can build on the last."
+    "text": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence.",
+    "raw": "From there, tutoring develops with the student. Lessons respond to what they need now while continuing to build stronger understanding, exam skills and independence."
   },
   "how-tutoring-works-016": {
     "raw": "SMART goals. Clear next steps.",
@@ -798,10 +798,6 @@
   "recommendations-011": {
     "raw": "These are individual experiences. The references to grades describe those families’ experiences; they are not promises of a particular result. Read the complete recommendations on LinkedIn for their full context.",
     "text": "These are individual experiences. The references to grades describe those families’ experiences; they are not promises of a particular result. Read the complete recommendations on LinkedIn for their full context."
-  },
-  "recommendations-012": {
-    "raw": "Read recommendations on Amanda’s LinkedIn profile",
-    "text": "Read recommendations on Amanda’s LinkedIn profile"
   },
   "recommendations-013": {
     "raw": "Submit a review",
@@ -1106,5 +1102,73 @@
   "faq-022": {
     "raw": "Read the full tutoring policies",
     "text": "Read the full tutoring policies"
+  },
+  "about-amanda-016": {
+    "text": "International education",
+    "raw": "International education"
+  },
+  "about-amanda-017": {
+    "text": "I spent about 20 years living and working internationally, teaching students from many backgrounds and working within different school systems. That has given me a broad view of education and shown me something practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability.",
+    "raw": "I spent about 20 years living and working internationally, teaching students from many backgrounds and working within different school systems. That has given me a broad view of education and shown me something practical: a student can move from one school or curriculum to another and suddenly appear to have “gaps” simply because the sequence, terminology or expectations have changed. I understand how important it is to find those gaps without turning them into a judgement about the student’s ability."
+  },
+  "about-amanda-018": {
+    "text": "I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring.",
+    "raw": "I have also led science departments in Vietnam and Barbados and worked in curriculum development, assessment and teacher mentoring."
+  },
+  "about-amanda-019": {
+    "text": "IB Biology assessment experience",
+    "raw": "IB Biology assessment experience"
+  },
+  "about-amanda-020": {
+    "text": "Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions.",
+    "raw": "Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions."
+  },
+  "about-amanda-021": {
+    "text": "Curriculum and leadership experience",
+    "raw": "Curriculum and leadership experience"
+  },
+  "about-amanda-022": {
+    "text": "Academic qualifications",
+    "raw": "Academic qualifications"
+  },
+  "about-amanda-023": {
+    "text": "Bachelor of Science in Biology — University of Western Ontario, London, Ontario (2000)",
+    "raw": "Bachelor of Science in Biology — University of Western Ontario, London, Ontario (2000)"
+  },
+  "about-amanda-024": {
+    "text": "Graduate Diploma in Education — University of Wollongong, New South Wales, Australia (2002)",
+    "raw": "Graduate Diploma in Education — University of Wollongong, New South Wales, Australia (2002)"
+  },
+  "about-amanda-025": {
+    "text": "Professional credentials",
+    "raw": "Professional credentials"
+  },
+  "about-amanda-026": {
+    "text": "Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry",
+    "raw": "Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry"
+  },
+  "about-amanda-027": {
+    "text": "Qualified Teacher Status in England",
+    "raw": "Qualified Teacher Status in England"
+  },
+  "about-amanda-028": {
+    "text": "Guidance and Career Education Additional Qualification Parts 1 and 2",
+    "raw": "Guidance and Career Education Additional Qualification Parts 1 and 2"
+  },
+  "how-tutoring-works-045": {
+    "text": "Communication with students and parents",
+    "raw": "Communication with students and parents"
+  },
+  "subjects-programmes-046": {
+    "text": "Guidance for assessed work supports the student’s thinking. Decisions, analysis and final submitted work remain the student’s own.",
+    "raw": "Guidance for assessed work supports the student’s thinking. Decisions, analysis and final submitted work remain the student’s own."
+  },
+  "subjects-programmes-047": {
+    "text": "Read the academic-integrity policy",
+    "raw": "Read the academic-integrity policy"
+  },
+  "faq-023": {
+    "text": "Read the academic-integrity policy",
+    "raw": "Read the academic-integrity policy"
   }
 }
