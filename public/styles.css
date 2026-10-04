@@ -139,9 +139,10 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 .recommendation-card figcaption{padding-top:1rem}
 .cta-band{padding-block:3.75rem}
 .cta-inner{gap:2rem 3rem}
-.page-navigation{padding-block:1.5rem 2.25rem;align-items:center}
-.page-navigation a{max-width:48%;text-wrap:balance}
-.page-navigation a:last-child{text-align:right}
+.page-navigation{padding-block:1.5rem 2.25rem;align-items:center;flex-wrap:wrap}
+.page-navigation a{max-width:100%;flex-shrink:0;white-space:nowrap;text-wrap:nowrap}
+.page-navigation a:last-child{text-align:right;margin-left:auto}
+.page-navigation>span:empty{display:none}
 .footer{padding-top:3.5rem}
 .footer-grid{gap:3rem}
 .footer-bottom{margin-top:2rem}
