@@ -17,7 +17,7 @@
 .header .brand img{display:block;max-width:100%;height:auto;object-fit:contain}
 .menu-toggle{min-height:44px;padding:.6rem 1rem;border:1px solid var(--midnight-violet);border-radius:var(--surface-radius);font:700 .95rem/1.2 var(--sans)}
 .button{min-height:var(--control-height);padding:.75rem 1.25rem;border:1px solid var(--teal-dark);border-radius:var(--surface-radius);background:var(--teal-dark);color:var(--alabaster);font:700 .95rem/1.2 var(--sans);letter-spacing:.01em;transition:filter .18s ease,transform .18s ease}
-.button:hover{filter:brightness(.94);transform:translateY(-1px)}
+.button:hover{background:var(--teal-dark);filter:none;transform:translateY(-1px)}
 .button:focus-visible{outline:3px solid var(--midnight-violet);outline-offset:3px}
 .button.secondary{background:transparent;border:1px solid currentColor;color:inherit}
 .button.secondary:hover{background:rgba(214,201,184,.28);filter:none;transform:none}
@@ -215,3 +215,7 @@ p,blockquote,li,.field,.check{ text-wrap:pretty }
 /* Keep in-page destinations clear of the sticky public header. */
 body#top main [id]{scroll-margin-top:6.5rem}
 .review-form .delivery-note{font-weight:400;margin-bottom:1.25rem}
+
+/* Keep small text readable against existing brand colours. */
+.skip-link{color:var(--midnight-violet)}
+.section.taupe .eyebrow{color:var(--midnight-violet)}
