@@ -4,6 +4,23 @@ menuButton?.addEventListener('click',()=>{const open=menuButton.getAttribute('ar
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu?.classList.contains('is-open')){menu.classList.remove('is-open');menuButton?.setAttribute('aria-expanded','false');if(menuButton)menuButton.textContent='Menu';menuButton?.focus()}});
 const enquiry=document.querySelector('#enquiry-form');
 if(enquiry){
+  const timezone=enquiry.elements.namedItem('timezone');
+  if(timezone?.dataset.examples){
+    try{
+      const examples=new Map();
+      const now=new Date();
+      for(const [place,zone] of JSON.parse(timezone.dataset.examples)){
+        const offset=new Intl.DateTimeFormat('en-GB',{timeZone:zone,timeZoneName:'longOffset'}).formatToParts(now).find(part=>part.type==='timeZoneName').value;
+        const value=offset==='GMT'?'UTC±00:00':offset.replace('GMT','UTC').replace('-','−');
+        if(!examples.has(value))examples.set(value,[]);
+        examples.get(value).push(place);
+      }
+      for(const option of timezone.options)if(option.value){
+        const places=examples.get(option.value);
+        option.textContent=option.value+(places?' — '+places.join(' / '):'');
+      }
+    }catch{ /* UTC offsets remain usable when regional formatting is unavailable. */ }
+  }
   const update=()=>{
     enquiry.querySelectorAll('[data-other-for]').forEach(field=>{
       const show=enquiry.elements.namedItem(field.dataset.otherFor).value==='Other';
