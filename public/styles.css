@@ -219,3 +219,17 @@ body#top main [id]{scroll-margin-top:6.5rem}
 /* Keep small text readable against existing brand colours. */
 .skip-link{color:var(--midnight-violet)}
 .section.taupe .eyebrow{color:var(--midnight-violet)}
+
+
+/* Header logo: the asset itself is transparent; keep every surrounding layer transparent so the cream header shows through. */
+.header .brand,
+.header .brand:before,
+.header .brand:after,
+.header .brand img{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.header .brand{padding:0!important;overflow:visible}
+.header .brand:before,.header .brand:after{content:none!important}
