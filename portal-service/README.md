@@ -20,3 +20,15 @@ The settings record's `reviewMode` flag pauses family sign-in and invitation cre
 Amanda can select **View as student** or **View as parent** from a student record. The first-party proxy forwards `x-auxesis-preview-role` and `x-auxesis-preview-student` alongside the existing HttpOnly session. The backend requires an actual administrator and uses the same role and family filters as genuine accounts. Preview headers do not grant identity or switch the stored session. Command and upload endpoints reject preview writes. Onboarding can be stepped through locally without saving acknowledgements. **Return to Amanda's workspace** removes the preview scope.
 
 Run the additional import render checks with `PORTAL_REVIEW_FIXTURE_PATH=/absolute/path/to/private-payload.json node --test tests/*.test.mjs`. Keep private payloads outside the repository. The optional `tests/portal-review-browser.mjs` uses Playwright with the same external fixture and a local server at port 8080; it checks navigation and overflow at mobile and desktop widths. It requires an installed Chromium executable.
+
+## Synchronization pilot
+
+The existing portal has a pilot-scoped `portal/sync` endpoint. Calendar controls exact occurrence times and cancellations; the Student Tracker controls business arrangements, attendance and teaching notes. Source mappings, account identity and pilot selection are held only in private server settings. Repository tests use synthetic identities.
+
+Existing records are updated by Calendar occurrence ID. Preparation, resources, opening balances, schedule history and cancellation evidence are preserved. Repeated snapshots update no lessons. Missing events are not assumed cancelled, and ambiguous matches are held for review. No purchases or attendance debits are replayed. The runner reads source data without writing Calendar or Sheets.
+
+Eight occurrences passed a connected-source pilot and a repeat pass updated zero lessons. Family previews showed the expected records and non-pilot data checksums were unchanged. Direct Google consent and permission to the existing Tracker file are still required; the drive.file integration may need Google Picker and its separately configured API key. Do not describe the connected-snapshot pilot as continuous or two-way synchronization.
+
+No scheduled job or wider rollout is enabled. Family access remains in private review. Publish the Floot service before deploying the companion Cloudflare interface change. After publication and consent, run the direct Google pilot twice and verify current source data, cancellation retention, family isolation and zero repeat changes before rollout.
+
+Local checks: 41 tests pass; one existing private-fixture test is skipped. Managed backend typecheck is clean.

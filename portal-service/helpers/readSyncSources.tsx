@@ -1,0 +1,28 @@
+type Item=Record<string,any>;
+// Access tokens stay on the server. The injected transport makes pagination/failure testable.
+export async function readSyncSources(config:Item, googleGet:(url:string)=>Promise<Item>, now=new Date()) {
+  const timeMin=new Date(now.getTime()-7*86400000).toISOString();
+  const timeMax=new Date(now.getTime()+56*86400000).toISOString();
+  const rows=(data:Item,required:string[],limit:number)=>{
+    const values=data.values;if(!Array.isArray(values)||!values.length)throw new Error('Tracker tab is empty or unreadable.');
+    const headers=values[0].map((v:any)=>String(v).trim());
+    if(required.some(h=>!headers.includes(h))||new Set(headers.filter(Boolean)).size!==headers.filter(Boolean).length)throw new Error('Tracker columns changed; review the mapping.');
+    if(values.length>=limit)throw new Error('Tracker range limit reached; extend the verified read bounds.');
+    return values.slice(1).filter((r:any[])=>r.some(v=>String(v).trim())).map((r:any[])=>Object.fromEntries(headers.map((h:string,i:number)=>[h,r[i]??'']).filter(([h]:any)=>h)));
+  };
+  const base='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(config.spreadsheetId)+'/values/';
+  const students=rows(await googleGet(base+encodeURIComponent('Students!A1:AD1000')),['Student','Rate','Currency'],1000);
+  const lessons=rows(await googleGet(base+encodeURIComponent('Lessons!A1:Y1001')),['Student','Lesson Date','Status'],1001);
+  const billing=rows(await googleGet(base+encodeURIComponent('Billing!A1:AF998')),['Student','Invoice Date','Status'],998);
+  let pageToken='',events:Item[]=[];const seen=new Set<string>();
+  do {
+    const q=new URLSearchParams({singleEvents:'true',showDeleted:'true',timeMin,timeMax,timeZone:'America/Toronto',maxResults:'2500'});
+    if(pageToken)q.set('pageToken',pageToken);
+    const page=await googleGet('https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(config.calendarId)+'/events?'+q);
+    if(!Array.isArray(page.items))throw new Error('Calendar response is incomplete.');
+    events.push(...page.items);pageToken=page.nextPageToken||'';
+    if(pageToken&&(seen.has(pageToken)||seen.size>=20))throw new Error('Calendar pagination could not finish.');
+    seen.add(pageToken);
+  }while(pageToken);
+  return {complete:true,calendarId:config.calendarId,spreadsheetId:config.spreadsheetId,students,lessons,billing,events,timeMin,timeMax};
+}
