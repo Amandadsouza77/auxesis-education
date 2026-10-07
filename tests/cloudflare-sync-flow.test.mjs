@@ -57,6 +57,11 @@ async function pilot(t){
 test('preview, delayed apply, Portal state and replay reconcile without debiting balances',async t=>{
  const p=await pilot(t),before=await p.records(),preview=await p.request('sync',{mode:'preview'});
  assert.equal(preview.status,200);assert.equal(preview.data.canApply,true);assert.ok(preview.data.changedRecords>0);
+ assert.equal(preview.data.diagnostics.calendar[0].eventId,'fixture-event');
+ assert.equal(preview.data.diagnostics.proposedLessons[0].start,'2026-10-08T14:00:00.000Z');
+ assert.equal(preview.data.diagnostics.portalBefore.purchased,preview.data.diagnostics.portalProposed.purchased);
+ const diagnostic=JSON.stringify(preview.data.diagnostics);
+ for(const privateValue of ['Existing focus','Existing homework','fixture-access','fixture-refresh','fixture-secret'])assert.ok(!diagnostic.includes(privateValue),'diagnostics exclude notes and credentials');
  assert.deepEqual(await p.records(),before,'preview leaves business records untouched');
  p.setNow('2026-10-07T12:02:00.000Z');
  const applied=await p.request('sync',{mode:'apply',digest:preview.data.digest});assert.equal(applied.status,200,JSON.stringify(applied.data));

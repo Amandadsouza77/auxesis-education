@@ -134,7 +134,7 @@ jobs:
                   health = json.loads(row.get("health") or "{}")
                   summary = health.get("summary") or {}
                   safe = {k: health.get(k) for k in ["state", "lastReadAt", "lastSuccessfulAt"]}
-                  safe.update({k: summary.get(k) for k in ["eventCount", "changedRecords", "canApply", "issues"]})
+                  safe.update({k: summary.get(k) for k in ["eventCount", "changedRecords", "canApply", "issues", "diagnostics"]})
                   lines.append("Recorded pilot preview: " + json.dumps(safe))
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))

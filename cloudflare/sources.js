@@ -1,6 +1,8 @@
+import {sourceWindow} from './time-window.js';
+
 export async function readSyncSources(config,googleGet,now=new Date()){
  const sourceError=(message,code)=>{throw Object.assign(new Error(message),{status:503,code});};
- const timeMin=new Date(now.getTime()-7*86400000).toISOString(),timeMax=new Date(now.getTime()+56*86400000).toISOString();
+ const {timeMin,timeMax}=sourceWindow(now);
  const rows=(data,required,limit)=>{const values=data.values;if(!Array.isArray(values)||!values.length)sourceError('Tracker tab is empty or unreadable.','tracker_unreadable');const headers=values[0].map(v=>String(v).trim());if(required.some(h=>!headers.includes(h))||new Set(headers.filter(Boolean)).size!==headers.filter(Boolean).length)sourceError('Tracker columns changed; review the mapping.','tracker_columns_changed');if(values.length>=limit)sourceError('Tracker range limit reached; extend the verified read bounds.','tracker_range_limit');return values.slice(1).map((r,index)=>({r,index})).filter(({r})=>r.some(v=>String(v).trim())).map(({r,index})=>({...Object.fromEntries(headers.map((h,i)=>[h,r[i]??'']).filter(([h])=>h)),_row:index+2}));};
  const base='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(config.spreadsheetId)+'/values/';
  const students=rows(await googleGet(base+encodeURIComponent('Students!A1:AD1000')),['Student','Rate','Currency'],1000);

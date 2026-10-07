@@ -4,6 +4,7 @@ import {listRecords,putRecord,getAccountBySession} from './d1-adapter.js';
 import {readSyncSources} from './sources.js';
 import {syncPlan} from './sync-plan.js';
 import {pilotSeed} from './pilot-seed.js';
+import {pilotDiagnostics} from './sync-diagnostics.js';
 
 const SESSION='__Host-auxesis_session',enc=new TextEncoder();
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});
@@ -64,6 +65,7 @@ async function runSync(env,actor,body){
  // to source content, record revisions and the resulting plan instead, so time
  // alone does not invalidate apply while window-dependent changes still do.
  const input=await readSyncSources(config,googleGet(await accessToken(env,actor))),plan=syncPlan(all,input,config),recordRows=await db.prepare('SELECT id,revision FROM portal_records WHERE student_id=?1 OR id=?1 OR id=?2 ORDER BY id').bind(config.studentId,all.find(r=>r.id===config.studentId)?.parentId||'').all(),digest=await hex(JSON.stringify({config,input:Object.fromEntries(Object.entries(input).filter(([key])=>!['timeMin','timeMax'].includes(key))),records:recordRows.results||[],plan})),summary={studentName:plan.studentName,studentId:plan.studentId,changedRecords:plan.changes.length,eventCount:plan.eventCount,trackerLessonCount:plan.trackerLessonCount,billingRowCount:plan.billingRowCount,issues:plan.issues,canApply:plan.canApply,digest};
+ summary.diagnostics=pilotDiagnostics(all,input,config,plan);
  if(body.mode==='apply'){if(body.digest!==digest)fail('Sources or portal records changed. Preview again.');if(!plan.canApply)fail('Resolve the listed source conflicts before applying this pilot.');const statements=plan.changes.map(change=>recordStatement(db,change.kind,change.data));statements.push(db.prepare('INSERT INTO portal_audit(id,account_id,action,record_id) VALUES(?1,?2,?3,?4)').bind(crypto.randomUUID(),actor.id,'sourceSync',config.studentId));await db.batch(statements);}
  settings.syncHealth={lastAttemptedAt:new Date().toISOString(),lastReadAt:new Date().toISOString(),lastSuccessfulAt:body.mode==='apply'?new Date().toISOString():settings.syncHealth?.lastSuccessfulAt||null,state:body.mode==='apply'?'applied':plan.canApply?'preview-ready':'conflicts',summary,error:null};await putRecord(db,'settings',settings);return {ok:true,mode:body.mode,...summary};
 }

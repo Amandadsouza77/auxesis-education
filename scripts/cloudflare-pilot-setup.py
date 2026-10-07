@@ -218,7 +218,7 @@ def verify(snapshot_file):
             "OAuth start: passed (302 to Google with stable callback, PKCE and approved scopes).",
             "Administrator Google connection: " + ("present; grant usability still unverified" if connected else "absent; owner sign-in and Tracker selection required"),
             "Live project settings and production deployment: unchanged.",
-            "Google-authenticated Andie sync and repeat-sync: NOT RUN until Google setup and consent are complete."])
+            "Current-runtime Andie preview/apply/replay and note write-back: pending authenticated live validation."])
 
 
 if __name__ == "__main__":
