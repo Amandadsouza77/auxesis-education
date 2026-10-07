@@ -53,3 +53,18 @@ Portable without Floot:
 - Cloudflare first-party request boundary and cookie pattern, after replacing its remote target.
 
 No production cutover is part of this branch. Do not merge PR #12 or disconnect the production fallback as part of the pilot.
+
+
+## Verified checkpoint — 7 October 2026
+
+- Branch: `codex/cloudflare-backend-migration`. Production and PR #12 were not changed.
+- The failed provisioning run `37629330201` returned Cloudflare HTTP 400. Commit `d71da76` replaced shared parameters in multi-statement migration initialization with fixed statement-local literals. The subsequent run [37629460065](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37629460065) succeeded. Do not rerun the obsolete failing revision.
+- Database `auxesis-migration-preview` (`34a9449d-85ee-4f06-a55d-3485905ca64e`) has all three migrations verified and zero business, account, session, Google connection and audit rows. It remains unbound.
+- Read-only readiness workflow added at `fdf90db`; [run 37634156114](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37634156114) passed the inventory check. This is an inventory result, not a passing end-to-end sync test.
+- The observed migration deployment was active at `https://1f31d04d.auxesis-education.pages.dev`. Preview `PORTAL_DB` and all migration environment variables were absent. Google OAuth client ID/secret, Picker API key/app ID, token key and admin email were also absent from the protected workflow secrets checked by that run.
+- Pages preview deployment policy is currently `all`, with included branches `["*"]`. Do not apply a shared preview database binding or credentials without ensuring the migration deployment alone uses them; preserve other previews and production.
+- Local validation at `d71da76`: `npm test` passed 60 tests, with one skipped; site build and static checks passed (28 HTML files and 546 local references). These checks used local fixtures, not live Google sync. No Floot infrastructure was used.
+- Remaining: securely obtain/configure the existing Google OAuth client and Picker settings, register the migration callback, establish branch-safe preview bindings and variables, then authenticate as the administrator and grant the selected Tracker file. `PORTAL_TOKEN_KEY` can be generated during secure setup; it does not need to be supplied by the user.
+- Run the existing Andie-only live sequence above after configuration. Preview/apply/zero-change replay, exact-row note write and restoration, unchanged Calendar checksums and rejection checks are **not yet verified live**.
+
+Resume from this checkpoint and inspect only settings that may have changed. Do not recreate the database, rebuild the migration, merge PR #12, or modify production.
