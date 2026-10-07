@@ -45,7 +45,7 @@ node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test
 git diff --check
 ```
 
-Current result: **25 passed, 0 failed, 0 skipped** (earlier checkpoints had
+Current result: **27 passed, 0 failed, 0 skipped** (earlier checkpoints had
 17 and 23 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
@@ -54,11 +54,80 @@ numbers, Calendar creation/rescheduling/cancellation, preserved balances,
 exact-cell note write and restoration, failed-read visibility, invalid OAuth
 callbacks, non-pilot rejection and concurrent Tracker-note conflicts.
 
-These are local integration tests, not an authenticated live Andie test. Earlier
+These include synthetic integration tests; live evidence is distinguished below. Earlier
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused until the real pilot passes.
 
-## Current checkpoint — Andie preview reviewed, owner-session apply pending, 7 October 2026
+## Current checkpoint — Andie import and replay passed; live note write pending
+
+The owner's authenticated apply succeeded at `2026-10-07T23:23:51.667Z`
+(19:23 Toronto), followed by a fresh preview at `2026-10-07T23:24:12.331Z`.
+[Read-only run 37700101519, attempt 2](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37700101519)
+confirmed **18 Calendar occurrences, zero changed records, zero conflicts**.
+Protected database evidence confirms one successful source apply, 18 pilot
+lessons, zero non-pilot students/lessons, and zero successful Tracker note saves.
+The Calendar schedule facts remain identical to the reviewed source facts.
+Rate **125 CAD**, Monthly package, purchased **8**, used **0** and the explicit
+`balanceVerified=false` review safeguard remain unchanged. No source business
+data has been written. Do not repeat the completed apply or authentication.
+
+Revision `a899a92` adds hashes from freshly read Google Tracker notes to saved
+preview diagnostics, independently of cached Portal metadata. Deployment
+[37703145008](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37703145008)
+passed 26 tests and all deployment/security/isolation checks. The existing
+Preview deployment and Google connection were preserved.
+
+Revision `f96deca` limits note writes to changed cells: the controlled test edits
+only Lesson Focus, leaving unchanged Homework / Next Step untouched. The 27
+targeted tests passed locally. The read-only proof also hashes the original
+note prefix when the exact temporary marker is appended, so no teaching text
+needs to be exposed. [Deployment run 37704086887](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086887)
+passed all steps, including 27 runner tests, real D1 session rejection,
+cross-origin rejection, stable Portal/callback, OAuth PKCE and unchanged live
+settings/deployment. The exact deployed commit is
+`f96deca5a097e2d1d57c35c433f7b6a1b1f7f036`, at
+`https://1cb27a6c.auxesis-migration-preview.pages.dev`.
+Use the unchanged stable alias for the owner's browser session.
+[Read-only run 37704086813, attempt 2](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086813)
+then confirmed that exact deployed revision, unchanged baseline hashes,
+18 pilot lessons, zero non-pilot records, one successful source apply and zero
+Tracker note saves. Its saved preview remains the successful zero-change replay.
+Fresh Tracker note evidence will appear after the next authenticated Preview;
+do not treat cached source hashes as an independent post-write Sheet read.
+
+Hash-only baseline and import/replay evidence are saved outside the checkout at
+`/workspace/auxesis-pilot-evidence/note-baseline.json` and
+`/workspace/auxesis-pilot-evidence/import-and-replay.json`. Recover the baseline
+from [read-only run 37703145168](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37703145168)
+if needed. Do not overwrite the baseline after a temporary write.
+
+**Remaining owner-session step:** the private signed-in browser is still the
+only authorized path for the live notes command and fresh Google reads.
+No Google reconnect, Tracker reselection, credential change or security change
+is needed. Never extract the session or mint an alternate admin session.
+
+After deployment verification, open the isolated completed **30 September
+Andie lesson / Tracker row 56**:
+
+<https://codex-cloudflare-backend-mig.auxesis-migration-preview.pages.dev/portal/lesson/?id=calendar-classroom107924035776692772286%2540group.calendar.google.com%257Cc5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68_20260930T084500Z>
+
+Keep the existing **What We Covered** text and append, on its own new line,
+`AUXESIS_PILOT_CHECK_20261007`. Leave Outcome and Next Steps unchanged.
+Click **Save lesson notes**, then **Preview pilot sync** on Students.
+Read the protected saved diagnostics before asking the owner to remove the
+marker. Require the fresh Tracker covered hash to equal the Portal covered
+hash, the prefix hash to equal the original baseline, unchanged other hashes,
+zero-change replay, one successful exact-pilot note save, unchanged Calendar
+and business facts, and continued non-pilot isolation.
+
+Only after that intermediate write passes, have the owner remove only the added
+marker line, Save and Preview again. Require exact baseline note hashes in both
+the Portal and fresh Tracker read, no marker, two successful saves, unchanged
+business/Calendar/isolation and zero-change replay. The live round trip remains
+**unproven** until both saves and independent source reads pass. Full-roster
+rollout, unattended updates and production changes remain paused.
+
+## Historical checkpoint — reviewed preview and owner-session apply, superseded
 
 The owner reran Preview and confirmed it with `DONE`. The saved live result at
 `2026-10-07T22:56:24.106Z` (18:56 Toronto time) is `preview-ready`,
