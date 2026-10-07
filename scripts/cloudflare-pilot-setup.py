@@ -15,6 +15,8 @@ BRANCH = "codex/cloudflare-backend-migration"
 DATABASE = "34a9449d-85ee-4f06-a55d-3485905ca64e"
 GOOGLE_KEYS = ("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID")
 BASE = "https://api.cloudflare.com/client/v4/accounts/" + ACCOUNT
+AUTH_COUNTS = "SELECT COUNT(*) AS count FROM google_connections WHERE email='adsouza35@gmail.com'"
+STABLE_HOST = "codex-cloudflare-backend-mig.auxesis-migration-preview.pages.dev"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -27,17 +29,21 @@ opener = urllib.request.build_opener(NoRedirect())
 
 def require(condition, message):
     if not condition:
+        escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print("::error title=Auxesis isolated pilot::" + escaped)
         raise SystemExit(message)
 
 
 def api(path, method="GET", body=None, missing_ok=False):
     allowed_write = (method == "POST" and path == "/pages/projects" and
                      isinstance(body, dict) and body.get("name") == PROJECT)
-    # The sole D1 POST is an explicitly read-only schema query.
+    # D1 POSTs are restricted to these exact read-only queries.
     schema_read = path == "/d1/database/" + DATABASE + "/query" and body == {
         "sql": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
     }
-    require(method == "GET" or allowed_write or schema_read, "Write target is outside the pilot.")
+    auth_read = path == "/d1/database/" + DATABASE + "/query" and body == {"sql": AUTH_COUNTS}
+    require(method == "GET" or allowed_write or (method == "POST" and (schema_read or auth_read)),
+            "Write target is outside the pilot.")
     request = urllib.request.Request(BASE + path, method=method,
         headers={"Authorization": "Bearer " + os.environ["CLOUDFLARE_API_TOKEN"], "Content-Type": "application/json"},
         data=json.dumps(body).encode() if body is not None else None)
@@ -78,6 +84,8 @@ def validate_pilot(project):
 
 def report(lines):
     print("\n".join(lines))
+    escaped = "\n".join(lines).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+    print("::notice title=Auxesis isolated pilot::" + escaped)
     with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
         output.write("\n## Isolated Cloudflare pilot\n\n" + "\n".join("- " + line for line in lines) + "\n")
 
@@ -171,10 +179,43 @@ def verify(snapshot_file):
     smoke(url, "/api/portal/state", 401, {"Cookie": "__Host-auxesis_session=" + "A" * 43})
     smoke(url, "/api/portal/sync", 403, {"Origin": "https://invalid.example", "Content-Type": "application/json"}, "POST", b'{"mode":"apply"}')
     aliases = [a for a in deployment.get("aliases", []) if a.endswith("." + PROJECT + ".pages.dev")]
+    stable = "https://" + STABLE_HOST
+    require(any(urllib.parse.urlparse(a).hostname == STABLE_HOST for a in aliases),
+            "The expected stable pilot alias is missing.")
+    smoke(stable, "/portal/", 200)
+    # Invalid state exercises the deployed callback error boundary without
+    # exchanging a Google code, creating a session or seeding business records.
+    smoke(stable, "/api/portal/auth/callback?state=invalid&code=invalid", 401)
+    try:
+        opener.open(stable + "/api/portal/auth/start", timeout=30)
+        require(False, "OAuth start did not redirect to Google.")
+    except urllib.error.HTTPError as response:
+        require(response.code == 302, "OAuth start failed: HTTP " + str(response.code))
+        target = urllib.parse.urlparse(response.headers.get("Location", ""))
+        query = urllib.parse.parse_qs(target.query)
+        require(target.scheme == "https" and target.netloc == "accounts.google.com" and
+                target.path == "/o/oauth2/v2/auth", "OAuth start returned an unexpected destination.")
+        require(query.get("redirect_uri") == [stable + "/api/portal/auth/callback"],
+                "OAuth start did not use the registered stable callback.")
+        require(query.get("code_challenge_method") == ["S256"] and bool(query.get("code_challenge")),
+                "OAuth start did not retain PKCE protection.")
+        require(set(query.get("scope", [""])[0].split()) == {
+                "openid", "profile", "email", "https://www.googleapis.com/auth/calendar.readonly",
+                "https://www.googleapis.com/auth/drive.file"}, "OAuth scopes differ from the pilot boundary.")
+    except (urllib.error.URLError, TimeoutError):
+        require(False, "OAuth start could not be reached; response and credentials omitted.")
+    # Only the count is retained; encrypted tokens and account records are not
+    # fetched. OAuth start above writes only an expiring operational auth flow.
+    auth_rows = api("/d1/database/" + DATABASE + "/query", "POST", {"sql": AUTH_COUNTS})
+    connected = sum(row["count"] for item in auth_rows for row in item.get("results", []))
+    require(live_snapshot() == json.loads(snapshot_file.read_text()), "Live configuration changed during verification.")
     report(["Deployed migration commit: " + os.environ["GITHUB_SHA"], "Pilot URL: " + url,
             "Pilot aliases: " + ", ".join(aliases),
             "Live D1 query via portal session lookup: passed (401 for nonexistent session).",
             "Cross-origin apply rejection: passed (403).",
+            "Stable alias and callback error boundary: passed (200/401).",
+            "OAuth start: passed (302 to Google with stable callback, PKCE and approved scopes).",
+            "Administrator Google connection: " + ("present; grant usability still unverified" if connected else "absent; owner sign-in and Tracker selection required"),
             "Live project settings and production deployment: unchanged.",
             "Google-authenticated Andie sync and repeat-sync: NOT RUN until Google setup and consent are complete."])
 

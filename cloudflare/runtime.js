@@ -60,7 +60,10 @@ function snapshot(actor,all){
 async function runSync(env,actor,body){
  if(actor.role!=='admin')fail('Administrator access is required.',403);if(!['preview','apply'].includes(body.mode))fail('Choose preview or apply.',400);
  const db=dbOf(env),all=await listRecords(db),settings=all.find(r=>r.id==='settings'),config=settings?.syncConfig;if(config?.mode!=='pilot')fail('One-student pilot is not configured.');
- const input=await readSyncSources(config,googleGet(await accessToken(env,actor))),plan=syncPlan(all,input,config),recordRows=await db.prepare('SELECT id,revision FROM portal_records WHERE student_id=?1 OR id=?1 OR id=?2 ORDER BY id').bind(config.studentId,all.find(r=>r.id===config.studentId)?.parentId||'').all(),digest=await hex(JSON.stringify({config,input,records:recordRows.results||[]})),summary={studentName:plan.studentName,studentId:plan.studentId,changedRecords:plan.changes.length,eventCount:plan.eventCount,trackerLessonCount:plan.trackerLessonCount,billingRowCount:plan.billingRowCount,issues:plan.issues,canApply:plan.canApply,digest};
+ // Sliding read-window timestamps change on every request. Bind the preview
+ // to source content, record revisions and the resulting plan instead, so time
+ // alone does not invalidate apply while window-dependent changes still do.
+ const input=await readSyncSources(config,googleGet(await accessToken(env,actor))),plan=syncPlan(all,input,config),recordRows=await db.prepare('SELECT id,revision FROM portal_records WHERE student_id=?1 OR id=?1 OR id=?2 ORDER BY id').bind(config.studentId,all.find(r=>r.id===config.studentId)?.parentId||'').all(),digest=await hex(JSON.stringify({config,input:Object.fromEntries(Object.entries(input).filter(([key])=>!['timeMin','timeMax'].includes(key))),records:recordRows.results||[],plan})),summary={studentName:plan.studentName,studentId:plan.studentId,changedRecords:plan.changes.length,eventCount:plan.eventCount,trackerLessonCount:plan.trackerLessonCount,billingRowCount:plan.billingRowCount,issues:plan.issues,canApply:plan.canApply,digest};
  if(body.mode==='apply'){if(body.digest!==digest)fail('Sources or portal records changed. Preview again.');if(!plan.canApply)fail('Resolve the listed source conflicts before applying this pilot.');const statements=plan.changes.map(change=>recordStatement(db,change.kind,change.data));statements.push(db.prepare('INSERT INTO portal_audit(id,account_id,action,record_id) VALUES(?1,?2,?3,?4)').bind(crypto.randomUUID(),actor.id,'sourceSync',config.studentId));await db.batch(statements);}
  settings.syncHealth={lastAttemptedAt:new Date().toISOString(),lastReadAt:new Date().toISOString(),lastSuccessfulAt:body.mode==='apply'?new Date().toISOString():settings.syncHealth?.lastSuccessfulAt||null,state:body.mode==='apply'?'applied':plan.canApply?'preview-ready':'conflicts',summary,error:null};await putRecord(db,'settings',settings);return {ok:true,mode:body.mode,...summary};
 }
@@ -85,15 +88,27 @@ async function runCommand(env,actor,body){
 
 export async function handlePortalRequest(context){
  const {request}=context,env=context.env||{},url=new URL(request.url),route=(Array.isArray(context.params.path)?context.params.path:[]).join('/');
+ let actor;
  try{
   if(url.hostname==='auxesis-education.pages.dev')return json({error:'The Cloudflare migration is preview-only.'},503);
   if(!['GET','POST'].includes(request.method))return json({error:'Method not allowed.'},405);
   if(request.method==='POST'&&(request.headers.get('Origin')!==origin(request)||request.headers.get('Content-Type')?.split(';')[0]!=='application/json'))return json({error:'Please submit this change from your Auxesis Portal.'},403);
   if(route==='auth/start'&&request.method==='GET')return new Response(null,{status:302,headers:{Location:await startOAuth(request,env,false),'Cache-Control':'no-store'}});
-  if(route==='auth/callback'&&request.method==='GET')return oauthCallback(request,env);
-  const actor=await account(request,env);if(route==='state'&&request.method==='GET')return json(snapshot(actor,await listRecords(dbOf(env))));
+  if(route==='auth/callback'&&request.method==='GET')return await oauthCallback(request,env);
+  actor=await account(request,env);if(route==='state'&&request.method==='GET')return json(snapshot(actor,await listRecords(dbOf(env))));
   let body={};if(request.method==='POST'){const raw=await request.text();if(raw.length>150000)return json({error:'This request is too large.'},413);body=raw?JSON.parse(raw):{};}
   if(route==='sync')return json(await runSync(env,actor,body));if(route==='command')return json(await runCommand(env,actor,body));if(route==='google/start')return json({url:await startOAuth(request,env,true)});if(route==='google/picker')return json({accessToken:await accessToken(env,actor),apiKey:required(env,'GOOGLE_API_KEY'),appId:required(env,'GOOGLE_APP_ID')});
   if(route==='logout'){await dbOf(env).prepare('DELETE FROM portal_sessions WHERE token_hash=?1').bind(await sha256(cookies(request)[SESSION]||'')).run();return json({ok:true},200,{'Set-Cookie':cookie('',0)});}if(['upload','file','realtime'].includes(route))return json({error:'This feature is not enabled in the one-student migration pilot.'},409);return json({error:'This page is not available.'},404);
- }catch(error){console.error('portal migration',route,error?.message);return json({error:error?.status?error.message:'The portal could not complete this request. Existing records were retained.'},error?.status||503);}
+ }catch(error){
+  const status=error?.status||503,message=error?.status?error.message:'The portal could not complete this request. Existing records were retained.';
+  // Do not log provider responses, request bodies, notes or credentials.
+  const safeRoute=['sync','command','state','auth/start','auth/callback','google/start','google/picker','logout'].includes(route)?route:'other';
+  const sourceCodes=['tracker_unreadable','tracker_columns_changed','tracker_range_limit','calendar_incomplete','calendar_pagination_incomplete'];
+  console.error(JSON.stringify({event:'portal_request_failed',route:safeRoute,status,...(sourceCodes.includes(error?.code)?{code:error.code}:{})}));
+  if(route==='sync'&&actor?.role==='admin')try{
+   const db=dbOf(env),row=await db.prepare("SELECT data FROM portal_records WHERE id='settings'").first();
+   if(row){const settings=JSON.parse(row.data);settings.syncHealth={...settings.syncHealth,lastAttemptedAt:new Date().toISOString(),state:'error',error:message,summary:{canApply:false}};await putRecord(db,'settings',settings);}
+  }catch{console.error(JSON.stringify({event:'sync_health_write_failed'}));}
+  return json({error:message},status);
+ }
 }
