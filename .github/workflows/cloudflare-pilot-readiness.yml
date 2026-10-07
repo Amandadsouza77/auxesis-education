@@ -117,6 +117,22 @@ jobs:
                   lines.append("Migration preview URL: " + str(latest.get("url", "")))
                   lines.append("Deployed source commit: " + str((latest.get("deployment_trigger", {}).get("metadata") or {}).get("commit_hash", "unknown")))
                   lines.append("Migration preview stage: " + str((latest.get("latest_stage") or {}).get("status", "unknown")))
+                  deployment_url = str(latest.get("url", ""))
+                  if not deployment_url.startswith("https://") or not deployment_url.endswith(".auxesis-migration-preview.pages.dev"):
+                      stop("Unexpected isolated deployment URL.")
+                  probe = urllib.request.Request(deployment_url + "/api/portal/state", headers={
+                      "User-Agent": "Auxesis-Pilot-Readiness/1.0",
+                      "Cookie": "__Host-auxesis_session=" + "A" * 43})
+                  try:
+                      with opener.open(probe, timeout=30) as response:
+                          status = response.status
+                  except urllib.error.HTTPError as error:
+                      status = error.code
+                  except (urllib.error.URLError, TimeoutError):
+                      stop("Deployed pilot D1 lookup could not be reached; response omitted.")
+                  if status != 401:
+                      stop("Deployed pilot D1 lookup: expected 401, received " + str(status))
+                  lines.append("Exact deployed pilot D1 session lookup: passed (401 for nonexistent session).")
                   deployed_vars = latest.get("env_vars") or {}
                   for key in ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID"]:
                       variable = deployed_vars.get(key) or {}
