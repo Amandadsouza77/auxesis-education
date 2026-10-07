@@ -41,8 +41,16 @@ jobs:
               def redirect_request(self, req, fp, code, msg, headers, newurl):
                   return None
           opener = urllib.request.build_opener(NoRedirect())
-          def read(path):
-              request = urllib.request.Request(base + path, headers={"Authorization": "Bearer " + token}, method="GET")
+          auth_sql = "SELECT COUNT(*) AS count FROM google_connections WHERE email='adsouza35@gmail.com'"
+          def read(path, sql=None):
+              if sql is not None and (path != "/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query" or sql != auth_sql):
+                  stop("Readiness query is outside its read-only scope.")
+              headers = {"Authorization": "Bearer " + token, "User-Agent": "Auxesis-Pilot-Readiness/1.0"}
+              if sql is not None:
+                  headers["Content-Type"] = "application/json"
+              request = urllib.request.Request(base + path, headers=headers,
+                  method="GET" if sql is None else "POST",
+                  data=None if sql is None else json.dumps({"sql": sql}).encode())
               try:
                   with opener.open(request, timeout=30) as response:
                       data = json.load(response)
@@ -87,7 +95,7 @@ jobs:
           required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
                       "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
                       "PILOT_STUDENT_NAME", "GOOGLE_SPREADSHEET_ID", "GOOGLE_CALENDAR_ID", "PILOT_SERIES_IDS"]
-          lines = ["Requests: GET only. No settings, deployments or records changed.",
+          lines = ["Control-plane reads only: GET plus one fixed D1 SELECT. No settings, deployments or business records changed.",
                    "Pilot database bound to production: no",
                    "Preview PORTAL_DB binding: " + ("present" if (preview.get("d1_databases") or {}).get("PORTAL_DB", {}).get("id") == pilot_id else "missing")]
           for key in required:
@@ -108,8 +116,16 @@ jobs:
                   lines.append("Migration preview URL: " + str(latest.get("url", "")))
                   lines.append("Deployed source commit: " + str((latest.get("deployment_trigger", {}).get("metadata") or {}).get("commit_hash", "unknown")))
                   lines.append("Migration preview stage: " + str((latest.get("latest_stage") or {}).get("status", "unknown")))
+                  deployed_vars = latest.get("env_vars") or {}
+                  for key in ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID"]:
+                      variable = deployed_vars.get(key) or {}
+                      configured = bool(variable.get("value")) or variable.get("type") == "secret_text"
+                      lines.append(key + ": deployed " + ("configured" if configured else "not reported"))
               else:
                   lines.append("Migration preview: absent from latest 10 deployments")
+          auth_rows = read("/d1/database/" + pilot_id + "/query", auth_sql)
+          connections = sum(row["count"] for item in auth_rows for row in item.get("results", []))
+          lines.append("Administrator Google connection: " + ("present; usability unverified" if connections else "absent; owner authentication required"))
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))
           # Keep non-secret presence checks readable through the GitHub API
