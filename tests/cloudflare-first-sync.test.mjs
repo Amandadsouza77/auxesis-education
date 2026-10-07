@@ -28,6 +28,19 @@ test('unlinked cancellations retain the safeguard when the Tracker does not corr
  }
 });
 
+test('first sync preserves explicitly supplied Calendar cancellation times and duration without charging the lesson',()=>{
+ const p=plan({events:[{...cancelled,start:{dateTime:'2026-10-07T04:45:00-04:00'},end:{dateTime:'2026-10-07T05:45:00-04:00'}}]});
+ assert.equal(p.canApply,true,JSON.stringify(p.issues));
+ const lesson=p.changes.find(c=>c.kind==='lessons').data;
+ assert.equal(lesson.start,'2026-10-07T08:45:00.000Z');assert.equal(lesson.end,'2026-10-07T09:45:00.000Z');
+ assert.equal(lesson.hours,1);assert.equal(lesson.durationVerified,true);assert.equal(lesson.status,'Cancelled');assert.equal(lesson.chargeable,false);
+ const updated=p.changes.find(c=>c.kind==='students').data;assert.equal(updated.purchased,8);assert.equal(updated.used,0);
+});
+
+test('invalid supplied cancellation intervals remain blocked',()=>{
+ for(const end of ['invalid','2026-10-07T04:15:00-04:00'])assert.equal(plan({events:[{...cancelled,start:cancelled.originalStartTime,end:{dateTime:end}}]}).canApply,false);
+});
+
 test('a cancelled tombstone without a timed Calendar slot cannot create a lesson',()=>{
  for(const originalStartTime of [undefined,{date:'2026-10-07'},{dateTime:'invalid'}]){
   const p=plan({events:[{...cancelled,originalStartTime}]});assert.equal(p.canApply,false);

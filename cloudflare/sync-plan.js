@@ -42,6 +42,10 @@ export function syncPlan(all,input,config){
     }
    }
    if(['Completed','No-show'].includes(l.status)){issue('history-conflict','Calendar cancellation conflicts with recorded attendance.',l.id);continue;}
+   if(start&&end){
+    if(!Number.isFinite(Date.parse(start))||!Number.isFinite(Date.parse(end))||Date.parse(end)<=Date.parse(start)){issue('invalid-time','A cancelled lesson has invalid Calendar start and end values.',e.id);continue;}
+    l.start=new Date(start).toISOString();l.end=new Date(end).toISOString();l.hours=(Date.parse(end)-Date.parse(start))/3600000;l.timeVerified=true;l.durationVerified=true;
+   }
    l.status='Cancelled';if(l.chargeable===undefined)l.chargeable=null;
   }
   else{if(!start||!end||!Number.isFinite(Date.parse(start))||!Number.isFinite(Date.parse(end))||Date.parse(end)<=Date.parse(start)){issue('invalid-time','A lesson must have valid timed start and end values.',e.id);continue;}if(!l){const candidates=lessons.filter(x=>!eventId(x)&&Date.parse(x.start)===Date.parse(start));if(candidates.length>1){issue('ambiguous-lesson','Several imported lessons match this event.',e.id);continue;}l=candidates[0];if(!l){l={id:'calendar-'+encodeURIComponent(config.calendarId+'|'+e.id),_kind:'lessons',studentId:student.id,start,subject:[student.programme,student.subject].filter(Boolean).join(' '),hours:(Date.parse(end)-Date.parse(start))/3600000,status:'Scheduled',planning:[],notes:{covered:'',outcome:'',next:''},resources:[],privateNotes:''};lessons.push(l);}}if(['Completed','No-show'].includes(l.status)&&Date.parse(l.start)!==Date.parse(start)){issue('history-conflict','Calendar moved a lesson with recorded attendance.',l.id);continue;}if(l.status==='Cancelled'){issue('cancellation-conflict','Calendar is active but the business record is cancelled.',l.id);continue;}l.start=new Date(start).toISOString();l.end=new Date(end).toISOString();l.hours=(Date.parse(end)-Date.parse(start))/3600000;l.timeVerified=true;l.durationVerified=true;}
