@@ -100,9 +100,9 @@ jobs:
           print("\n".join(lines))
           # Keep non-secret presence checks readable through the GitHub API
           # when the runner's external log-download host is unavailable.
-          for line in lines:
-              escaped = line.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-              print("::notice title=Auxesis read-only readiness::" + escaped)
+          # One annotation avoids the runner's per-step annotation limit.
+          escaped = "\n".join(lines).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print("::notice title=Auxesis read-only readiness::" + escaped)
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
               output.write("## Read-only pilot readiness inventory\n\n" + "\n".join("- " + line for line in lines) + "\n")
           PY
