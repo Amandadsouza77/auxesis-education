@@ -1,0 +1,91 @@
+name: Check migration pilot readiness
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/cloudflare-pilot-readiness.yml]
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-migration-access
+  cancel-in-progress: false
+jobs:
+  check-readiness:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: auxesis-migration-preview
+    steps:
+      - name: Inspect preview configuration without changing Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_APP_ID: ${{ secrets.GOOGLE_APP_ID }}
+          PORTAL_TOKEN_KEY: ${{ secrets.PORTAL_TOKEN_KEY }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.request
+          token = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+          if not token:
+              raise SystemExit("Protected preview Cloudflare credential is missing.")
+          base = "https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719"
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+          opener = urllib.request.build_opener(NoRedirect())
+          def read(path):
+              request = urllib.request.Request(base + path, headers={"Authorization": "Bearer " + token}, method="GET")
+              try:
+                  with opener.open(request, timeout=30) as response:
+                      data = json.load(response)
+              except urllib.error.HTTPError as error:
+                  raise SystemExit("Cloudflare readiness read failed: HTTP " + str(error.code)) from None
+              except (urllib.error.URLError, TimeoutError, ValueError):
+                  raise SystemExit("Cloudflare readiness read failed; response omitted.") from None
+              if not data.get("success"):
+                  raise SystemExit("Cloudflare readiness read was rejected; response omitted.")
+              return data.get("result")
+          project = read("/pages/projects/auxesis-education")
+          if project.get("name") != "auxesis-education" or project.get("production_branch") != "main":
+              raise SystemExit("Unexpected project configuration; stopped.")
+          configs = project.get("deployment_configs") or {}
+          preview = configs.get("preview") or {}
+          production = configs.get("production") or {}
+          preview_ids = {v.get("id") for v in (preview.get("d1_databases") or {}).values() if isinstance(v, dict)}
+          production_ids = {v.get("id") for v in (production.get("d1_databases") or {}).values() if isinstance(v, dict)}
+          pilot_id = "34a9449d-85ee-4f06-a55d-3485905ca64e"
+          if pilot_id in production_ids or (preview_ids & production_ids):
+              raise SystemExit("STOP: pilot database is bound to production or a database is shared.")
+          variables = preview.get("env_vars") or {}
+          required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
+                      "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
+                      "PILOT_STUDENT_NAME", "GOOGLE_SPREADSHEET_ID", "GOOGLE_CALENDAR_ID", "PILOT_SERIES_IDS"]
+          lines = ["Requests: GET only. No settings, deployments or records changed.",
+                   "Pilot database bound to production: no",
+                   "Preview PORTAL_DB binding: " + ("present" if (preview.get("d1_databases") or {}).get("PORTAL_DB", {}).get("id") == pilot_id else "missing")]
+          for key in required:
+              configured = bool((variables.get(key) or {}).get("value"))
+              protected = bool(os.environ.get(key))
+              lines.append(key + ": preview " + ("configured" if configured else "missing") +
+                           "; protected workflow secret " + ("available" if protected else "not available"))
+          source = project.get("source") or {}
+          source_config = source.get("config") or {}
+          lines.append("Preview deployment mode: " + str(source_config.get("preview_deployment_setting", "unknown")))
+          lines.append("Preview included branches: " + json.dumps(source_config.get("preview_branch_includes", [])))
+          deployments = read("/pages/projects/auxesis-education/deployments?per_page=10")
+          if isinstance(deployments, list):
+              branch = "codex/cloudflare-backend-migration"
+              matches = [d for d in deployments if ((d.get("deployment_trigger") or {}).get("metadata") or {}).get("branch") == branch]
+              if matches:
+                  latest = matches[0]
+                  lines.append("Migration preview URL: " + str(latest.get("url", "")))
+                  lines.append("Migration preview stage: " + str((latest.get("latest_stage") or {}).get("status", "unknown")))
+              else:
+                  lines.append("Migration preview: absent from latest 10 deployments")
+          print("\n".join(lines))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
+              output.write("## Read-only pilot readiness inventory\n\n" + "\n".join("- " + line for line in lines) + "\n")
+          PY
