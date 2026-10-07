@@ -53,17 +53,17 @@ jobs:
               raise SystemExit("Unexpected Pages project; stopped.")
           if not isinstance(databases, list):
               raise SystemExit("Unexpected D1 inventory; stopped.")
-          preview = project.get("deployment_configs", {}).get("preview", {})
-          production = project.get("deployment_configs", {}).get("production", {})
-          preview_d1 = preview.get("d1_databases", {})
-          production_d1 = production.get("d1_databases", {})
+          preview = (project.get("deployment_configs") or {}).get("preview") or {}
+          production = (project.get("deployment_configs") or {}).get("production") or {}
+          preview_d1 = preview.get("d1_databases") or {}
+          production_d1 = production.get("d1_databases") or {}
           summary = [
               "Cloudflare Pages access: verified",
               "Cloudflare D1 access: verified",
               "Requests: GET only; no settings, deployments or records changed.",
               "Production branch: " + str(project.get("production_branch", "unknown")),
               "Preview PORTAL_DB binding: " + ("present" if "PORTAL_DB" in preview_d1 else "missing"),
-              "Preview variable names: " + ", ".join(sorted(preview.get("env_vars", {}))),
+              "Preview variable names: " + ", ".join(sorted(preview.get("env_vars") or {})),
               "D1 database count: " + str(len(databases)),
           ]
           for db in databases:
