@@ -29,9 +29,13 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, urllib.error, urllib.request
+          def stop(message):
+              escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print("::error title=Auxesis read-only readiness::" + escaped)
+              raise SystemExit(message)
           token = os.environ.get("CLOUDFLARE_API_TOKEN", "")
           if not token:
-              raise SystemExit("Protected preview Cloudflare credential is missing.")
+              stop("Protected preview Cloudflare credential is missing.")
           base = "https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719"
           class NoRedirect(urllib.request.HTTPRedirectHandler):
               def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -43,32 +47,35 @@ jobs:
                   with opener.open(request, timeout=30) as response:
                       data = json.load(response)
               except urllib.error.HTTPError as error:
-                  raise SystemExit("Cloudflare readiness read failed: HTTP " + str(error.code)) from None
+                  stop("Cloudflare readiness read failed: HTTP " + str(error.code))
               except (urllib.error.URLError, TimeoutError, ValueError):
-                  raise SystemExit("Cloudflare readiness read failed; response omitted.") from None
+                  stop("Cloudflare readiness read failed; response omitted.")
               if not data.get("success"):
-                  raise SystemExit("Cloudflare readiness read was rejected; response omitted.")
+                  stop("Cloudflare readiness read was rejected; response omitted.")
               return data.get("result")
           project = read("/pages/projects/auxesis-education")
           if project.get("name") != "auxesis-education" or project.get("production_branch") != "main":
-              raise SystemExit("Unexpected project configuration; stopped.")
+              stop("Unexpected project configuration; stopped.")
           live_configs = project.get("deployment_configs") or {}
           pilot_id = "34a9449d-85ee-4f06-a55d-3485905ca64e"
           if any(pilot_id == binding.get("id") for config in live_configs.values()
                  for binding in (config.get("d1_databases") or {}).values()):
-              raise SystemExit("STOP: isolated pilot database is attached to the live project.")
+              stop("STOP: isolated pilot database is attached to the live project.")
           project = read("/pages/projects/auxesis-migration-preview")
           if (project.get("name") != "auxesis-migration-preview" or
               project.get("production_branch") != "main" or project.get("source") or
               project.get("canonical_deployment")):
-              raise SystemExit("Unexpected isolated pilot project; stopped.")
+              stop("Unexpected isolated pilot project; stopped.")
           configs = project.get("deployment_configs") or {}
           preview = configs.get("preview") or {}
           production = configs.get("production") or {}
           preview_ids = {v.get("id") for v in (preview.get("d1_databases") or {}).values() if isinstance(v, dict)}
           production_ids = {v.get("id") for v in (production.get("d1_databases") or {}).values() if isinstance(v, dict)}
           if production_ids or production.get("env_vars"):
-              raise SystemExit("STOP: isolated pilot has production bindings or credentials.")
+              names = sorted(key for key in (production.get("env_vars") or {}) if key in
+                             ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID"])
+              stop("STOP: isolated pilot has production bindings or credentials." +
+                   (" Google variable names configured in Production: " + ", ".join(names) if names else ""))
           variables = preview.get("env_vars") or {}
           required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
                       "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
@@ -90,7 +97,7 @@ jobs:
               if matches:
                   latest = matches[0]
                   if latest.get("environment") != "preview":
-                      raise SystemExit("STOP: migration deployment is not a preview.")
+                      stop("STOP: migration deployment is not a preview.")
                   lines.append("Migration preview URL: " + str(latest.get("url", "")))
                   lines.append("Deployed source commit: " + str((latest.get("deployment_trigger", {}).get("metadata") or {}).get("commit_hash", "unknown")))
                   lines.append("Migration preview stage: " + str((latest.get("latest_stage") or {}).get("status", "unknown")))
