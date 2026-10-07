@@ -36,6 +36,7 @@ jobs:
                   return None
           opener = urllib.request.build_opener(NoRedirect())
           def api(path, body=None):
+              print("Cloudflare:", "GET" if body is None else "POST", path)
               request = urllib.request.Request(BASE + path,
                   data=None if body is None else json.dumps(body).encode(),
                   headers={"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json"},
@@ -76,7 +77,7 @@ jobs:
           if "migration_preview_owner" not in tables:
               if tables - {"_cf_KV", "sqlite_sequence"}:
                   raise SystemExit("Existing schema has no pilot ownership marker; stopped.")
-              query("CREATE TABLE migration_preview_owner (owner TEXT PRIMARY KEY); INSERT INTO migration_preview_owner(owner) VALUES (?); CREATE TABLE migration_preview_schema (name TEXT PRIMARY KEY, sha256 TEXT NOT NULL);", [OWNER])
+              query("CREATE TABLE migration_preview_owner (owner TEXT PRIMARY KEY); INSERT INTO migration_preview_owner(owner) VALUES ('" + OWNER + "'); CREATE TABLE migration_preview_schema (name TEXT PRIMARY KEY, sha256 TEXT NOT NULL);")
           owners = query("SELECT owner FROM migration_preview_owner")[0]["results"]
           if owners != [{"owner": OWNER}]:
               raise SystemExit("Pilot database ownership mismatch; stopped.")
@@ -99,7 +100,7 @@ jobs:
                   columns = query("PRAGMA table_info(portal_auth_flows)")[0]["results"]
                   if any(r["name"] == "payload" for r in columns):
                       sql = ""
-              query(sql + "\nINSERT INTO migration_preview_schema(name, sha256) VALUES (?, ?);", [name, checksum])
+              query(sql + "\nINSERT INTO migration_preview_schema(name, sha256) VALUES ('" + name + "', '" + checksum + "');")
           tables = {r["name"] for r in query("SELECT name FROM sqlite_master WHERE type='table'")[0]["results"]}
           required = {"portal_accounts", "portal_sessions", "portal_auth_flows", "portal_records", "google_connections", "portal_audit", "portal_rate_limits", "portal_operations"}
           if not required <= tables:
