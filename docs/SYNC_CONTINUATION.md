@@ -45,8 +45,8 @@ node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test
 git diff --check
 ```
 
-Current result: **23 passed, 0 failed, 0 skipped** (the earlier checkpoint had
-17 passing tests). The new flow tests execute the actual
+Current result: **25 passed, 0 failed, 0 skipped** (earlier checkpoints had
+17 and 23 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
 replay, Portal state, stale-source and window-change rejection, physical row
@@ -58,7 +58,87 @@ These are local integration tests, not an authenticated live Andie test. Earlier
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused until the real pilot passes.
 
-## Current checkpoint — corrected first-sync preview awaiting owner session, 7 October 2026
+## Current checkpoint — Andie preview reviewed, owner-session apply pending, 7 October 2026
+
+The owner reran Preview and confirmed it with `DONE`. The saved live result at
+`2026-10-07T22:56:24.106Z` (18:56 Toronto time) is `preview-ready`,
+`canApply=true`, **18 Calendar occurrences, 20 proposed records, zero conflicts**,
+and no successful apply yet. Do not repeat the old authentication, Tracker
+selection, partial-day or unmatched-cancellation investigations.
+
+The original GitHub annotation was truncated at 4,096 characters. A workflow-only
+fix now publishes the bounded pilot facts in ordered chunks without changing
+Cloudflare or business records. All chunks from
+[readiness run 37699451946](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37699451946)
+were reconstructed and validated locally. Only whitelisted pilot diagnostics,
+not notes, contacts, tokens or browser session values, were fetched.
+
+Actual source-to-proposal checks passed:
+
+- All 18 Calendar occurrence IDs and proposed lesson IDs are unique and have
+  exact one-to-one links inside the full Toronto read window.
+- All 17 confirmed lesson start/end times and one-hour durations match Calendar,
+  including its supplied offsets across the November DST change.
+- All nine in-window Tracker lesson rows link by exact Toronto date and physical
+  row number; their Completed, Scheduled and Cancelled statuses agree.
+- Tracker roster row 9 and the proposed Portal student retain **125 CAD,
+  Monthly, purchased 8, used 0**. Attendance evidence sets `balanceVerified=false`
+  rather than silently recalculating or debiting the package.
+- The 7 October cancellation matches Tracker row 72 and retains `chargeable=false`.
+- The completed **30 September lesson / Tracker row 56** is the candidate for
+  the controlled exact-cell note write/restoration after import and zero-change
+  replay are confirmed. Its Calendar event ends in `_20260930T084500Z`.
+
+One additional incomplete mapping was found in these live facts: Calendar
+supplied both start and end for the cancelled lesson, but its first-sync Portal
+proposal retained unknown duration. Revision **`5892b1f`** now preserves the
+provided valid start/end and one-hour duration without changing cancellation,
+no-charge evidence or balances. Sparse tombstones still retain unknown duration;
+invalid supplied intervals and recorded-attendance conflicts still block apply.
+The targeted suite passed **25 tests locally and in the deployment runner**.
+
+That revision deployed successfully to
+`https://f087e171.auxesis-migration-preview.pages.dev`; the stable pilot alias is
+unchanged. The deployment workflow's immediate smoke check caught a transient
+404 while the new numbered route propagated. No rebuild/redeploy was repeated.
+The stable endpoint subsequently passed its D1 lookup, and fresh
+[read-only run 37700101519](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37700101519)
+confirmed exact deployed commit `5892b1faa87fb5042d864dff98a630cd5d76ea0d`,
+successful deployment stage and 401 from the new numbered deployment's real D1
+session lookup. This distinguishes successful publication and later successful
+verification from the original workflow's failed immediate smoke step.
+
+The stored source facts still predate that last timing correction. A fresh
+authenticated Preview must therefore precede Apply: the old preview digest
+must not be reused, bypassed or fabricated. No business records have been applied
+or written to the Tracker, and the full real round trip is **not yet proven**.
+
+**Single access blocker:** mutation and fresh Google-source read requests must
+use the owner's authenticated Portal session. That session exists only in her
+browser; no usable agent browser/session connection is available. The stored
+Google refresh token and encryption key remain protected, and no credentials or
+cookies were requested or extracted. Do not create an admin session through D1,
+bypass authentication, add an alternate privileged route, rotate secrets or
+change security controls to avoid the owner-session step.
+
+**Next owner clicks:** in the signed-in isolated `/portal/students/` page,
+refresh, click **Preview pilot sync**, then **Apply reviewed changes** for the
+controlled Andie pilot, then **Preview pilot sync** again. Apply is now necessary
+to exercise the isolated Portal database import, and the source proposal has been
+reviewed for safe pilot scope. If fresh Preview reports any conflict or Apply
+rejects a stale digest, do not bypass the safeguard; inspect its saved result.
+The following replay must report zero changed records before the exact-row note
+write/restoration test proceeds.
+
+Resume by reading only the changed saved preview/apply diagnostics. After import
+and replay pass, use the existing Google-authorized administrator `notes` command
+for row 56, a non-sensitive temporary note and restoration. Verify the real
+Tracker read after each save, the final zero-change replay, source Calendar
+checksums, unchanged business balances and non-pilot isolation. Those real writes
+remain unrun; synthetic tests and clean preview must not be reported as a proven
+live write path. Production and Portal design remain untouched.
+
+## Historical checkpoint — first-sync repair, superseded
 
 Google sign-in and selected Tracker access are now working. The owner resolved
 Google's Testing/test-user restriction and ran the real Andie-only preview.
