@@ -72,10 +72,17 @@ jobs:
           preview_ids = {v.get("id") for v in (preview.get("d1_databases") or {}).values() if isinstance(v, dict)}
           production_ids = {v.get("id") for v in (production.get("d1_databases") or {}).values() if isinstance(v, dict)}
           if production_ids or production.get("env_vars"):
+              google_keys = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID"]
               names = sorted(key for key in (production.get("env_vars") or {}) if key in
-                             ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_API_KEY", "GOOGLE_APP_ID"])
+                             google_keys)
+              preview_states = []
+              for key in google_keys:
+                  variable = (preview.get("env_vars") or {}).get(key) or {}
+                  configured = bool(variable.get("value")) or variable.get("type") == "secret_text"
+                  preview_states.append(key + ": " + ("configured" if configured else "missing"))
               stop("STOP: isolated pilot has production bindings or credentials." +
-                   (" Google variable names configured in Production: " + ", ".join(names) if names else ""))
+                   (" Google variable names configured in Production: " + ", ".join(names) if names else "") +
+                   ". Preview status: " + "; ".join(preview_states))
           variables = preview.get("env_vars") or {}
           required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
                       "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
