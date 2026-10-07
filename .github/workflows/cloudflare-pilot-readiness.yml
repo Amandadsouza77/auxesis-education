@@ -134,8 +134,19 @@ jobs:
                   health = json.loads(row.get("health") or "{}")
                   summary = health.get("summary") or {}
                   safe = {k: health.get(k) for k in ["state", "lastReadAt", "lastSuccessfulAt"]}
-                  safe.update({k: summary.get(k) for k in ["eventCount", "changedRecords", "canApply", "issues", "diagnostics"]})
+                  safe.update({k: summary.get(k) for k in ["eventCount", "changedRecords", "canApply", "issues"]})
                   lines.append("Recorded pilot preview: " + json.dumps(safe))
+                  diagnostics = summary.get("diagnostics")
+                  if diagnostics is not None:
+                      # GitHub truncates a large annotation. Keep facts lossless
+                      # and below the per-step ten-annotation limit.
+                      compact = json.dumps(diagnostics, separators=(",", ":"))
+                      chunks = [compact[i:i+2400] for i in range(0, len(compact), 2400)]
+                      if len(chunks) > 8:
+                          stop("Pilot diagnostic facts exceed the bounded annotation read; no records changed.")
+                      for index, chunk in enumerate(chunks, 1):
+                          escaped_chunk = chunk.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+                          print("::notice title=Auxesis pilot facts " + str(index) + "/" + str(len(chunks)) + "::" + escaped_chunk)
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))
           # Keep non-secret presence checks readable through the GitHub API
