@@ -25,6 +25,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 opener = urllib.request.build_opener(NoRedirect())
+opener.addheaders = [("User-Agent", "Auxesis-Pilot-Readiness/1.0")]
 
 
 def require(condition, message):
