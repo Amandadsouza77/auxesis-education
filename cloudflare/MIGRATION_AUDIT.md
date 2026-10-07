@@ -30,5 +30,8 @@ R2 is deliberately not provisioned yet. The old core imports Floot storage for p
 ## Realtime decision
 No dedicated realtime service is required for the migration. The UI can re-fetch state after successful mutations and on navigation. This removes a Floot dependency without changing source-of-truth rules.
 
+## Pilot runtime status
+The migration preview has no Floot network route. Direct Google OAuth, D1 persistence, Calendar/Tracker reads, guarded apply, and exact-row Tracker note write-back now terminate in Cloudflare. The production portal remains unchanged until a separate accepted cutover. Uploads are disabled in the pilot because the pilot inventory contains no required attachment migration.
+
 ## Security invariants
 Calendar scope is calendar.readonly and the replacement Google module exposes no Calendar write operation. Tracker selection remains file-scoped via drive.file. OAuth credentials stay server-side. Production is not a migration target.

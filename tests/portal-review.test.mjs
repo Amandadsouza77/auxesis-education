@@ -15,13 +15,10 @@ function screen(data){
  vm.runInContext(source.replace('initialise();\n})();',"db={...empty(),...fixture};me=db.me;activeChild=db.students[0]?.id||'';selectOnboarding();globalThis.show=go;render();\n})();"),ctx);
  return {root,ctx};
 }
-test('first-party boundary forwards preview scope alongside its HttpOnly session',async()=>{
- const previous=globalThis.fetch;globalThis.crypto??=webcrypto;let headers;
- globalThis.fetch=async(_url,options)=>{headers=options.headers;return Response.json({preview:{readOnly:true}});};
- try{
-  const r=await onRequest({request:new Request('https://auxesis-education.pages.dev/api/portal/state',{headers:{Cookie:'__Host-auxesis_session='+'a'.repeat(43),'x-auxesis-preview-role':'student','x-auxesis-preview-student':'scope-123'}}),params:{path:['state']}});
-  assert.equal(r.status,200);assert.equal(headers['x-auxesis-preview-role'],'student');assert.equal(headers['x-auxesis-preview-student'],'scope-123');assert.equal(headers['x-auxesis-session'],'a'.repeat(43));
- }finally{globalThis.fetch=previous;}
+test('first-party boundary does not trust browser-supplied preview scope',()=>{
+ const route=fs.readFileSync(new URL('../functions/api/portal/[[path]].js',import.meta.url),'utf8'),runtime=fs.readFileSync(new URL('../cloudflare/runtime.js',import.meta.url),'utf8');
+ assert.doesNotMatch(route+runtime,/x-auxesis-preview-role|x-auxesis-preview-student/);
+ assert.doesNotMatch(route+runtime,/floot\.app/);
 });
 test('imported source rows, missing dates and restricted preview screens render',{skip:!fixture},()=>{
  const data={me:{id:'owner',name:'Amanda',role:'admin'},settings:{reviewMode:true},preview:null};

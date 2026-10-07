@@ -15,5 +15,11 @@ test('migration documents Calendar as read-only authority',()=>{
  assert.match(readme,/Google Calendar: lesson scheduling authority/);
  assert.match(readme,/Calendar access from the portal is read-only/);
  assert.match(readme,/Andie Ng only/);
- assert.match(readme,/Do not disconnect Floot/);
+ assert.match(readme,/Do not merge PR #12 or disconnect the production fallback/);
+});
+
+test('Pages portal boundary no longer proxies to Floot',()=>{
+ const route=fs.readFileSync('functions/api/portal/[[path]].js','utf8');
+ assert.doesNotMatch(route,/floot\.app|SERVICE=/i);
+ assert.match(route,/handlePortalRequest/);
 });

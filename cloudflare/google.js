@@ -2,7 +2,7 @@ const enc=new TextEncoder();
 const b64url=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 export async function sha256(v){return b64url(await crypto.subtle.digest('SHA-256',enc.encode(v)));}
 export function googleScopes(){
-  return ['openid','email','https://www.googleapis.com/auth/calendar.readonly','https://www.googleapis.com/auth/drive.file'];
+  return ['openid','profile','email','https://www.googleapis.com/auth/calendar.readonly','https://www.googleapis.com/auth/drive.file'];
 }
 export function authorizeUrl(env,{state,redirectUri,codeChallenge}){
  const q=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri,response_type:'code',scope:googleScopes().join(' '),access_type:'offline',include_granted_scopes:'true',prompt:'consent',state,code_challenge:codeChallenge,code_challenge_method:'S256'});

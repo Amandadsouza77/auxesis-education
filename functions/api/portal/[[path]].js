@@ -1,23 +1,5 @@
-// First-party portal boundary. Identity and all record permissions are checked
-// again by the portal service; browser scripts never receive session tokens.
-const SERVICE='https://auxesis-portal-service.floot.app';
-const SITE='https://auxesis-education.pages.dev';
-const SESSION='__Host-auxesis_session',NONCE='__Host-auxesis_login';
-const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});
-const cookies=request=>Object.fromEntries((request.headers.get('Cookie')||'').split(';').map(x=>x.trim().split('=')));
-const cookie=(name,value,age)=>`${name}=${value}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${age}`;
-async function digest(value){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,'0')).join('');}
-function random(){return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-async function remote(request,route,body,token){const headers={'Content-Type':'application/json'};if(token)headers['x-auxesis-session']=token;for(const name of ['x-auxesis-preview-role','x-auxesis-preview-student'])if(request.headers.has(name))headers[name]=request.headers.get(name);headers['x-auxesis-client']=await digest(request.headers.get('CF-Connecting-IP')||'unknown');return fetch(SERVICE+'/_api/portal/'+route,{method:body===undefined?'GET':'POST',headers,body:body===undefined?undefined:JSON.stringify(body),redirect:'manual'});}
-export async function onRequest(context){const request=context.request,url=new URL(request.url),route=(Array.isArray(context.params.path)?context.params.path:[]).join('/'),jar=cookies(request);try{
- if(!['GET','POST'].includes(request.method))return json({error:'Method not allowed.'},405);
- if(request.method==='POST'&&(request.headers.get('Origin')!==SITE||request.headers.get('Content-Type')?.split(';')[0]!=='application/json'))return json({error:'Please submit this change from your Auxesis Portal.'},403);
- if(route==='auth/start'&&request.method==='GET'){const nonce=random(),r=await remote(request,'start',{nonceHash:await digest(nonce)}),data=await r.json();if(!r.ok)return json(data,r.status);const dest=new URL(data.url);if(dest.origin!=='https://floot.com')return json({error:'Sign-in is unavailable.'},503);return new Response(null,{status:302,headers:{Location:data.url,'Set-Cookie':cookie(NONCE,nonce,600),'Cache-Control':'no-store'}});}
- if(route==='auth/exchange'&&request.method==='POST'){if(!jar[NONCE])return json({error:'This sign-in has expired. Please try again.'},401);const v=await request.json();if(!/^[\w-]{43}$/.test(v.token||''))return json({error:'Please retry signing in.'},400);const r=await remote(request,'redeem',{token:v.token,nonceHash:await digest(jar[NONCE])}),data=await r.json();if(!r.ok)return json(data,r.status);const response=json({ok:true});response.headers.append('Set-Cookie',cookie(SESSION,data.token,604800));response.headers.append('Set-Cookie',cookie(NONCE,'',0));return response;}
- if(!/^[\w-]{43}$/.test(jar[SESSION]||''))return json({error:'Please sign in to continue.'},401);
- if(route==='file'&&request.method==='GET'){const r=await remote(request,'file?id='+encodeURIComponent(url.searchParams.get('id')||''),undefined,jar[SESSION]),data=await r.json();if(!r.ok)return json(data,r.status);const dest=new URL(data.url);if(dest.protocol!=='https:')return json({error:'This file is unavailable.'},503);const file=await fetch(dest.href,{redirect:'error'});if(!file.ok)return json({error:'This file is unavailable.'},404);const filename=data.name.replace(/[^\x20-\x7E]|["\\\r\n]/g,'_');return new Response(file.body,{headers:{'Content-Type':data.mime,'Content-Disposition':`attachment; filename="${filename}"`,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"sandbox; default-src 'none'"}});}
- const getRoutes=['state'],postRoutes=['command','upload','logout','realtime','sync','google/start','google/picker'];if(!(request.method==='GET'&&getRoutes.includes(route)||request.method==='POST'&&postRoutes.includes(route)))return json({error:'This page is not available.'},404);
- let body;if(request.method==='POST'){const raw=await request.text();if(raw.length>150000)return json({error:'This request is too large.'},413);body=JSON.parse(raw);}
- const r=await remote(request,route,body,jar[SESSION]),data=await r.json(),response=json(data,r.status);if(route==='logout'||r.status===401)response.headers.append('Set-Cookie',cookie(SESSION,'',0));return response;
- }catch{return json({error:'The portal could not complete this request. Please try again.'},503);}}
+import {handlePortalRequest} from '../../../cloudflare/runtime.js';
 
+// Cloudflare-native portal boundary for the migration preview. This route must
+// not proxy to Floot: identity, persistence and source access terminate here.
+export const onRequest = handlePortalRequest;
