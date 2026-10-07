@@ -51,14 +51,23 @@ jobs:
           project = read("/pages/projects/auxesis-education")
           if project.get("name") != "auxesis-education" or project.get("production_branch") != "main":
               raise SystemExit("Unexpected project configuration; stopped.")
+          live_configs = project.get("deployment_configs") or {}
+          pilot_id = "34a9449d-85ee-4f06-a55d-3485905ca64e"
+          if any(pilot_id == binding.get("id") for config in live_configs.values()
+                 for binding in (config.get("d1_databases") or {}).values()):
+              raise SystemExit("STOP: isolated pilot database is attached to the live project.")
+          project = read("/pages/projects/auxesis-migration-preview")
+          if (project.get("name") != "auxesis-migration-preview" or
+              project.get("production_branch") != "main" or project.get("source") or
+              project.get("canonical_deployment")):
+              raise SystemExit("Unexpected isolated pilot project; stopped.")
           configs = project.get("deployment_configs") or {}
           preview = configs.get("preview") or {}
           production = configs.get("production") or {}
           preview_ids = {v.get("id") for v in (preview.get("d1_databases") or {}).values() if isinstance(v, dict)}
           production_ids = {v.get("id") for v in (production.get("d1_databases") or {}).values() if isinstance(v, dict)}
-          pilot_id = "34a9449d-85ee-4f06-a55d-3485905ca64e"
-          if pilot_id in production_ids or (preview_ids & production_ids):
-              raise SystemExit("STOP: pilot database is bound to production or a database is shared.")
+          if production_ids or production.get("env_vars"):
+              raise SystemExit("STOP: isolated pilot has production bindings or credentials.")
           variables = preview.get("env_vars") or {}
           required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
                       "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
@@ -67,24 +76,26 @@ jobs:
                    "Pilot database bound to production: no",
                    "Preview PORTAL_DB binding: " + ("present" if (preview.get("d1_databases") or {}).get("PORTAL_DB", {}).get("id") == pilot_id else "missing")]
           for key in required:
-              configured = bool((variables.get(key) or {}).get("value"))
+              variable = variables.get(key) or {}
+              configured = bool(variable.get("value")) or variable.get("type") == "secret_text"
               protected = bool(os.environ.get(key))
               lines.append(key + ": preview " + ("configured" if configured else "missing") +
                            "; protected workflow secret " + ("available" if protected else "not available"))
-          source = project.get("source") or {}
-          source_config = source.get("config") or {}
-          lines.append("Preview deployment mode: " + str(source_config.get("preview_deployment_setting", "unknown")))
-          lines.append("Preview included branches: " + json.dumps(source_config.get("preview_branch_includes", [])))
-          deployments = read("/pages/projects/auxesis-education/deployments?per_page=10")
+          lines.append("Live project: isolated pilot database is absent from all bindings.")
+          deployments = read("/pages/projects/auxesis-migration-preview/deployments?per_page=10")
           if isinstance(deployments, list):
               branch = "codex/cloudflare-backend-migration"
               matches = [d for d in deployments if ((d.get("deployment_trigger") or {}).get("metadata") or {}).get("branch") == branch]
               if matches:
                   latest = matches[0]
+                  if latest.get("environment") != "preview":
+                      raise SystemExit("STOP: migration deployment is not a preview.")
                   lines.append("Migration preview URL: " + str(latest.get("url", "")))
+                  lines.append("Deployed source commit: " + str((latest.get("deployment_trigger", {}).get("metadata") or {}).get("commit_hash", "unknown")))
                   lines.append("Migration preview stage: " + str((latest.get("latest_stage") or {}).get("status", "unknown")))
               else:
                   lines.append("Migration preview: absent from latest 10 deployments")
+          lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
               output.write("## Read-only pilot readiness inventory\n\n" + "\n".join("- " + line for line in lines) + "\n")
