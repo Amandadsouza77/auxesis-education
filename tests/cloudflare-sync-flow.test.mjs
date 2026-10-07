@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
+import {createHash} from 'node:crypto';
 import {handlePortalRequest} from '../cloudflare/runtime.js';
 import {putRecord,listRecords} from '../cloudflare/d1-adapter.js';
 import {seal} from '../cloudflare/crypto.js';
@@ -112,11 +113,31 @@ test('Portal notes write and restoration touch only the exact Tracker cells afte
  const lesson=(await p.request('state')).data.lessons[0],original=structuredClone(p.values.lessons),events=p.getEvents();
  const update=await p.request('command',{action:'notes',id:lesson.id,operationId:'fixture-note-update-01',covered:'Temporary note',outcome:'Portal only outcome',next:'Temporary next step'});
  assert.equal(update.status,200,JSON.stringify(update.data));assert.equal(p.values.lessons[3][3],'Temporary note');assert.equal(p.values.lessons[3][4],'Temporary next step');
+ const written=await p.request('sync',{mode:'preview'});assert.equal(written.data.changedRecords,0);
+ const writeProof=written.data.diagnostics.trackerNoteEvidence.find(row=>row.rowNumber===4);
+ assert.equal(writeProof.coveredHash,createHash('sha256').update('Temporary note').digest('hex'));
+ assert.equal(writeProof.nextHash,createHash('sha256').update('Temporary next step').digest('hex'));
  assert.equal((await p.request('state')).data.lessons[0].notes.outcome,'Portal only outcome');
  const restore=await p.request('command',{action:'notes',id:lesson.id,operationId:'fixture-note-restore-01',covered:original[3][3],outcome:'',next:original[3][4]});assert.equal(restore.status,200);
  assert.deepEqual(p.values.lessons,original);assert.deepEqual(p.getEvents(),events);
- assert.equal((await p.request('sync',{mode:'preview'})).data.changedRecords,0);
+ const restored=await p.request('sync',{mode:'preview'});assert.equal(restored.data.changedRecords,0);
+ assert.equal(restored.data.diagnostics.trackerNoteEvidence.find(row=>row.rowNumber===4).coveredHash,createHash('sha256').update(original[3][3]).digest('hex'));
  assert.ok(p.calls.filter(c=>c.method!=='GET').every(c=>c.url==='https://oauth2.googleapis.com/token'||c.url.endsWith('/values:batchUpdate')));
+});
+
+test('saved note hashes use fresh pilot Sheets values rather than cached Portal notes, including rows outside the Calendar window',async t=>{
+ const p=await pilot(t);
+ p.values.lessons.push(['Fixture Student','2026-09-20','Completed','Historical source note','Historical next']);
+ p.values.lessons.push(['Other Student','2026-09-20','Completed','Other student private note','Other next']);
+ const first=await p.request('sync',{mode:'preview'});assert.equal(first.status,200);
+ assert.equal((await p.request('sync',{mode:'apply',digest:first.data.digest})).status,200);
+ const lesson=(await p.request('state')).data.lessons[0];
+ lesson.notes.covered='Portal-only copy';lesson.sourceMeta.trackerLesson.row['Lesson Focus']='Portal-only copy';
+ await putRecord(p.db,'lessons',lesson);
+ const result=await p.request('sync',{mode:'preview'}),proof=result.data.diagnostics.trackerNoteEvidence;
+ assert.equal(proof.length,2);assert.equal(proof.find(r=>r.rowNumber===2).coveredHash,createHash('sha256').update('Existing focus').digest('hex'));
+ assert.equal(proof.find(r=>r.rowNumber===3).coveredHash,createHash('sha256').update('Historical source note').digest('hex'));
+ assert.ok(!JSON.stringify(proof).includes('Historical source note'));assert.ok(!proof.some(r=>r.rowNumber===4));
 });
 
 test('a failed source read is visible in sync health and clears the old apply affordance',async t=>{

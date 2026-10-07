@@ -147,6 +147,7 @@ jobs:
           lines.append("Administrator Google connection: " + ("present; usability unverified" if connections else "absent; owner authentication required"))
           key = (variables.get("PORTAL_TOKEN_KEY") or {}).get("value")
           lines.append("Existing token-encryption key returned by API: " + ("present; usability unverified" if key else "opaque; do not request or replace it"))
+          health = {}
           for item in read("/d1/database/" + pilot_id + "/query", health_sql):
               for row in item.get("results", []):
                   health = json.loads(row.get("health") or "{}")
@@ -165,7 +166,7 @@ jobs:
                       for index, chunk in enumerate(chunks, 1):
                           escaped_chunk = chunk.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
                           print("::notice title=Auxesis pilot facts " + str(index) + "/" + str(len(chunks)) + "::" + escaped_chunk)
-          lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
+          lines.append("Inventory alone does not prove a live round trip; validate saved apply/replay and note-write/restoration evidence.")
           proof = {}
           for item in read("/d1/database/" + pilot_id + "/query", isolation_sql):
               for row in item.get("results", []):
@@ -184,8 +185,13 @@ jobs:
               proof["noteHashes"] = {k: hashlib.sha256(v.encode()).hexdigest() for k, v in fields.items()}
               proof["sourceNoteHashes"] = {k: hashlib.sha256(str((tracker.get("row") or {}).get(h) or "").encode()).hexdigest() for k, h in [("covered", "Lesson Focus"), ("next", "Homework / Next Step")]}
               proof["markerPresent"] = "AUXESIS_PILOT_CHECK_20261007" in covered
-              proof["notesCanonical"] = all(v == v.strip().strip("\ufeff") for v in fields.values())
+              proof["noteUtf16Lengths"] = {k: len(v.encode("utf-16-le")) // 2 for k, v in fields.items()}
+              proof["notesCanonical"] = all(v == v.strip().strip("\ufeff") and "\r" not in v for v in fields.values()) and all(n <= 3000 for n in proof["noteUtf16Lengths"].values())
               proof["coveredUtf16Length"] = len(covered.encode("utf-16-le")) // 2
+              fresh_notes = [r for r in ((health.get("summary") or {}).get("diagnostics") or {}).get("trackerNoteEvidence", []) if r.get("rowNumber") == tracker.get("rowNumber")]
+              if len(fresh_notes) == 1:
+                  proof["freshTrackerNotes"] = fresh_notes[0]
+                  proof["freshTrackerReadAt"] = health.get("lastReadAt")
           escaped_proof = json.dumps(proof, separators=(",", ":")).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
           print("::notice title=Auxesis pilot write proof::" + escaped_proof)
           print("\n".join(lines))

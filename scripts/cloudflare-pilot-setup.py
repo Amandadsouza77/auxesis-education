@@ -154,7 +154,7 @@ def smoke(url, path, expected, headers=None, method="GET", body=None):
             status = error.code
         except (urllib.error.URLError, TimeoutError):
             status = None
-        if status == expected or (status is not None and status not in (502, 503, 504)):
+        if status == expected or (status is not None and status not in (404, 502, 503, 504)):
             break
         if attempt < 17:
             print(f"Waiting for new preview HTTPS availability ({attempt + 1}/18).", flush=True)
