@@ -1,0 +1,118 @@
+name: Provision isolated Cloudflare pilot database
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/cloudflare-pilot-database.yml]
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-migration-access
+  cancel-in-progress: false
+jobs:
+  provision-pilot:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: auxesis-migration-preview
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Provision empty, unbound pilot D1 and verify schema
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, urllib.error, urllib.request
+          TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+          if not TOKEN:
+              raise SystemExit("CLOUDFLARE_API_TOKEN is missing.")
+          BASE = "https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719"
+          NAME = "auxesis-migration-preview"
+          OWNER = "Amandadsouza77/auxesis-education:codex/cloudflare-backend-migration"
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+          opener = urllib.request.build_opener(NoRedirect())
+          def api(path, body=None):
+              request = urllib.request.Request(BASE + path,
+                  data=None if body is None else json.dumps(body).encode(),
+                  headers={"Authorization": "Bearer " + TOKEN, "Content-Type": "application/json"},
+                  method="GET" if body is None else "POST")
+              try:
+                  with opener.open(request, timeout=40) as response:
+                      data = json.load(response)
+              except urllib.error.HTTPError as error:
+                  raise SystemExit("Cloudflare request failed: HTTP " + str(error.code)) from None
+              except (urllib.error.URLError, TimeoutError, ValueError):
+                  raise SystemExit("Cloudflare request failed; response omitted.") from None
+              if not data.get("success"):
+                  raise SystemExit("Cloudflare rejected the request; response omitted.")
+              return data["result"]
+          project = api("/pages/projects/auxesis-education")
+          if project.get("name") != "auxesis-education" or project.get("production_branch") != "main":
+              raise SystemExit("Unexpected Pages project configuration; stopped.")
+          configs = project.get("deployment_configs") or {}
+          bound = {(v or {}).get("id") for config in configs.values()
+                   for v in ((config or {}).get("d1_databases") or {}).values()}
+          databases = api("/d1/database?per_page=100")
+          if not isinstance(databases, list) or len(databases) >= 100:
+              raise SystemExit("Unexpected or paginated database listing; stopped.")
+          matches = [d for d in databases if d.get("name") == NAME]
+          if len(matches) > 1:
+              raise SystemExit("Ambiguous pilot database; stopped.")
+          database = matches[0] if matches else api("/d1/database", {"name": NAME})
+          database_id = database.get("uuid") or database.get("id")
+          if not database_id or database_id in bound:
+              raise SystemExit("Database is already bound or has no ID; stopped.")
+          def query(sql, params=None):
+              results = api("/d1/database/" + database_id + "/query",
+                            {"sql": sql, "params": params or []})
+              if not isinstance(results, list) or not results or any(not r.get("success") for r in results):
+                  raise SystemExit("D1 query failed; response omitted.")
+              return results
+          tables = {r["name"] for r in query("SELECT name FROM sqlite_master WHERE type='table'")[0]["results"]}
+          if "migration_preview_owner" not in tables:
+              if tables - {"_cf_KV", "sqlite_sequence"}:
+                  raise SystemExit("Existing schema has no pilot ownership marker; stopped.")
+              query("CREATE TABLE migration_preview_owner (owner TEXT PRIMARY KEY); INSERT INTO migration_preview_owner(owner) VALUES (?); CREATE TABLE migration_preview_schema (name TEXT PRIMARY KEY, sha256 TEXT NOT NULL);", [OWNER])
+          owners = query("SELECT owner FROM migration_preview_owner")[0]["results"]
+          if owners != [{"owner": OWNER}]:
+              raise SystemExit("Pilot database ownership mismatch; stopped.")
+          expected = {
+              "0001_portal.sql": "f7cf8e2304d0a69e719529ef18df5c6841392ca5c79c2b65ab9fd82dcb640d54",
+              "0002_portal_runtime.sql": "f4fe48458fc57ee922a09e951dab887ecbddbede07ea516292679d4d405565c1",
+              "0003_pilot_runtime.sql": "05262b1083a41512ebc0395a071c347bdeaca67052043840e2bf516098bb1830",
+          }
+          ledger = {r["name"]: r["sha256"] for r in query("SELECT name, sha256 FROM migration_preview_schema")[0]["results"]}
+          if any(name not in expected or expected[name] != checksum for name, checksum in ledger.items()):
+              raise SystemExit("Unexpected migration ledger; stopped.")
+          for name, checksum in expected.items():
+              sql = pathlib.Path("cloudflare/migrations", name).read_text()
+              if hashlib.sha256(sql.encode()).hexdigest() != checksum:
+                  raise SystemExit("Migration checksum mismatch; stopped.")
+              if name in ledger:
+                  continue
+              # Recover safely if a prior run applied the non-repeatable ALTER before recording its ledger entry.
+              if name == "0002_portal_runtime.sql":
+                  columns = query("PRAGMA table_info(portal_auth_flows)")[0]["results"]
+                  if any(r["name"] == "payload" for r in columns):
+                      sql = ""
+              query(sql + "\nINSERT INTO migration_preview_schema(name, sha256) VALUES (?, ?);", [name, checksum])
+          tables = {r["name"] for r in query("SELECT name FROM sqlite_master WHERE type='table'")[0]["results"]}
+          required = {"portal_accounts", "portal_sessions", "portal_auth_flows", "portal_records", "google_connections", "portal_audit", "portal_rate_limits", "portal_operations"}
+          if not required <= tables:
+              raise SystemExit("Pilot schema validation failed.")
+          columns = query("PRAGMA table_info(portal_auth_flows)")[0]["results"]
+          if not any(r["name"] == "payload" for r in columns):
+              raise SystemExit("OAuth flow payload column is missing.")
+          for table in sorted(required):
+              count = query("SELECT COUNT(*) AS total FROM " + table)[0]["results"][0]["total"]
+              if count != 0:
+                  raise SystemExit("Pilot database contains data; provisioning verification stopped.")
+          summary = "Pilot D1 ready: " + NAME + "\nDatabase ID: " + database_id + "\nSchema: all 3 migrations verified.\nStudent, account, session, Google connection and audit rows: 0.\nPages configuration: unchanged. Database remains unbound."
+          print(summary)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
+              output.write("## Isolated pilot database\n\n" + summary.replace("\n", "\n\n") + "\n")
+          PY
