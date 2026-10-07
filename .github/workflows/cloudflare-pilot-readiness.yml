@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import json, os, urllib.error, urllib.request
+          import hashlib, json, os, urllib.error, urllib.request
           def stop(message):
               escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
               print("::error title=Auxesis read-only readiness::" + escaped)
@@ -43,8 +43,10 @@ jobs:
           opener = urllib.request.build_opener(NoRedirect())
           auth_sql = "SELECT COUNT(*) AS count FROM google_connections WHERE email='adsouza35@gmail.com'"
           health_sql = "SELECT json_extract(data, '$.syncHealth') AS health FROM portal_records WHERE id='settings'"
+          lesson_sql = "SELECT data FROM portal_records WHERE kind='lessons' AND student_id='5febba2d-82ee-5585-805f-a3fc5e89f803' AND json_extract(data, '$.sourceMeta.calendarEventId')='c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68_20260930T084500Z'"
+          isolation_sql = "SELECT (SELECT COUNT(*) FROM portal_records WHERE kind='students' AND id!='5febba2d-82ee-5585-805f-a3fc5e89f803') AS nonPilotStudents, (SELECT COUNT(*) FROM portal_records WHERE kind='lessons' AND (student_id IS NULL OR student_id!='5febba2d-82ee-5585-805f-a3fc5e89f803')) AS nonPilotLessons, (SELECT COUNT(*) FROM portal_records WHERE kind='lessons' AND student_id='5febba2d-82ee-5585-805f-a3fc5e89f803') AS pilotLessons, (SELECT COUNT(*) FROM portal_audit WHERE action='trackerNotes') AS successfulTrackerNoteWrites, (SELECT COUNT(*) FROM portal_audit WHERE action='sourceSync') AS successfulSourceApplies"
           def read(path, sql=None):
-              if sql is not None and (path != "/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query" or sql not in [auth_sql, health_sql]):
+              if sql is not None and (path != "/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query" or sql not in [auth_sql, health_sql, lesson_sql, isolation_sql]):
                   stop("Readiness query is outside its read-only scope.")
               headers = {"Authorization": "Bearer " + token, "User-Agent": "Auxesis-Pilot-Readiness/1.0"}
               if sql is not None:
@@ -164,6 +166,28 @@ jobs:
                           escaped_chunk = chunk.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
                           print("::notice title=Auxesis pilot facts " + str(index) + "/" + str(len(chunks)) + "::" + escaped_chunk)
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
+          proof = {}
+          for item in read("/d1/database/" + pilot_id + "/query", isolation_sql):
+              for row in item.get("results", []):
+                  proof["databaseCounts"] = row
+          lesson_rows = [row for item in read("/d1/database/" + pilot_id + "/query", lesson_sql) for row in item.get("results", [])]
+          if len(lesson_rows) > 1:
+              stop("The pilot write target is ambiguous; no write was attempted.")
+          if lesson_rows:
+              lesson = json.loads(lesson_rows[0]["data"])
+              notes = lesson.get("notes") or {}
+              tracker = (lesson.get("sourceMeta") or {}).get("trackerLesson") or {}
+              covered = str(notes.get("covered") or "")
+              fields = {k: str(notes.get(k) or "") for k in ["covered", "outcome", "next"]}
+              proof["lesson"] = {k: lesson.get(k) for k in ["id", "studentId", "start", "end", "hours", "status"]}
+              proof["lesson"]["trackerRowNumber"] = tracker.get("rowNumber")
+              proof["noteHashes"] = {k: hashlib.sha256(v.encode()).hexdigest() for k, v in fields.items()}
+              proof["sourceNoteHashes"] = {k: hashlib.sha256(str((tracker.get("row") or {}).get(h) or "").encode()).hexdigest() for k, h in [("covered", "Lesson Focus"), ("next", "Homework / Next Step")]}
+              proof["markerPresent"] = "AUXESIS_PILOT_CHECK_20261007" in covered
+              proof["notesCanonical"] = all(v == v.strip().strip("\ufeff") for v in fields.values())
+              proof["coveredUtf16Length"] = len(covered.encode("utf-16-le")) // 2
+          escaped_proof = json.dumps(proof, separators=(",", ":")).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print("::notice title=Auxesis pilot write proof::" + escaped_proof)
           print("\n".join(lines))
           # Keep non-secret presence checks readable through the GitHub API
           # when the runner's external log-download host is unavailable.
