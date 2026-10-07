@@ -42,8 +42,9 @@ jobs:
                   return None
           opener = urllib.request.build_opener(NoRedirect())
           auth_sql = "SELECT COUNT(*) AS count FROM google_connections WHERE email='adsouza35@gmail.com'"
+          health_sql = "SELECT json_extract(data, '$.syncHealth') AS health FROM portal_records WHERE id='settings'"
           def read(path, sql=None):
-              if sql is not None and (path != "/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query" or sql != auth_sql):
+              if sql is not None and (path != "/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query" or sql not in [auth_sql, health_sql]):
                   stop("Readiness query is outside its read-only scope.")
               headers = {"Authorization": "Bearer " + token, "User-Agent": "Auxesis-Pilot-Readiness/1.0"}
               if sql is not None:
@@ -95,7 +96,7 @@ jobs:
           required = ["MIGRATION_PREVIEW_ONLY", "ADMIN_EMAIL", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
                       "GOOGLE_API_KEY", "GOOGLE_APP_ID", "PORTAL_TOKEN_KEY", "PILOT_STUDENT_ID",
                       "PILOT_STUDENT_NAME", "GOOGLE_SPREADSHEET_ID", "GOOGLE_CALENDAR_ID", "PILOT_SERIES_IDS"]
-          lines = ["Control-plane reads only: GET plus one fixed D1 SELECT. No settings, deployments or business records changed.",
+          lines = ["Control-plane reads only: GET plus fixed D1 SELECTs. No settings, deployments or business records changed.",
                    "Pilot database bound to production: no",
                    "Preview PORTAL_DB binding: " + ("present" if (preview.get("d1_databases") or {}).get("PORTAL_DB", {}).get("id") == pilot_id else "missing")]
           for key in required:
@@ -126,6 +127,15 @@ jobs:
           auth_rows = read("/d1/database/" + pilot_id + "/query", auth_sql)
           connections = sum(row["count"] for item in auth_rows for row in item.get("results", []))
           lines.append("Administrator Google connection: " + ("present; usability unverified" if connections else "absent; owner authentication required"))
+          key = (variables.get("PORTAL_TOKEN_KEY") or {}).get("value")
+          lines.append("Existing token-encryption key returned by API: " + ("present; usability unverified" if key else "opaque; do not request or replace it"))
+          for item in read("/d1/database/" + pilot_id + "/query", health_sql):
+              for row in item.get("results", []):
+                  health = json.loads(row.get("health") or "{}")
+                  summary = health.get("summary") or {}
+                  safe = {k: health.get(k) for k in ["state", "lastReadAt", "lastSuccessfulAt"]}
+                  safe.update({k: summary.get(k) for k in ["eventCount", "changedRecords", "canApply", "issues"]})
+                  lines.append("Recorded pilot preview: " + json.dumps(safe))
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))
           # Keep non-secret presence checks readable through the GitHub API
