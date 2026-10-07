@@ -37,6 +37,7 @@ async function pilot(t){
   if(url==='https://oauth2.googleapis.com/token')return Response.json({access_token:'fixture-access'});
   const decoded=decodeURIComponent(String(url));
   if(decoded.endsWith('/values:batchUpdate')){
+   calls[calls.length-1].ranges=JSON.parse(options.body).data.map(item=>item.range);
    for(const item of JSON.parse(options.body).data){const match=item.range.match(/^Lessons!([A-Z]+)(\d+)$/);assert.ok(match);const column=[...match[1]].reduce((n,c)=>n*26+c.charCodeAt(0)-64,0)-1;values.lessons[Number(match[2])-1][column]=item.values[0][0];}
    return Response.json({totalUpdatedCells:2});
   }
@@ -138,6 +139,17 @@ test('saved note hashes use fresh pilot Sheets values rather than cached Portal 
  assert.equal(proof.length,2);assert.equal(proof.find(r=>r.rowNumber===2).coveredHash,createHash('sha256').update('Existing focus').digest('hex'));
  assert.equal(proof.find(r=>r.rowNumber===3).coveredHash,createHash('sha256').update('Historical source note').digest('hex'));
  assert.ok(!JSON.stringify(proof).includes('Historical source note'));assert.ok(!proof.some(r=>r.rowNumber===4));
+});
+
+test('editing the covered note writes one exact cell and leaves the unchanged Tracker homework cell untouched',async t=>{
+ const p=await pilot(t),preview=await p.request('sync',{mode:'preview'});
+ assert.equal((await p.request('sync',{mode:'apply',digest:preview.data.digest})).status,200);
+ const lesson=(await p.request('state')).data.lessons[0];
+ const result=await p.request('command',{action:'notes',id:lesson.id,operationId:'fixture-single-cell-note-01',covered:'Single-cell pilot check',outcome:lesson.notes.outcome,next:lesson.notes.next});
+ assert.equal(result.status,200);
+ assert.deepEqual(p.calls.filter(c=>c.url.endsWith('/values:batchUpdate')).map(c=>c.ranges),[['Lessons!D2']]);
+ assert.equal(p.values.lessons[1][4],'Existing homework');
+ assert.equal((await p.request('sync',{mode:'preview'})).data.changedRecords,0);
 });
 
 test('a failed source read is visible in sync health and clears the old apply affordance',async t=>{

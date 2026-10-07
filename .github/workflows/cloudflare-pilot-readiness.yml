@@ -185,6 +185,9 @@ jobs:
               proof["noteHashes"] = {k: hashlib.sha256(v.encode()).hexdigest() for k, v in fields.items()}
               proof["sourceNoteHashes"] = {k: hashlib.sha256(str((tracker.get("row") or {}).get(h) or "").encode()).hexdigest() for k, h in [("covered", "Lesson Focus"), ("next", "Homework / Next Step")]}
               proof["markerPresent"] = "AUXESIS_PILOT_CHECK_20261007" in covered
+              marker_suffix = "\nAUXESIS_PILOT_CHECK_20261007"
+              if covered.endswith(marker_suffix):
+                  proof["coveredWithoutPilotMarkerHash"] = hashlib.sha256(covered[:-len(marker_suffix)].encode()).hexdigest()
               proof["noteUtf16Lengths"] = {k: len(v.encode("utf-16-le")) // 2 for k, v in fields.items()}
               proof["notesCanonical"] = all(v == v.strip().strip("\ufeff") and "\r" not in v for v in fields.values()) and all(n <= 3000 for n in proof["noteUtf16Lengths"].values())
               proof["coveredUtf16Length"] = len(covered.encode("utf-16-le")) // 2
