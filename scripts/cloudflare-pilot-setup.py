@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import secrets
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -136,11 +137,19 @@ def configure(snapshot_file):
 
 def smoke(url, path, expected, headers=None, method="GET", body=None):
     request = urllib.request.Request(url + path, method=method, headers=headers or {}, data=body)
-    try:
-        with opener.open(request, timeout=30) as response:
-            status = response.status
-    except urllib.error.HTTPError as error:
-        status = error.code
+    for attempt in range(18):
+        try:
+            with opener.open(request, timeout=15) as response:
+                status = response.status
+        except urllib.error.HTTPError as error:
+            status = error.code
+        except (urllib.error.URLError, TimeoutError):
+            status = None
+        if status == expected or (status is not None and status not in (502, 503, 504)):
+            break
+        if attempt < 17:
+            print(f"Waiting for new preview HTTPS availability ({attempt + 1}/18).", flush=True)
+            time.sleep(10)
     require(status == expected, f"Pilot smoke check {path}: expected {expected}, received {status}.")
 
 
