@@ -1,0 +1,45 @@
+name: Deploy isolated Cloudflare migration pilot
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - .github/workflows/cloudflare-pilot-deploy.yml
+      - scripts/cloudflare-pilot-setup.py
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-migration-access
+  cancel-in-progress: false
+jobs:
+  deploy-pilot:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: auxesis-migration-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Configure isolated preview and preserve live settings
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_APP_ID: ${{ secrets.GOOGLE_APP_ID }}
+        run: python3 scripts/cloudflare-pilot-setup.py configure
+      - name: Build existing site
+        run: npm run build
+      - name: Deploy existing migration branch to isolated preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4 pages deploy dist --project-name=auxesis-migration-preview --branch=codex/cloudflare-backend-migration --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify preview binding and production isolation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/cloudflare-pilot-setup.py verify
