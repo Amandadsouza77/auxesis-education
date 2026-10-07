@@ -2,8 +2,8 @@
 
 Continue the existing Cloudflare pilot. Do not recreate its project or database,
 rebuild completed artifacts, use Floot, or change the production Portal.
-The checkout is on `codex/auxesis-sync-continuation`, based on
-`origin/codex/cloudflare-backend-migration` at `0fa7656`.
+The checkout remains on `codex/auxesis-sync-continuation`, continuing the existing
+`origin/codex/cloudflare-backend-migration` checkpoint originally at `0fa7656`.
 
 ## Existing work retained
 
@@ -41,11 +41,12 @@ credentials or business rules were changed. Legacy Floot-helper edits started on
 Run from `/workspace/auxesis-education`:
 
 ```sh
-node --test tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs
+node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs
 git diff --check
 ```
 
-Result: **17 passed, 0 failed, 0 skipped**. The new flow tests execute the actual
+Current result: **23 passed, 0 failed, 0 skipped** (the earlier checkpoint had
+17 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
 replay, Portal state, stale-source and window-change rejection, physical row
@@ -57,7 +58,94 @@ These are local integration tests, not an authenticated live Andie test. Earlier
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused until the real pilot passes.
 
-## Current checkpoint — owner authentication required, 7 October 2026
+## Current checkpoint — corrected first-sync preview awaiting owner session, 7 October 2026
+
+Google sign-in and selected Tracker access are now working. The owner resolved
+Google's Testing/test-user restriction and ran the real Andie-only preview.
+No credential replacement, Cloudflare security change or source write was needed.
+The preview read 18 Calendar occurrences and proposed 19 records, but correctly
+blocked apply with these recorded issues:
+
+- One unlinked cancellation: the approved series occurrence
+  `c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68_20261007T084500Z`.
+- Tracker dates `2026-09-30` and `2026-10-07` lacked an exact Portal lesson match.
+
+[Read-only diagnostic run 37687650347](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37687650347)
+confirmed the saved preview timestamp `2026-10-07T21:09:19.692Z`, its issue codes
+and occurrence ID, `canApply=false`, no successful apply, and a present encrypted
+administrator Google connection. The encryption key remains opaque to the agent;
+it was not retrieved, requested, replaced or exposed. Existing authenticated
+source access terminates in the deployed runtime and the owner's browser session.
+
+Two first-sync edge cases were reproduced and corrected:
+
+1. Calendar reads previously began at `now - 7 elapsed days`, while Tracker rows
+   were checked by full Toronto date. A 30 September morning lesson was therefore
+   excluded from an afternoon read even though its Sheet row was included. Both
+   bounds now use whole Toronto calendar days, with DST-aware midnights.
+2. A cancelled occurrence could not be imported on first sync because the Portal
+   link did not exist yet. It can now link or create a cancelled pilot record
+   **only** with a timed Calendar slot and exactly one corroborating cancelled
+   Tracker row. A supplied Tracker event ID must match. Duplicate matches,
+   missing dates, uncorroborated cancellations and completed-history conflicts
+   still block apply. Sparse cancellations retain unknown duration and do not
+   invent an end time, chargeability or package debits. Explicit no-charge
+   evidence continues to come from the Tracker.
+
+Preview health now retains limited pilot diagnostic facts: read bounds, source
+event IDs/times/statuses, Tracker dates/statuses/row numbers, proposed lesson
+links and before/proposed rate/package/balance values. It excludes teaching
+notes, contacts, tokens, session values, raw provider payloads and other students.
+The protected read-only workflow can inspect these saved facts without exposing
+credentials or writing business records.
+
+Application revision **`1b5003c`** is deployed successfully at
+`https://0b9f1b32.auxesis-migration-preview.pages.dev`. Continue using the unchanged
+stable alias:
+`https://codex-cloudflare-backend-mig.auxesis-migration-preview.pages.dev`.
+[Deployment run 37688388231](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37688388231)
+passed all steps: the 23 targeted checks in the runner, existing-site packaging,
+isolated deployment, actual D1 session rejection, cross-origin rejection,
+Portal availability, callback error handling, OAuth start/PKCE and unchanged
+live-site settings/deployment snapshot. The earlier Python-user-agent smoke
+failure is resolved; no security controls were changed. Runtime path changes now
+trigger this existing isolated deployment workflow, which runs the targeted
+checks before publication. No infrastructure or database was recreated.
+
+The 23 local checks passed too, including cancellation bootstrap/replay, retained
+ambiguity/history safeguards, first-day morning inclusion, DST transitions,
+diagnostic privacy and all prior preview/apply/write-back protections. The new
+application was packaged once for these actual changes; completed tests were
+not repeated without a new change.
+
+**Pending owner-session action:** refresh the signed-in pilot **Students** page
+(`/portal/students/`) and click **Preview pilot sync** once. The controls are on
+Students, not Dashboard. Do not click **Apply reviewed changes** yet. No new
+Google authorization or Tracker selection is needed while the existing grant
+remains valid. The agent cannot submit an authenticated request using the private
+browser session; do not request cookies, tokens or replacement secrets. A fresh
+preview is necessary to validate the corrected code against live Calendar and
+Tracker facts. The owner can reply that the preview ran; another screenshot is
+optional because its bounded saved diagnostics are directly readable.
+
+Next resume: read the changed `syncHealth` through the existing protected
+readiness workflow, validate each source-to-proposed lesson link and the preserved
+business balances, then complete the authorized one-student apply/replay and
+exact-row note-write/restoration only when safe. Do not infer corrected live
+reconciliation from the 23 synthetic checks or deploy smoke alone. If cancellation
+evidence is not corroborated, retain the conflict and inspect the recorded facts.
+Full-roster rollout and unattended synchronization remain pending this real pilot.
+Google OAuth is still in Testing; its refresh-token lifetime must be addressed
+before claiming reliable unattended operation beyond the pilot.
+
+No Calendar, Tracker or existing Portal business record was written during this
+repair. The owner's prior OAuth callback initialized the approved isolated pilot
+reference seed, and their preview wrote operational health only. Production,
+the Portal design and security controls are unchanged. Do not rebuild/redeploy
+unchanged code, recheck the full configuration, repeat passed tests, reconnect
+Google or reselect the Tracker simply to resume.
+
+## Historical checkpoint — initial owner authorization, superseded
 
 The owner corrected the credential scope without rotating the encryption key or
 touching the live project. Fresh
