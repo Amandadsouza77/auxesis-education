@@ -1,5 +1,6 @@
 name: Check migration pilot readiness
 on:
+  workflow_dispatch:
   push:
     branches: [codex/cloudflare-backend-migration]
     paths: [.github/workflows/cloudflare-pilot-readiness.yml]
@@ -97,6 +98,11 @@ jobs:
                   lines.append("Migration preview: absent from latest 10 deployments")
           lines.append("Google-authenticated live sync and replay remain unverified; inventory is not an end-to-end test.")
           print("\n".join(lines))
+          # Keep non-secret presence checks readable through the GitHub API
+          # when the runner's external log-download host is unavailable.
+          for line in lines:
+              escaped = line.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print("::notice title=Auxesis read-only readiness::" + escaped)
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
               output.write("## Read-only pilot readiness inventory\n\n" + "\n".join("- " + line for line in lines) + "\n")
           PY
