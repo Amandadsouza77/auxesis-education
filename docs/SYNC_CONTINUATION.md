@@ -41,11 +41,11 @@ credentials or business rules were changed. Legacy Floot-helper edits started on
 Run from `/workspace/auxesis-education`:
 
 ```sh
-node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs tests/cloudflare-roster-dry-run.test.mjs tests/portal.test.mjs tests/cloudflare-ui-migration.test.mjs
+node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs tests/cloudflare-roster-dry-run.test.mjs tests/cloudflare-roster-review.test.mjs tests/portal.test.mjs tests/cloudflare-ui-migration.test.mjs
 git diff --check
 ```
 
-Current result: **47 passed, 0 failed, 0 skipped** (earlier checkpoints had
+Current result: **52 passed, 0 failed, 0 skipped** (earlier checkpoints had
 17 and 23 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
@@ -58,7 +58,76 @@ These include synthetic integration tests; live evidence is distinguished below.
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused under the current Andie-only scope.
 
-## Current checkpoint — full active-roster dry run read and verified; no import authorized
+## Current checkpoint — read-only mapping/identity/balance review; fresh evidence pending
+
+The owner authorized a **read-only review for the remaining 14 active students**:
+prepare proposed Calendar mappings with evidence, review identities and opening
+balances, flag ambiguity and never guess. No imports, source business writes,
+automation or production changes are authorized. Reuse the completed Andie pilot
+and full-roster dry run; neither needs to be repeated.
+
+Revision `4eb83d0` extends the existing isolated admin-only roster endpoint with
+`{mode:"review"}` and a **Review mappings and balances (read-only)** control.
+It reuses the existing connected Google account, selected Tracker, Calendar,
+source reader and whole Toronto date window. Only review diagnostics are saved
+under `settings.rosterReview`; the original dry-run report, pilot configuration,
+pilot health and all business records are preserved.
+
+The evidence includes exact roster identity/physical row references, arrangement
+fields, lesson dates/statuses, invoice dates/statuses/amounts/quantities and a
+Calendar series/occurrence inventory with titles and actual schedule times.
+Teaching logs, billing notes, payment references, attendees, descriptions,
+credentials and tokens are omitted; title contact details/URLs are redacted.
+All mappings remain unapproved and the report has `readOnly:true`, `canApply:false`
+and no import digest or command. Remaining students stay unimported.
+
+Exact full-name matches can support a proposal. Exact first-name-only matches
+require a unique roster first name and at least two distinct corroborating
+Tracker lesson dates for a supported proposal; all others remain insufficient
+or ambiguous. Shared names, multiple same-date occurrences, event-ID mismatches
+and Calendar/Tracker status conflicts block supported proposals. First-name
+evidence is explicitly labelled and never treated as a confirmed alias.
+Opening balances remain unverified: invoice quantities or completed lessons
+must not be converted into an opening balance without a confirmed cutoff,
+units, carry-forward and financial reconciliation. Invoice evidence discrepancies
+are flagged; no rates, payment statuses or billing rules are altered.
+
+Local validation: **52 passed**, covering readonly GET-source behavior,
+unchanged business record data/revisions/audits, preservation of earlier reports,
+financial non-inference, ambiguous names/statuses, title privacy, error visibility
+and all existing pilot/Portal safeguards. All three protected read-only workflow
+Python scripts compile; `git diff --check` passes. The existing deployment
+workflow runs these checks; deployment verification follows below.
+The mapping review uses a separate fixed SELECT and lossless gzip/base64 chunks
+to preserve full bounded evidence within GitHub annotation limits.
+
+[Deployment run 37715995628](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995628)
+passed all steps, including the targeted test suite, real D1 session lookup,
+cross-origin rejection, stable Portal/callback/OAuth PKCE, and unchanged
+production settings/deployment snapshot. Exact application revision
+`4eb83d0ff3db0df2f8c19f1e586b84234b1327a0` is deployed at
+`https://63aeaba1.auxesis-migration-preview.pages.dev` with the same stable alias.
+Shared-first-name tests use fictional student identities; the affected four
+tests passed after that fixture cleanup. No application rebuild is needed for
+the test-only cleanup or this documentation checkpoint.
+[Read-only run 37715995546, attempt 2](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/2)
+confirmed that deployed revision, unchanged earlier roster report and completed
+Andie restoration proof, unchanged business/audit counts, and production binding
+isolation. Its new mapping/balance review state is **not-run**.
+Safe deployment evidence is saved outside the checkout at
+`/workspace/auxesis-pilot-evidence/mapping-review-deployment-proof.json`.
+
+**Next owner-session step after verified deployment:** refresh the isolated
+Students page, click **Review mappings and balances (read-only)** and reply done.
+Do not click Apply, reconnect Google or select another Tracker. The existing
+private browser session is unavailable to the agent; do not extract it, mint a
+new session, bypass security or introduce another credential route.
+Resume by reading only changed saved review evidence through the protected
+readiness workflow. Validate Andie's unchanged restored proof and non-pilot
+isolation, then produce supported per-student proposals with unresolved items.
+Do not claim the real review complete before its fresh source read.
+
+## Completed checkpoint — full active-roster dry run read and verified; no import authorized
 
 The owner clicked **Preview active roster (read-only)**. [Protected read-only
 run 37709597195, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37709597195/attempts/3)

@@ -9,7 +9,7 @@ const event=(id,summary,recurringEventId,date='2026-10-08')=>({id,summary,recurr
 const log=(Student,_row,date)=>({Student,_row,'Lesson Date':date,Status:'Completed','Lesson Focus':'PRIVATE TEACHING TEXT','Homework / Next Step':'PRIVATE HOMEWORK'});
 
 test('unique first name requires multiple corroborating dates; shared first names and unrelated substring titles remain ambiguous',()=>{
- const input={...base,students:[row('Andie Ng',9),row('Alex Smith',2),row('Maya Hassan',3),row('Maya Keinan',4)],lessons:[log('Alex Smith',2,'2026-10-08'),log('Alex Smith',3,'2026-10-15'),log('Maya Hassan',4,'2026-10-08'),log('Maya Hassan',5,'2026-10-15')],events:[event('a','Alex Biology','alex'),event('b','Alex Biology','alex','2026-10-15'),event('m','Maya Biology','maya'),event('n','Maya Biology','maya','2026-10-15'),event('bad','Alexandra Biology','alexandra')]};
+ const input={...base,students:[row('Andie Ng',9),row('Alex Smith',2),row('Maya North',3),row('Maya South',4)],lessons:[log('Alex Smith',2,'2026-10-08'),log('Alex Smith',3,'2026-10-15'),log('Maya North',4,'2026-10-08'),log('Maya North',5,'2026-10-15')],events:[event('a','Alex Biology','alex'),event('b','Alex Biology','alex','2026-10-15'),event('m','Maya Biology','maya'),event('n','Maya Biology','maya','2026-10-15'),event('bad','Alexandra Biology','alexandra')]};
  const before=structuredClone(input),report=rosterReview([],input,config);
  assert.equal(report.studentCount,3);assert.ok(!report.students.some(s=>s.name==='Andie Ng'));assert.equal(report.readOnly,true);assert.equal(report.canApply,false);
  const alex=report.students[0];assert.deepEqual(alex.proposedCalendarGroups,['series:alex']);assert.equal(alex.calendarCandidates.length,1);assert.equal(alex.calendarCandidates[0].basis,'exact-first-name-only');assert.equal(alex.calendarCandidates[0].approved,false);
@@ -19,7 +19,7 @@ test('unique first name requires multiple corroborating dates; shared first name
 });
 
 test('full-name owner prevents another student with the same first name from claiming a group; conflicting status blocks a proposal',()=>{
- const input={...base,students:[row('Maya Hassan',2),row('Maya Keinan',3)],lessons:[{...log('Maya Keinan',4,'2026-10-08'),Status:'Cancelled'}],events:[event('m','Maya Keinan Biology','maya')]};
+ const input={...base,students:[row('Maya North',2),row('Maya South',3)],lessons:[{...log('Maya South',4,'2026-10-08'),Status:'Cancelled'}],events:[event('m','Maya South Biology','maya')]};
  const report=rosterReview([],input,config);assert.equal(report.students[0].calendarCandidates.length,0);
  assert.equal(report.students[1].calendarCandidates[0].basis,'exact-full-name');assert.ok(report.students[1].calendarCandidates[0].conflicts.some(c=>c.code==='lesson-status-review'));assert.deepEqual(report.students[1].proposedCalendarGroups,[]);
 });
