@@ -40,6 +40,8 @@ export async function prepare(){
  const old=preview.env_vars||{};
  const requiredKeys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_API_KEY','GOOGLE_APP_ID','PORTAL_TOKEN_KEY'];
  const unavailable=requiredKeys.filter(k=>!old[k]?.value&&!process.env[k]);
+ const oauthClientId=process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value;
+ const oauthClientSecret=process.env.GOOGLE_CLIENT_SECRET||old.GOOGLE_CLIENT_SECRET?.value;
  let project=await cf('/pages/projects/'+staging),db;
  if(project){
   require(!project.source&&!project.canonical_deployment,'Staging unexpectedly has an active app.');
@@ -63,7 +65,7 @@ export async function prepare(){
  const keyRows=await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:"SELECT secret FROM portal_release_keys WHERE id='migration-transport'"});
  const transportKey=keyRows.flatMap(r=>r.results||[])[0]?.secret;require(transportKey,'Protected migration transport key is unavailable.');
  const result={databaseId:db.uuid,stagingProject:staging,releasePublicKey:releaseKey(transportKey).publicKey,googleGrantReadAccess:false,productionCallback:callback,googleClientId:process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value,appDeployed:false,synchronizationActivated:false,liveProjectUnchanged:true,unavailableCredentialNames:unavailable.filter(k=>k!=='PORTAL_TOKEN_KEY'),ownerProductionConsentRequired:true};
- if(unavailable.length){
+ if(!oauthClientId||!oauthClientSecret||!old.PORTAL_TOKEN_KEY?.value){
   require(liveFingerprint(await cf('/pages/projects/auxesis-education'))===before,'Live project changed during preparation.');
   console.log('::notice title=Auxesis production preparation::'+JSON.stringify(result));
   if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Independent production database and encrypted transport prepared. Existing secrets remain protected. Owner production Google authorization is required. No app deployed and automation stays disabled.\n');
@@ -73,13 +75,15 @@ export async function prepare(){
  const connections=rows.flatMap(r=>r.results||[]);require(connections.length===1,'The existing administrator connection is not unique.');
  const scopes=new Set(connections[0].scopes.split(/\s+/));require(scopes.has('https://www.googleapis.com/auth/calendar.readonly')&&scopes.has('https://www.googleapis.com/auth/drive.file'),'Existing Google grant lacks approved read scopes.');
  const refreshToken=await open(old.PORTAL_TOKEN_KEY.value,connections[0].refresh_token_ciphertext);
- const response=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:vars.GOOGLE_CLIENT_ID.value,client_secret:vars.GOOGLE_CLIENT_SECRET.value,grant_type:'refresh_token',refresh_token:refreshToken})});
+ const response=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:oauthClientId,client_secret:oauthClientSecret,grant_type:'refresh_token',refresh_token:refreshToken})});
  require(response.ok,'Existing Google grant cannot be refreshed. Owner Google authorization is required.');
  const access=(await response.json()).access_token;require(access,'Google refresh did not return usable access.');
  const sourceUrls=[['tracker','https://sheets.googleapis.com/v4/spreadsheets/'+vars.GOOGLE_SPREADSHEET_ID.value+'/values/'+encodeURIComponent('Students!A1:AD1000')],['calendar','https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(vars.GOOGLE_CALENDAR_ID.value)+'/events?maxResults=1&timeMin=2026-10-01T00%3A00%3A00-04%3A00&singleEvents=true']];
  for(const [kind,url] of sourceUrls){const r=await fetch(url,{redirect:'error',headers:{Authorization:'Bearer '+access}});require(r.ok,'Existing grant cannot read the production '+kind+'. Owner source access is required.');const data=await r.json();require(kind==='tracker'?Array.isArray(data.values):Array.isArray(data.items),'Production '+kind+' source returned an incomplete read.');}
  require(liveFingerprint(await cf('/pages/projects/auxesis-education'))===before,'Live project changed during preparation.');
  result.googleGrantReadAccess=true;
+ result.stagingSecretBindingPresent=!!vars.GOOGLE_CLIENT_SECRET;
+ result.pickerOptional=true;
  console.log('::notice title=Auxesis production preparation::'+JSON.stringify(result));
  if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Production database prepared separately. Existing Google grant reads Tracker and Calendar. No application deployed; automation and Apply remain disabled.\n');
  return result;

@@ -6,6 +6,7 @@ on:
       - .github/workflows/auxesis-production-import.yml
       - scripts/production-import.mjs
       - scripts/production-sync-schema.sql
+      - scripts/production-prepare.mjs
 permissions:
   contents: read
 concurrency:
