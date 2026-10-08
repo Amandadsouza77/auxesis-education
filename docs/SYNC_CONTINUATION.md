@@ -56,9 +56,55 @@ callbacks, non-pilot rejection and concurrent Tracker-note conflicts.
 
 These include synthetic integration tests; live evidence is distinguished below. Earlier
 unchanged build/deployment checks were not repeated. Full-roster synchronization
-and unattended automation remain paused until the real pilot passes.
+and unattended automation remain paused under the current Andie-only scope.
 
-## Current checkpoint — live Andie note write verified; exact restoration pending
+## Current checkpoint — controlled Andie round trip proven end to end
+
+The owner removed only the temporary marker, saved the lesson and ran Preview.
+[Read-only run 37704086813, attempt 4](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086813/attempts/4)
+completed successfully and verified the fresh Google-source read at
+`2026-10-08T00:37:33.368Z` (**20:37 on 7 October in Toronto**).
+
+All final assertions passed:
+
+- The Portal covered/outcome/next hashes exactly match the original baseline;
+  the marker is absent and the original lengths are restored.
+- Independently and freshly read Google Tracker row 56 covered/next hashes
+  exactly match the original baseline and Portal. Cached metadata also agrees.
+- Two successful note saves are recorded (temporary write and restoration),
+  following the one successful source import. Both writes used the existing
+  Google-authorized owner session and one exact changed lesson-note cell.
+- The final preview reports **18 Calendar occurrences, zero changes, zero
+  conflicts**. Lesson identity, status, start/end/duration, all Calendar facts,
+  Tracker lesson links, rate/package/balance values and the existing business
+  review safeguard remain identical to the reviewed baseline.
+- The isolated database has 18 pilot lessons and **zero non-pilot students or
+  lessons**. The deployed application remains `f96deca`; live production is
+  unchanged and has no binding to the isolated pilot database.
+
+Hash-only evidence and successful assertions are saved outside the checkout at
+`/workspace/auxesis-pilot-evidence/restoration-proof.json`; the prior marker
+write and original baseline files remain preserved. No further owner action or
+authentication/configuration blocker remains for this completed pilot.
+Do not repeat completed writes, tests, builds, apply or authentication.
+
+**Verified scope:** actual Calendar/Tracker-to-Portal import and replay, the
+existing cancellation/lesson-status mappings, real Portal-to-Tracker covered-note
+save, independent fresh source confirmation, and exact restoration. The 27
+passing handler/SQL integration tests also exercise creation, rescheduling,
+cancellation, exact-cell writes, restoration and failure/security safeguards.
+Live Calendar reschedule/cancel mutations were not performed: Calendar access
+remains read-only and the real schedule was preserved.
+
+Portal note saves now write changed Tracker note cells automatically through the
+existing authorized path. Source refresh still uses the existing **Preview pilot
+sync** / reviewed Apply controls. Unattended scheduling and wider rollout remain
+paused under the user's explicit pilot-only scope; passing this pilot does not
+authorize enabling them or merging/deploying production. Keep Calendar as the
+schedule authority, Tracker as the business authority and Portal as the consuming
+interface. The existing downloadable Sheet remains intact.
+
+## Historical checkpoint — live note write verified; restoration pending, superseded
 
 The owner saved the requested marker and ran Preview. [Read-only run
 37704086813, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086813)
