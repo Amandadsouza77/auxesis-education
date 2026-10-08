@@ -60,6 +60,37 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner refresh — Maria/today discrepancy checked
+
+The owner clicked the read-only review again. Its fresh Google source read was
+`2026-10-08T05:21:01.306Z` (**01:21 on 8 October in Toronto**).
+[Protected readiness run 37715995546, attempt 6](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/6)
+verified the refreshed saved report, exact unchanged Andie restoration proof,
+earlier roster report, business hash and production binding isolation. The fresh
+source summary exactly matches the prior corrected assessment: 10 students with
+partial supported proposals, all 14 balances unverified, no imports.
+
+For 8 October, Calendar contains six student-labelled lesson entries: Maya Keinan
+04:30, Mireya 05:45, Guiliana Stalteri 09:30, Fern 13:00, May 14:30 and the
+unresolved `Maya gr 11 chem` label 16:00, all Toronto times. A separate Meet &
+Greet is at 20:00. Maya Keinan's actual 04:30 start differs from the original
+11:45 start, confirming that existing rescheduled occurrence times are read.
+Maria's title-matched series has no occurrence on 8 October; its next is
+10 October, 06:30–07:30 Toronto, with unchanged original start. The owner's
+reported move is not visible in this connected Calendar inventory. Do not
+guess an event identity or change sources to match the report.
+
+The remaining owner-only evidence needed for this discrepancy is a screenshot
+of the moved Maria event opened in Google Calendar, showing title, exact
+date/time and calendar name. This will identify the event/source to compare.
+The regular Portal remains unchanged; isolated preview still imports only Andie.
+No new code, deployment, business write or repeated tests were needed.
+Detailed evidence is retained outside git at
+`/workspace/auxesis-pilot-evidence/TODAY_CALENDAR_CHECK.md` and
+`/workspace/auxesis-pilot-evidence/refreshed-calendar-review.json`.
+
+### Completed mapping and balance review
+
 The owner completed the read-only review control. Fresh source evidence was saved
 at `2026-10-08T04:38:29.908Z` (**00:38 on 8 October in Toronto**), then exported
 losslessly by [protected readiness run 37715995546, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/3).
