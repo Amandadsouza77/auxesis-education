@@ -206,3 +206,39 @@ jobs:
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as output:
               output.write("## Read-only pilot readiness inventory\n\n" + "\n".join("- " + line for line in lines) + "\n")
           PY
+      - name: Read saved roster dry-run diagnostics without business writes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.request
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+          opener = urllib.request.build_opener(NoRedirect())
+          # Fixed SELECT against the existing isolated database only.
+          url = 'https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/d1/database/34a9449d-85ee-4f06-a55d-3485905ca64e/query'
+          sql = "SELECT json_extract(data, '$.rosterDryRun') AS report FROM portal_records WHERE id='settings'"
+          req = urllib.request.Request(url, method='POST', data=json.dumps({'sql': sql}).encode(), headers={
+              'Authorization': 'Bearer ' + os.environ['CLOUDFLARE_API_TOKEN'],
+              'User-Agent': 'Auxesis-Pilot-Readiness/1.0', 'Content-Type': 'application/json'})
+          try:
+              with opener.open(req, timeout=30) as response:
+                  data = json.load(response)
+              if not data.get('success'):
+                  raise ValueError()
+          except (urllib.error.URLError, TimeoutError, ValueError):
+              raise SystemExit('Saved roster diagnostics could not be read; no writes attempted.')
+          rows = [row for item in data['result'] for row in item.get('results', [])]
+          report = json.loads(rows[0]['report']) if rows and rows[0].get('report') else {'state': 'not-run'}
+          if report.get('summary') and (report['summary'].get('readOnly') is not True or report['summary'].get('canApply') is not False):
+              raise SystemExit('Saved roster report violates read-only scope.')
+          compact = json.dumps(report, separators=(',', ':'))
+          chunks = [compact[i:i+2800] for i in range(0, len(compact), 2800)]
+          if len(chunks) > 8:
+              raise SystemExit('Roster report exceeds the bounded diagnostic export; use the authenticated preview. No writes attempted.')
+          for i, chunk in enumerate(chunks, 1):
+              escaped = chunk.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print('::notice title=Auxesis roster dry run ' + str(i) + '/' + str(len(chunks)) + '::' + escaped)
+          PY

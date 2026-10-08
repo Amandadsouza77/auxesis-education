@@ -9,7 +9,7 @@ const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 // Pure reconciliation. Calendar supplies schedule; Tracker supplies business
 // identity, attendance and teaching-log evidence. It never mutates a source.
 export function syncPlan(all,input,config){
- if(!config.studentId||!config.calendarId||!config.spreadsheetId||!Array.isArray(config.seriesIds)||!config.seriesIds.length)throw new Error('Configure one pilot student and their Calendar series first.');
+ if(!config.studentId||!config.calendarId||!config.spreadsheetId||!Array.isArray(config.seriesIds)||(!config.seriesIds.length&&!config.eventIds?.length))throw new Error('Configure one pilot student and their Calendar series first.');
  if(input.complete!==true||input.calendarId!==config.calendarId||input.spreadsheetId!==config.spreadsheetId)throw new Error('Both source reads must complete for the configured Calendar and Tracker.');
  const original=all.find(r=>r._kind==='students'&&r.id===config.studentId);if(!original)throw new Error('The configured pilot student is missing.');
  const matching=input.students.filter(r=>known(r['Student ID'])?r['Student ID']===original.id:norm(r.Student)===norm(config.studentName));if(matching.length!==1)throw new Error('The pilot must match exactly one Tracker row.');

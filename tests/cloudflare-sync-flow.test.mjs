@@ -53,8 +53,56 @@ async function pilot(t){
   return {status:response.status,data:await response.json()};
  };
  const records=async()=>JSON.parse(JSON.stringify((await listRecords(db)).filter(r=>r._kind!=='settings')));
- return {request,records,db,sqlite,values,calls,setNow:value=>now=value,setEvents:value=>events=value,getEvents:()=>structuredClone(events)};
+ return {request,records,db,sqlite,env,values,calls,setNow:value=>now=value,setEvents:value=>events=value,getEvents:()=>structuredClone(events)};
 }
+
+test('active roster preview reconciles in memory with GET-only sources and no business imports or apply token',async t=>{
+ const p=await pilot(t);p.env.MIGRATION_PREVIEW_ONLY='true';
+ p.values.students=[['Student','Rate','Currency','Status','Package'],['Fixture Student','125','CAD','Active','Monthly'],['Second Student','90','USD','Active','Block'],['Former Student','80','CAD','Inactive','Block']];
+ p.values.lessons[0].push('Calendar Event ID');p.values.lessons[1].push('');
+ p.values.lessons.push(['Second Student','2026-10-08','Scheduled','Private second focus','Private second homework','second-event']);
+ p.setEvents([...p.getEvents(),{id:'second-event',status:'confirmed',start:{dateTime:'2026-10-08T12:00:00-04:00'},end:{dateTime:'2026-10-08T13:00:00-04:00'}}]);
+ const before=await p.records(),businessRows=p.sqlite.prepare("SELECT id,data,revision FROM portal_records WHERE id!='settings' ORDER BY id").all();
+ const settingsBefore=JSON.parse(p.sqlite.prepare("SELECT data FROM portal_records WHERE id='settings'").get().data);
+ const report=await p.request('roster-preview',{mode:'preview'});
+ assert.equal(report.status,200,JSON.stringify(report.data));
+ const s=report.data.summary;assert.equal(s.readOnly,true);assert.equal(s.canApply,false);assert.equal(s.activeStudentCount,2);assert.deepEqual(s.excludedStatuses,{inactive:1});assert.ok(!('digest' in s));
+ const second=s.students.find(r=>r.name==='Second Student');assert.equal(second.projectionOnly,true);assert.equal(second.confirmedCalendarOccurrences,1);assert.equal(second.reviewRequired,true);assert.ok(second.issues.some(i=>i.code==='opening-record-review'));assert.equal(second.businessProposed.rate,90);assert.equal(second.businessProposed.purchased,null);assert.equal(second.businessProposed.used,null);
+ assert.deepEqual(await p.records(),before);
+ assert.deepEqual(p.sqlite.prepare("SELECT id,data,revision FROM portal_records WHERE id!='settings' ORDER BY id").all(),businessRows);
+ assert.equal(p.sqlite.prepare('SELECT COUNT(*) AS n FROM portal_audit').get().n,0);
+ const settingsAfter=JSON.parse(p.sqlite.prepare("SELECT data FROM portal_records WHERE id='settings'").get().data);
+ assert.deepEqual(settingsAfter.syncConfig,settingsBefore.syncConfig);assert.deepEqual(settingsAfter.syncHealth,settingsBefore.syncHealth);
+ assert.ok(p.calls.filter(c=>c.url.includes('googleapis.com')&&!c.url.includes('oauth2.')).every(c=>c.method==='GET'));
+ for(const value of ['Private second focus','Private second homework','fixture-access','fixture-refresh','fixture-secret'])assert.ok(!JSON.stringify(report.data).includes(value));
+ assert.equal((await p.request('roster-preview',{mode:'apply'})).status,400);
+ assert.equal((await p.request('roster-preview',{mode:'preview',studentId:'second'})).status,400);
+ assert.equal((await p.request('sync',{mode:'apply'})).status,409);
+ assert.deepEqual(await p.records(),before);
+ const state=(await p.request('state')).data;assert.equal(state.students.length,1);assert.equal(state.settings.rosterDryRunEnabled,true);assert.deepEqual(state.settings.rosterDryRun.summary,s);
+});
+
+test('roster preview requires preview flag, admin session, POST and normal same-origin protection',async t=>{
+ const p=await pilot(t);
+ assert.equal((await p.request('roster-preview',{mode:'preview'})).status,403);assert.equal(p.calls.length,0);
+ p.env.MIGRATION_PREVIEW_ONLY='true';assert.equal((await p.request('roster-preview')).status,405);
+ const cross=await handlePortalRequest({env:p.env,params:{path:['roster-preview']},request:new Request('https://fixture.auxesis-migration-preview.pages.dev/api/portal/roster-preview',{method:'POST',headers:{Origin:'https://another.invalid','Content-Type':'application/json',Cookie:'__Host-auxesis_session='+'A'.repeat(43)},body:'{"mode":"preview"}'})});
+ assert.equal(cross.status,403);
+ const outside=await handlePortalRequest({env:p.env,params:{path:['roster-preview']},request:new Request('https://another.pages.dev/api/portal/roster-preview',{method:'POST',headers:{Origin:'https://another.pages.dev','Content-Type':'application/json',Cookie:'__Host-auxesis_session='+'A'.repeat(43)},body:'{"mode":"preview"}'})});
+ assert.equal(outside.status,403);assert.equal(p.calls.length,0);
+ p.sqlite.prepare("UPDATE portal_accounts SET role='parent'").run();
+ assert.equal((await p.request('roster-preview',{mode:'preview'})).status,403);assert.equal(p.calls.length,0);
+ assert.equal((await p.request('state')).data.settings.rosterDryRunEnabled,undefined);
+});
+
+test('failed roster read clears its stale report while preserving completed pilot health and business records',async t=>{
+ const p=await pilot(t);p.env.MIGRATION_PREVIEW_ONLY='true';p.values.students=[['Student','Rate','Currency','Status'],['Fixture Student','125','CAD','Active']];
+ await p.request('sync',{mode:'preview'});await p.request('roster-preview',{mode:'preview'});
+ const before=await p.records(),health=(await p.request('state')).data.settings.syncHealth;
+ p.values.students=[];assert.equal((await p.request('roster-preview',{mode:'preview'})).status,503);
+ const state=(await p.request('state')).data;assert.equal(state.settings.rosterDryRun.state,'error');assert.equal(state.settings.rosterDryRun.summary.canApply,false);assert.equal(state.settings.rosterDryRun.summary.students,undefined);
+ assert.deepEqual(state.settings.syncHealth,health);assert.deepEqual(await p.records(),before);
+});
 
 test('preview, delayed apply, Portal state and replay reconcile without debiting balances',async t=>{
  const p=await pilot(t),before=await p.records(),preview=await p.request('sync',{mode:'preview'});
