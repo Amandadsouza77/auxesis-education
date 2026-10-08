@@ -1,0 +1,37 @@
+name: Prepare isolated Auxesis production resources
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - .github/workflows/auxesis-production-prepare.yml
+      - scripts/production-prepare.mjs
+      - scripts/production-envelope.mjs
+      - tests/production-envelope.test.mjs
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: auxesis-migration-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate authenticated release encryption
+        run: node --test tests/production-envelope.test.mjs
+      - name: Prepare separate production resources and verify existing Google access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_APP_ID: ${{ secrets.GOOGLE_APP_ID }}
+        run: node scripts/production-prepare.mjs
