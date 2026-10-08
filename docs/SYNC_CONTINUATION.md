@@ -60,6 +60,26 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner confirmation — Ari Figgs future series resolved in proposals
+
+Amanda confirmed the `Ari` Monday/Wednesday 16:00 Toronto series belongs to
+**Ari Figgs**, existing Students row 11. The specific group is
+`series:6pj3ip9o6co32bb26os68b9k70s3cb9o6oom2bb56gqjgor2ccqmcob1c8`:
+16 confirmed occurrences from 12 October through 2 December, all 16:00 Toronto
+across DST. The Tracker roster already records Monday/Wednesday 16:00.
+The confirmation does not extend to Ari's separate earlier two-occurrence group
+or approve new lesson-log links, imports, balances or financial changes.
+
+The local owner-confirmed review now supports proposals for **12 students**;
+Mireya and Nina remain unresolved, along with other partial coverage/status
+items and all 14 opening balances. Maya Hassan's previously confirmed identity
+remains intact. Exact-series/time scope, unchanged other students/business
+evidence and all read-only safeguards were validated. The same external
+`owner-confirmed-mapping-proposals.json` and `OWNER_MAPPING_CONFIRMATIONS.md`
+retain both confirmations. No runtime, live diagnostics/configuration, business
+records, Google sources or production settings were changed. The saved
+Google-only report still records 10 automatically supported students.
+
 ### Latest owner confirmation — Maya Hassan identity resolved in proposals
 
 Amanda explicitly confirmed **`Maya gr 11 chem` belongs to Maya Hassan**.
