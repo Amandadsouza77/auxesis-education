@@ -80,13 +80,11 @@ Maria's title-matched series has no occurrence on 8 October; its next is
 reported move is not visible in this connected Calendar inventory. Do not
 guess an event identity or change sources to match the report.
 
-The remaining owner-only evidence needed for this discrepancy is a screenshot
-of the moved Maria event opened in Google Calendar, showing title, exact
-date/time and calendar name. This will identify the event/source to compare.
-Subsequently the owner confirmed the six listed Calendar entries are correct;
-no screenshot is needed to validate that list. This is schedule-read confirmation,
-not approval of ambiguous full-name identities, balances or imports. The unclear
-student-name phrase in that reply was not interpreted as a roster correction.
+The owner subsequently clarified the name as **Maria** and confirmed Maria has
+no lesson on 8 October; the six listed Calendar entries are correct. The prior
+reported Maria discrepancy is resolved. No screenshot or source change is needed.
+This confirms the schedule read, without approving ambiguous full-name Maya
+identities, opening balances or imports.
 The regular Portal remains unchanged; isolated preview still imports only Andie.
 No new code, deployment, business write or repeated tests were needed.
 Detailed evidence is retained outside git at
