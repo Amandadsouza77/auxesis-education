@@ -60,6 +60,31 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner clarification — Mireya recurrence corrected; fresh read needed
+
+Amanda clarified the name as **Mireya Borromeo**, not Maria. Mireya's normal
+lesson is **Wednesday 06:00 Toronto**. Only this week's lesson moved to
+**Thursday 8 October at 05:45**. Amanda reports restoring the recurring Calendar
+schedule after accidentally applying the Thursday move to every week, keeping
+this week's exception. The last saved Google read predates this correction.
+
+Do not treat Mireya's upcoming Wednesday Tracker lesson rows as established
+errors or shift them to Thursdays. The owner's confirmed normal weekday
+explains those dates; earlier suspicion that they were stale is superseded.
+The source roster's Thursday schedule string remains evidence, not a value to
+rewrite under the current read-only scope. Maria's verified Saturday schedule
+and all other owner confirmations remain unchanged.
+
+Next owner-session action: click **Review mappings and balances (read-only)**
+on the same isolated Students page and reply done. Then retrieve only the fresh
+saved review via the existing protected workflow. Compare actual event IDs and
+Toronto dates/times to verify normal Wednesdays and the 8 October exception.
+No import, automation, source business write or production change is authorized.
+The local proposal count remains 13 until this fresh verification; all 14
+balances remain unverified. This reported correction and pending verification
+are recorded in the existing external owner-confirmation artifacts. No runtime
+change, deployment, test rerun or business write by the agent was needed.
+
 ### Latest owner confirmation — Nina's regular schedule confirmed separately
 
 Amanda confirmed Nina's regular **Monday 05:15 Toronto** schedule, starting
