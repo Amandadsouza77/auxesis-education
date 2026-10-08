@@ -7,3 +7,6 @@ node_modules/
 .wrangler/
 __pycache__/
 test-results/
+# Keep private reconciliation evidence and recovery packages off public GitHub.
+work/
+releases/
