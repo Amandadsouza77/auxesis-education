@@ -17,7 +17,8 @@ async function cf(path,method='GET',body){
   "SELECT secret FROM portal_release_keys WHERE id='migration-transport'",
   "INSERT INTO portal_release_keys(id,secret) VALUES('migration-transport',?1) ON CONFLICT(id) DO NOTHING"
  ].includes(body?.sql);
- require(method==='GET'||writes||read||keyOperation,'Preparation rejected a write outside isolated resources.');
+ const credentialPatch=method==='PATCH'&&path==='/pages/projects/'+staging&&Object.keys(body?.deployment_configs||{}).join()==='preview'&&Object.keys(body.deployment_configs.preview.env_vars||{}).every(k=>['GOOGLE_CLIENT_SECRET','GOOGLE_CLIENT_ID','GOOGLE_API_KEY','GOOGLE_APP_ID'].includes(k));
+ require(method==='GET'||writes||read||keyOperation||credentialPatch,'Preparation rejected a write outside isolated resources.');
  const response=await fetch(base+path,{method,redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
  if(response.status===404&&method==='GET')return null;
  require(response.ok,'Cloudflare preparation failed: HTTP '+response.status+'. Provider response omitted.');
@@ -42,6 +43,7 @@ export async function prepare(){
  const unavailable=requiredKeys.filter(k=>!old[k]?.value&&!process.env[k]);
  const oauthClientId=process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value;
  const oauthClientSecret=process.env.GOOGLE_CLIENT_SECRET||old.GOOGLE_CLIENT_SECRET?.value;
+ const existingTokenKey=process.env.PORTAL_TOKEN_KEY||old.PORTAL_TOKEN_KEY?.value;
  let project=await cf('/pages/projects/'+staging),db;
  if(project){
   require(!project.source&&!project.canonical_deployment,'Staging unexpectedly has an active app.');
@@ -56,7 +58,15 @@ export async function prepare(){
   project=await cf('/pages/projects','POST',{name:staging,production_branch:'main',deployment_configs:{preview:{compatibility_date:'2026-10-08',d1_databases:{PORTAL_DB:{id}},env_vars:variables},production:{env_vars:{},d1_databases:{}}}});
   project=await cf('/pages/projects/'+staging);
  }
+ // Match Wrangler's additive Pages secret PATCH; never resubmit opaque secrets.
+ const supplied={};
+ for(const k of ['GOOGLE_CLIENT_SECRET','GOOGLE_CLIENT_ID','GOOGLE_API_KEY','GOOGLE_APP_ID'])if(process.env[k])supplied[k]=secret(process.env[k]);
+ if(Object.keys(supplied).length){
+  await cf('/pages/projects/'+staging,'PATCH',{deployment_configs:{preview:{env_vars:supplied,wrangler_config_hash:project.deployment_configs.preview.wrangler_config_hash}}});
+  project=await cf('/pages/projects/'+staging);
+ }
  const vars=project.deployment_configs?.preview?.env_vars||{};
+ require(vars.PORTAL_TOKEN_KEY&&vars.PORTAL_DB_ID?.value===db.uuid&&project.deployment_configs.preview.d1_databases.PORTAL_DB.id===db.uuid,'Staging identity or existing key binding changed during credential wiring.');
  require(vars.PRODUCTION_SYNC_ENABLED?.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Staging synchronization must stay disabled.');
  preparedDbId=db.uuid;
  require(preparedDbId&&preparedDbId!==pilotDb&&!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===preparedDbId)),'Migration transport key must remain isolated from live databases.');
@@ -64,8 +74,8 @@ export async function prepare(){
  await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:"INSERT INTO portal_release_keys(id,secret) VALUES('migration-transport',?1) ON CONFLICT(id) DO NOTHING",params:[randomBytes(48).toString('base64url')]});
  const keyRows=await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:"SELECT secret FROM portal_release_keys WHERE id='migration-transport'"});
  const transportKey=keyRows.flatMap(r=>r.results||[])[0]?.secret;require(transportKey,'Protected migration transport key is unavailable.');
- const result={databaseId:db.uuid,stagingProject:staging,releasePublicKey:releaseKey(transportKey).publicKey,googleGrantReadAccess:false,productionCallback:callback,googleClientId:process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value,appDeployed:false,synchronizationActivated:false,liveProjectUnchanged:true,unavailableCredentialNames:unavailable.filter(k=>k!=='PORTAL_TOKEN_KEY'),ownerProductionConsentRequired:true};
- if(!oauthClientId||!oauthClientSecret||!old.PORTAL_TOKEN_KEY?.value){
+ const result={databaseId:db.uuid,stagingProject:staging,releasePublicKey:releaseKey(transportKey).publicKey,googleGrantReadAccess:false,productionCallback:callback,googleClientId:process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value,appDeployed:false,synchronizationActivated:false,liveProjectUnchanged:true,unavailableCredentialNames:unavailable,stagingSecretBindingPresent:!!vars.GOOGLE_CLIENT_SECRET,grantRefreshBlockers:[...(!oauthClientId?['GOOGLE_CLIENT_ID']:[]),...(!oauthClientSecret?['GOOGLE_CLIENT_SECRET']:[]),...(!existingTokenKey?['PORTAL_TOKEN_KEY']:[])],ownerProductionConsentRequired:true};
+ if(!oauthClientId||!oauthClientSecret||!existingTokenKey){
   require(liveFingerprint(await cf('/pages/projects/auxesis-education'))===before,'Live project changed during preparation.');
   console.log('::notice title=Auxesis production preparation::'+JSON.stringify(result));
   if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Independent production database and encrypted transport prepared. Existing secrets remain protected. Owner production Google authorization is required. No app deployed and automation stays disabled.\n');
@@ -74,7 +84,7 @@ export async function prepare(){
  const rows=await cf('/d1/database/'+pilotDb+'/query','POST',{sql:"SELECT account_id,email,refresh_token_ciphertext,scopes FROM google_connections WHERE lower(email)='adsouza35@gmail.com'"});
  const connections=rows.flatMap(r=>r.results||[]);require(connections.length===1,'The existing administrator connection is not unique.');
  const scopes=new Set(connections[0].scopes.split(/\s+/));require(scopes.has('https://www.googleapis.com/auth/calendar.readonly')&&scopes.has('https://www.googleapis.com/auth/drive.file'),'Existing Google grant lacks approved read scopes.');
- const refreshToken=await open(old.PORTAL_TOKEN_KEY.value,connections[0].refresh_token_ciphertext);
+ const refreshToken=await open(existingTokenKey,connections[0].refresh_token_ciphertext);
  const response=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:oauthClientId,client_secret:oauthClientSecret,grant_type:'refresh_token',refresh_token:refreshToken})});
  require(response.ok,'Existing Google grant cannot be refreshed. Owner Google authorization is required.');
  const access=(await response.json()).access_token;require(access,'Google refresh did not return usable access.');

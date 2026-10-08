@@ -33,5 +33,6 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          PORTAL_TOKEN_KEY: ${{ secrets.PORTAL_TOKEN_KEY }}
           GOOGLE_APP_ID: ${{ secrets.GOOGLE_APP_ID }}
         run: node scripts/production-prepare.mjs

@@ -1,5 +1,5 @@
 // Controlled migration into an UNPUBLISHED, separately provisioned database.
-// Public release transport is encrypted. The private key stays in protected D1.
+// Recovery transport stays in private Drive. The private key stays in protected D1.
 import {readFileSync,appendFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
@@ -50,12 +50,13 @@ export async function importProduction(){
   require(process.env.PRODUCTION_RECOVERY_DRIVE_FILE_ID,'Private recovery-package Drive file ID is required.');
   require(process.env.GOOGLE_CLIENT_SECRET,'Protected Google client secret is required to read the private recovery package.');
   const preview=await api('/pages/projects/auxesis-migration-preview'),vars=preview.deployment_configs?.preview?.env_vars||{};
-  require(vars.PORTAL_TOKEN_KEY?.value&&vars.GOOGLE_CLIENT_ID?.value,'Existing Google connection key or client identity is unavailable; owner authorization is required.');
+  const existingTokenKey=process.env.PORTAL_TOKEN_KEY||vars.PORTAL_TOKEN_KEY?.value;
+  require(existingTokenKey&&vars.GOOGLE_CLIENT_ID?.value,'Existing Google connection key or client identity is unavailable; owner authorization is required.');
   // Google tokens are decrypted and used only inside the protected runner.
   const response=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+'/d1/database/'+pilotDb+'/query',{method:'POST',redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({sql:"SELECT refresh_token_ciphertext,scopes FROM google_connections WHERE lower(email)='adsouza35@gmail.com'"})});
   require(response.ok,'Existing Google connection could not be read.');const json=await response.json();require(json.success,'Existing Google connection read was rejected.');
   const connections=json.result.flatMap(r=>r.results||[]);require(connections.length===1,'Existing Google connection is not unique.');
-  const refreshToken=await open(vars.PORTAL_TOKEN_KEY.value,connections[0].refresh_token_ciphertext);
+  const refreshToken=await open(existingTokenKey,connections[0].refresh_token_ciphertext);
   const refreshed=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:vars.GOOGLE_CLIENT_ID.value,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:refreshToken})});
   require(refreshed.ok,'Existing Google authorization cannot be refreshed; owner consent is required.');
   const access=(await refreshed.json()).access_token;require(access,'Google returned no usable access token.');
