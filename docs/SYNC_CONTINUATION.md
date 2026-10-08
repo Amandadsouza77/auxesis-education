@@ -45,7 +45,7 @@ node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test
 git diff --check
 ```
 
-Current result: **52 passed, 0 failed, 0 skipped** (earlier checkpoints had
+Current result: **54 passed, 0 failed, 0 skipped** (earlier checkpoints had
 17 and 23 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
@@ -58,74 +58,80 @@ These include synthetic integration tests; live evidence is distinguished below.
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused under the current Andie-only scope.
 
-## Current checkpoint — read-only mapping/identity/balance review; fresh evidence pending
+## Current checkpoint — remaining 14 students reviewed; no import authorized
 
-The owner authorized a **read-only review for the remaining 14 active students**:
-prepare proposed Calendar mappings with evidence, review identities and opening
-balances, flag ambiguity and never guess. No imports, source business writes,
-automation or production changes are authorized. Reuse the completed Andie pilot
-and full-roster dry run; neither needs to be repeated.
+The owner completed the read-only review control. Fresh source evidence was saved
+at `2026-10-08T04:38:29.908Z` (**00:38 on 8 October in Toronto**), then exported
+losslessly by [protected readiness run 37715995546, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/3).
+The completed Andie restoration proof, earlier full-roster report and business
+record hash remain unchanged. No repeat of either pilot or Google source read
+was necessary to complete the review.
 
-Revision `4eb83d0` extends the existing isolated admin-only roster endpoint with
-`{mode:"review"}` and a **Review mappings and balances (read-only)** control.
-It reuses the existing connected Google account, selected Tracker, Calendar,
-source reader and whole Toronto date window. Only review diagnostics are saved
-under `settings.rosterReview`; the original dry-run report, pilot configuration,
-pilot health and all business records are preserved.
+Results:
 
-The evidence includes exact roster identity/physical row references, arrangement
-fields, lesson dates/statuses, invoice dates/statuses/amounts/quantities and a
-Calendar series/occurrence inventory with titles and actual schedule times.
-Teaching logs, billing notes, payment references, attendees, descriptions,
-credentials and tokens are omitted; title contact details/URLs are redacted.
-All mappings remain unapproved and the report has `readOnly:true`, `canApply:false`
-and no import digest or command. Remaining students stay unimported.
+- **10 students have at least one supported, unapproved Calendar proposal**.
+  These are partial proposals where other series or standalone events lack
+  sufficient evidence; they do not imply full schedule coverage or import readiness.
+- **Mireya Borromeo, Nina Mapa, Ari Figgs and Maya Hassan** have no supported
+  proposal. Mireya's new Thursday series lacks corroborating Wednesday Tracker
+  dates; Nina's group includes rescheduled/TBD evidence; Ari's new series has no
+  matching Tracker dates; shared first-name Maya labels remain ambiguous.
+- Clara's Monday series has a Calendar-active versus Tracker-Cancelled conflict.
+  Maya Keinan's HOLD series remains provisional. Operational invoice reminders
+  and wholly cancelled older series are not proposed as current lessons.
+- All 14 exact roster names are unique; no Student ID column exists. Identity
+  proposals retain the exact existing roster name and physical row reference.
+  No non-pilot identity was created, and production identities were not compared.
+- **All 14 opening balances remain unverified**. There is no explicit source
+  opening/carry-forward/paid-through field. A confirmed cutoff, units and
+  reconciled ledger are needed before any future balance approval. Invoice
+  quantities minus historical attendance are never treated as balances.
+  Paid-versus-received differences may include fees; no payment status or
+  billing rule was changed. The literal Maya Hassan discount is retained and
+  requires business-rule clarification before a future import.
+- The read window covers 1 October–2 December inclusive in Toronto. The full
+  Calendar inventory has 184 groups (145 cancelled-history, 4 operational
+  reminders, 33 lesson candidates, 2 provisional). These include unrelated
+  entries and are not student/lesson counts. Lesson and Billing names have no
+  unmatched source aliases in this read.
 
-Exact full-name matches can support a proposal. Exact first-name-only matches
-require a unique roster first name and at least two distinct corroborating
-Tracker lesson dates for a supported proposal; all others remain insufficient
-or ambiguous. Shared names, multiple same-date occurrences, event-ID mismatches
-and Calendar/Tracker status conflicts block supported proposals. First-name
-evidence is explicitly labelled and never treated as a confirmed alias.
-Opening balances remain unverified: invoice quantities or completed lessons
-must not be converted into an opening balance without a confirmed cutoff,
-units, carry-forward and financial reconciliation. Invoice evidence discrepancies
-are flagged; no rates, payment statuses or billing rules are altered.
+Revision `7d74464` corrects conservative review classification using the retained
+whitelisted evidence. The original saved report remains unchanged; authenticated
+admin GET state reassesses it in memory for display, without Google calls or D1
+writes. Fresh reviews use the same rules. Operational reminders, HOLD/TBD,
+wholly cancelled series, invalid timed intervals and duplicate/status conflicts
+cannot become supported current-lesson proposals. The raw saved initial report
+count of 11 supported students is superseded by the corrected assessment of 10.
+All proposals remain `approved:false`, `readOnly:true`, `canApply:false`.
 
-Local validation: **52 passed**, covering readonly GET-source behavior,
-unchanged business record data/revisions/audits, preservation of earlier reports,
-financial non-inference, ambiguous names/statuses, title privacy, error visibility
-and all existing pilot/Portal safeguards. All three protected read-only workflow
-Python scripts compile; `git diff --check` passes. The existing deployment
-workflow runs these checks; deployment verification follows below.
-The mapping review uses a separate fixed SELECT and lossless gzip/base64 chunks
-to preserve full bounded evidence within GitHub annotation limits.
+Affected tests passed locally (21); the required full 54-test suite and existing
+preview security/isolation checks passed in [deployment run 37729200000](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37729200000).
+The corrected application is deployed only to the existing isolated preview at
+`https://f8d4f470.auxesis-migration-preview.pages.dev`, with the same stable alias.
+No production merge, automation, imports, credentials, security controls or
+source business data were changed. Andie-only write guards remain active.
+[Protected readiness run 37715995546, attempt 4](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/4)
+confirmed the corrected deployed commit, exact equality of the original saved
+mapping report and earlier roster report, and exact equality of Andie's completed
+restoration proof. Non-pilot students/lessons remain zero; pilot lessons remain
+18, with one source apply and two exact-row note saves. Business record hash
+remains `61a1474a72ff65e1ad8c04f7ef2470795d446177d69e3987082d9e39f6114c6b`.
+Full final verification is saved alongside the report at
+`/workspace/auxesis-pilot-evidence/mapping-review-final-verification.json`.
 
-[Deployment run 37715995628](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995628)
-passed all steps, including the targeted test suite, real D1 session lookup,
-cross-origin rejection, stable Portal/callback/OAuth PKCE, and unchanged
-production settings/deployment snapshot. Exact application revision
-`4eb83d0ff3db0df2f8c19f1e586b84234b1327a0` is deployed at
-`https://63aeaba1.auxesis-migration-preview.pages.dev` with the same stable alias.
-Shared-first-name tests use fictional student identities; the affected four
-tests passed after that fixture cleanup. No application rebuild is needed for
-the test-only cleanup or this documentation checkpoint.
-[Read-only run 37715995546, attempt 2](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37715995546/attempts/2)
-confirmed that deployed revision, unchanged earlier roster report and completed
-Andie restoration proof, unchanged business/audit counts, and production binding
-isolation. Its new mapping/balance review state is **not-run**.
-Safe deployment evidence is saved outside the checkout at
-`/workspace/auxesis-pilot-evidence/mapping-review-deployment-proof.json`.
+Detailed per-student evidence, exact Calendar IDs/times, physical lesson and
+invoice row references, proposed mappings and unresolved items are retained
+outside the repository to avoid publishing student business records:
 
-**Next owner-session step after verified deployment:** refresh the isolated
-Students page, click **Review mappings and balances (read-only)** and reply done.
-Do not click Apply, reconnect Google or select another Tracker. The existing
-private browser session is unavailable to the agent; do not extract it, mint a
-new session, bypass security or introduce another credential route.
-Resume by reading only changed saved review evidence through the protected
-readiness workflow. Validate Andie's unchanged restored proof and non-pilot
-isolation, then produce supported per-student proposals with unresolved items.
-Do not claim the real review complete before its fresh source read.
+- `/workspace/auxesis-pilot-evidence/MAPPING_BALANCE_REVIEW.md`
+- `/workspace/auxesis-pilot-evidence/mapping-balance-review.json` (original read)
+- `/workspace/auxesis-pilot-evidence/mapping-review-assessed.json` (corrected review)
+
+The authorized read-only review is complete. No further owner click or Google
+authorization is required for it. Do not import records, approve aliases/balances,
+enable automation or alter production. A later phase must resolve the documented
+ambiguities and obtain verified opening-balance evidence before any separately
+authorized safe rollout.
 
 ## Completed checkpoint — full active-roster dry run read and verified; no import authorized
 
