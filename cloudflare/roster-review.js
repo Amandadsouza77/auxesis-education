@@ -10,6 +10,53 @@ const number=v=>typeof v==='number'&&Number.isFinite(v)?v:known(v)&&/^-?\d+(?:\.
 const title=v=>String(v??'').replace(/https?:\/\/\S+/gi,'[link omitted]').replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi,'[email omitted]').replace(/\+?\d[\d ().-]{7,}\d/g,'[phone omitted]').slice(0,200);
 const problem=(code,detail)=>({code,detail});
 
+// Reassess the whitelisted saved evidence as well as fresh reads. This allows
+// corrections to review rules without another Google read or business write.
+export function assessRosterReview(evidence){
+ const review=structuredClone(evidence),groups=new Map(review.calendarInventory.map(g=>[g.key,g]));
+ for(const g of groups.values()){
+  const labels=g.titleLabels.join(' ');
+  g.reviewRole=/\b(?:invoice|billing|payment|renewal)\b/i.test(labels)?'operational-reminder':/\b(?:hold|tbd|tentative)\b/i.test(labels)?'provisional-schedule':g.events.length&&g.events.every(e=>e.status==='cancelled')?'cancelled-history':'lesson-candidate';
+ }
+ for(const student of review.students){
+  const slots=new Map();
+  for(const c of student.calendarCandidates){
+   const g=groups.get(c.calendarGroup);if(g?.reviewRole!=='lesson-candidate')continue;
+   for(const e of g.events)if(e.status!=='cancelled'&&e.start&&e.end){
+    const key=Date.parse(e.start)+'|'+Date.parse(e.end),owners=slots.get(key)||new Set();owners.add(g.key);slots.set(key,owners);
+   }
+  }
+  const duplicateGroups=new Set([...slots.values()].filter(owners=>owners.size>1).flatMap(owners=>[...owners]));
+  for(const c of student.calendarCandidates){
+   const g=groups.get(c.calendarGroup);c.reviewRole=g?.reviewRole||'unresolved';
+   c.conflicts=c.conflicts.filter(i=>!['duplicate-active-slot','scheduled-cancellation-review','calendar-time-review'].includes(i.code));
+   if(c.reviewRole==='operational-reminder')c.assessment='excluded-operational-reminder';
+   else if(c.reviewRole==='provisional-schedule')c.assessment='provisional-schedule-review';
+   else if(c.reviewRole==='cancelled-history')c.assessment='cancelled-history-review';
+   if(c.reviewRole==='lesson-candidate'&&g.events.some(e=>e.status!=='cancelled'&&(!/^\d{4}-\d{2}-\d{2}T/.test(e.start||'')||!/^\d{4}-\d{2}-\d{2}T/.test(e.end||'')||!Number.isFinite(Date.parse(e.start))||!Number.isFinite(Date.parse(e.end))||Date.parse(e.end)<=Date.parse(e.start)))){
+    c.conflicts.push(problem('calendar-time-review','Current lesson candidate lacks a valid timed Calendar start/end interval.'));
+    c.assessment='insufficient-or-conflicting-evidence';
+   }
+   if(duplicateGroups.has(c.calendarGroup)){
+    c.conflicts.push(problem('duplicate-active-slot','More than one candidate series has an active occurrence at the same actual start/end time.'));
+    c.assessment='insufficient-or-conflicting-evidence';
+   }
+   for(const match of c.trackerDateMatches){
+    const row=student.lessonEvidence.find(l=>l.row===match.trackerRow),e=g?.events.find(e=>e.id===match.eventId);
+    if(norm(row?.status)==='scheduled'&&e?.status==='cancelled'){
+     c.conflicts.push(problem('scheduled-cancellation-review','Tracker still says Scheduled for cancelled Calendar occurrence at row '+row.row+'.'));
+     if(c.assessment==='supported-proposal-awaiting-owner-review')c.assessment='insufficient-or-conflicting-evidence';
+    }
+   }
+   c.approved=false;
+  }
+  student.proposedCalendarGroups=student.calendarCandidates.filter(c=>c.assessment==='supported-proposal-awaiting-owner-review').map(c=>c.calendarGroup);
+ }
+ review.supportedProposalStudents=review.students.filter(s=>s.proposedCalendarGroups.length).length;
+ review.reviewRules='Operational reminders, provisional schedules and wholly cancelled series cannot be proposed as current lessons. Source status and duplicate-slot conflicts remain review items.';
+ return review;
+}
+
 export function rosterReview(all,input,pilot){
  if(input.complete!==true||input.calendarId!==pilot.calendarId||input.spreadsheetId!==pilot.spreadsheetId)throw new Error('Both configured source reads must complete.');
  const active=input.students.filter(r=>norm(r.Status)==='active'),remaining=active.filter(r=>norm(r.Student)!==norm(pilot.studentName));
@@ -74,10 +121,10 @@ export function rosterReview(all,input,pilot){
     explanation:'Invoice lesson quantities and historical attendance are evidence, not an opening balance. No purchases, usage, financial debits or balances were inferred.'}};
  });
  const sourceAliases={lessons:[...new Set(input.lessons.map(r=>String(r.Student??'').trim()).filter(Boolean))].filter(n=>!active.some(r=>norm(r.Student)===norm(n))),billing:[...new Set(input.billing.map(r=>String(r.Student??'').trim()).filter(Boolean))].filter(n=>!active.some(r=>norm(r.Student)===norm(n)))};
- return {scope:'roster-mapping-balance-review',readOnly:true,canApply:false,studentCount:students.length,
+ return assessRosterReview({scope:'roster-mapping-balance-review',readOnly:true,canApply:false,studentCount:students.length,
   readWindow:{timeMin:input.timeMin,timeMax:input.timeMax,timeZone:'America/Toronto'},
   sourceScope:{previewOnly:true,productionIdentityCompared:false,openingBalancesCalculated:false,excludedNonActiveRows:input.students.length-active.length},
   supportedProposalStudents:students.filter(s=>s.proposedCalendarGroups.length).length,verifiedOpeningBalances:0,
   sourceAliases,students,calendarInventory:groupList.map(g=>({key:g.key,seriesId:g.seriesId,titleLabels:[...g.titles],fullNameOwners:g.fullNameOwners,events:g.events})),
-  warning:'All proposed mappings remain unapproved. No records are imported, source values changed, automation enabled or production modified.'};
+  warning:'All proposed mappings remain unapproved. No records are imported, source values changed, automation enabled or production modified.'});
 }

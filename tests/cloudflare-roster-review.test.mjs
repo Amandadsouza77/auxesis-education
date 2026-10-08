@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {rosterReview} from '../cloudflare/roster-review.js';
+import {rosterReview,assessRosterReview} from '../cloudflare/roster-review.js';
 
 const config={studentId:'pilot',studentName:'Andie Ng',calendarId:'cal',spreadsheetId:'sheet',seriesIds:['approved']};
 const base={complete:true,calendarId:'cal',spreadsheetId:'sheet',timeMin:'2026-09-30T04:00:00Z',timeMax:'2026-12-02T05:00:00Z',students:[],lessons:[],billing:[],events:[]};
@@ -40,4 +40,22 @@ test('one first-name date, duplicate identities and multiple same-day occurrence
  assert.equal(report.students[0].calendarCandidates[0].assessment,'insufficient-or-conflicting-evidence');
  assert.ok(report.students[1].identity.identityIssues.some(i=>i.code==='duplicate-tracker-name'));
  const serialized=JSON.stringify(report);for(const value of ['sam@example.invalid','555 555 1212','https://example.invalid/secret'])assert.ok(!serialized.includes(value));
+});
+
+test('invoice reminders, HOLD slots and fully cancelled series stay outside current lesson proposals; scheduled cancellation and duplicate active slots require review',()=>{
+ const input={...base,students:[row('Alex Smith',2)],lessons:[log('Alex Smith',3,'2026-10-08'),{...log('Alex Smith',4,'2026-10-15'),Status:'Scheduled'}],events:[
+  event('invoice','Alex Smith invoice','invoice'),event('hold','Alex Smith HOLD','hold'),
+  {...event('old1','Alex Smith','old'),status:'cancelled'},{...event('old2','Alex Smith','old','2026-10-15'),status:'cancelled'},
+  event('scheduled','Alex Smith','scheduled'),{...event('scheduled2','Alex Smith','scheduled','2026-10-15'),status:'cancelled'},
+  event('dup1','Alex Smith','dup1'),event('dup2','Alex Smith','dup2'),{id:'all-day',summary:'Alex Smith',status:'confirmed',start:{date:'2026-10-08'},end:{date:'2026-10-09'}}
+ ]};
+ const report=rosterReview([],input,config),c=report.students[0].calendarCandidates;
+ assert.deepEqual(report.students[0].proposedCalendarGroups,[]);
+ assert.equal(c.find(x=>x.calendarGroup==='series:invoice').assessment,'excluded-operational-reminder');
+ assert.equal(c.find(x=>x.calendarGroup==='series:hold').assessment,'provisional-schedule-review');
+ assert.equal(c.find(x=>x.calendarGroup==='series:old').assessment,'cancelled-history-review');
+ assert.ok(c.find(x=>x.calendarGroup==='series:scheduled').conflicts.some(i=>i.code==='scheduled-cancellation-review'));
+ assert.ok(c.find(x=>x.calendarGroup==='series:dup1').conflicts.some(i=>i.code==='duplicate-active-slot'));
+ assert.ok(c.find(x=>x.calendarGroup==='event:all-day').conflicts.some(i=>i.code==='calendar-time-review'));
+ const before=structuredClone(report);assert.deepEqual(assessRosterReview(report),report,'reassessment is idempotent');assert.deepEqual(report,before,'saved evidence retained without mutation');
 });

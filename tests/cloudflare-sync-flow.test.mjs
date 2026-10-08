@@ -126,6 +126,24 @@ test('mapping/balance review uses existing GET sources, preserves dry-run/pilot 
  assert.equal((await p.request('roster-preview',{mode:'review',digest:'attempted-apply'})).status,400);
 });
 
+test('saved review classification is corrected on GET state without writes or new Google reads',async t=>{
+ const p=await pilot(t);p.env.MIGRATION_PREVIEW_ONLY='true';
+ p.values.students=[['Student','Rate','Currency','Status'],['Fixture Student','125','CAD','Active'],['Second Student','90','USD','Active']];
+ p.setEvents([{id:'hold-event',summary:'Second Student HOLD',status:'confirmed',start:{dateTime:'2026-10-08T12:00:00-04:00'},end:{dateTime:'2026-10-08T13:00:00-04:00'}}]);
+ const result=await p.request('roster-preview',{mode:'review'});assert.equal(result.status,200);
+ const stored=JSON.parse(p.sqlite.prepare("SELECT data FROM portal_records WHERE id='settings'").get().data);
+ // A legacy saved report can contain a full-name HOLD proposal.
+ stored.rosterReview.summary.students[0].calendarCandidates[0].assessment='supported-proposal-awaiting-owner-review';
+ stored.rosterReview.summary.students[0].proposedCalendarGroups=['event:hold-event'];stored.rosterReview.summary.supportedProposalStudents=1;
+ await putRecord(p.db,'settings',stored);
+ const before=p.sqlite.prepare('SELECT id,data,revision FROM portal_records ORDER BY id').all(),calls=p.calls.length;
+ const state=await p.request('state');assert.equal(state.status,200);
+ assert.equal(state.data.settings.rosterReview.summary.supportedProposalStudents,0);
+ assert.equal(state.data.settings.rosterReview.summary.students[0].calendarCandidates[0].assessment,'provisional-schedule-review');
+ assert.deepEqual(p.sqlite.prepare('SELECT id,data,revision FROM portal_records ORDER BY id').all(),before);
+ assert.equal(p.calls.length,calls);assert.equal(p.sqlite.prepare('SELECT COUNT(*) AS n FROM portal_audit').get().n,0);
+});
+
 test('preview, delayed apply, Portal state and replay reconcile without debiting balances',async t=>{
  const p=await pilot(t),before=await p.records(),preview=await p.request('sync',{mode:'preview'});
  assert.equal(preview.status,200);assert.equal(preview.data.canApply,true);assert.ok(preview.data.changedRecords>0);

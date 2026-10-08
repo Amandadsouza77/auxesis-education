@@ -6,7 +6,7 @@ import {syncPlan} from './sync-plan.js';
 import {pilotSeed} from './pilot-seed.js';
 import {pilotDiagnostics} from './sync-diagnostics.js';
 import {rosterDryRun} from './roster-dry-run.js';
-import {rosterReview} from './roster-review.js';
+import {rosterReview,assessRosterReview} from './roster-review.js';
 
 const SESSION='__Host-auxesis_session',enc=new TextEncoder();
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});
@@ -58,7 +58,13 @@ async function oauthCallback(request,env){
 function snapshot(actor,all,enableRoster=false){
  const state={me:actor,students:[],parents:[],lessons:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],notifications:[],onboardings:[],billingHistory:[],billingArchive:[],importReviews:[],settings:{transfer:'',paypal:''},entitled:true,policyVersion:'2026-10-03',preview:null},settings=all.find(r=>r._kind==='settings'),pilot=settings?.syncConfig?.studentId,student=all.find(r=>r._kind==='students'&&r.id===pilot);
  for(const raw of all){if(raw._kind!=='settings'&&raw.id!==pilot&&raw.studentId!==pilot&&raw.id!==student?.parentId&&raw.parentId!==student?.parentId)continue;const r={...raw};delete r._kind;if(raw._kind==='settings')state.settings={transfer:r.transfer||'',paypal:r.paypal||'',reviewMode:r.reviewMode===true,syncHealth:r.syncHealth,syncPilot:r.syncConfig?{studentName:r.syncConfig.studentName}:null};else if(Array.isArray(state[raw._kind]))state[raw._kind].push(r);}
- if(actor.role==='admin'&&enableRoster){state.settings.rosterDryRunEnabled=true;state.settings.rosterDryRun=settings?.rosterDryRun;state.settings.rosterReview=settings?.rosterReview;}
+ if(actor.role==='admin'&&enableRoster){
+  state.settings.rosterDryRunEnabled=true;state.settings.rosterDryRun=settings?.rosterDryRun;
+  const report=settings?.rosterReview;
+  // Correct classification of retained review evidence for display only;
+  // leave the original saved source report, business records and health intact.
+  state.settings.rosterReview=report?.summary?.calendarInventory&&report.summary.students?{...report,summary:assessRosterReview(report.summary)}:report;
+ }
  return state;
 }
 
