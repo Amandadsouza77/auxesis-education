@@ -60,6 +60,26 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner confirmation — Nina's regular schedule confirmed separately
+
+Amanda confirmed Nina's regular **Monday 05:15 Toronto** schedule, starting
+19 October. This agrees with existing Students row 8. The local proposed review
+now supports the seven existing confirmed regular occurrences individually
+(19/26 October and 2/9/16/23/30 November), using their exact Calendar event IDs
+and actual start/end times. It does not approve the entire mixed-title group:
+the original 5/12 October cancellations remain unchanged and the 5 October
+replacement date is still unknown. No attendance, charge or balance is inferred.
+
+The owner-confirmed review now has proposals for **13 students** (12 with group
+proposals, plus Nina's explicitly scoped regular-occurrence proposals). Mireya's
+upcoming Wednesday Tracker log dates versus Thursday Calendar dates remain
+unresolved, along with other partial coverage/status items and all 14 balances.
+The source-only report/UI remains unchanged at 10 automatically supported
+students; the owner-confirmed addendum is outside git. Assertions verified exact
+Monday/time/event scope, preserved cancellations/pending date, unchanged other
+students and business evidence, and all read-only safeguards. No runtime, live
+configuration, Google data, Portal business records or production changes.
+
 ### Latest owner confirmation — Nina's 5 October replacement is pending
 
 Amanda confirmed the replacement lesson date is still unknown. Tracker Lessons
