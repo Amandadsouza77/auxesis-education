@@ -85,6 +85,14 @@ no lesson on 8 October; the six listed Calendar entries are correct. The prior
 reported Maria discrepancy is resolved. No screenshot or source change is needed.
 This confirms the schedule read, without approving ambiguous full-name Maya
 identities, opening balances or imports.
+A targeted Maria Tracker check confirms Students row 6 says Sat 06:30 and
+Lessons row 76 says 10 October Scheduled. All nine in-window Maria Tracker dates
+match Calendar, with zero conflicts. The earlier dry-run mapping warning came
+from requiring an approved link or full-name title (`Maria` versus
+`Maria Estavillo`); the later review already supports a first-name proposal with
+nine date matches. The assistant's separate "today discrepancy" was a mistaken
+interpretation, not a Tracker or reader error. No schedule/code change is needed.
+Evidence: `/workspace/auxesis-pilot-evidence/maria-schedule-verification.json`.
 The regular Portal remains unchanged; isolated preview still imports only Andie.
 No new code, deployment, business write or repeated tests were needed.
 Detailed evidence is retained outside git at
