@@ -8,10 +8,16 @@ const account='2ac862d7c1f865935d185df59e7bd719',pilotDb='34a9449d-85ee-4f06-a55
 const origin='https://auxesis-education.pages.dev',callback=origin+'/api/portal/auth/callback';
 const require=(ok,message)=>{if(!ok)throw new Error(message);};
 const base='https://api.cloudflare.com/client/v4/accounts/'+account;
+let preparedDbId;
 async function cf(path,method='GET',body){
  const writes=method==='POST'&&path==='/d1/database'&&body?.name===databaseName||method==='POST'&&path==='/pages/projects'&&body?.name===staging;
  const read=method==='POST'&&path==='/d1/database/'+pilotDb+'/query'&&body?.sql==="SELECT account_id,email,refresh_token_ciphertext,scopes FROM google_connections WHERE lower(email)='adsouza35@gmail.com'";
- require(method==='GET'||writes||read,'Preparation rejected a write outside isolated resources.');
+ const keyOperation=method==='POST'&&preparedDbId&&preparedDbId!==pilotDb&&path==='/d1/database/'+preparedDbId+'/query'&&[
+  'CREATE TABLE IF NOT EXISTS portal_release_keys(id TEXT PRIMARY KEY,secret TEXT NOT NULL)',
+  "SELECT secret FROM portal_release_keys WHERE id='migration-transport'",
+  "INSERT INTO portal_release_keys(id,secret) VALUES('migration-transport',?1) ON CONFLICT(id) DO NOTHING"
+ ].includes(body?.sql);
+ require(method==='GET'||writes||read||keyOperation,'Preparation rejected a write outside isolated resources.');
  const response=await fetch(base+path,{method,redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
  if(response.status===404&&method==='GET')return null;
  require(response.ok,'Cloudflare preparation failed: HTTP '+response.status+'. Provider response omitted.');
@@ -33,7 +39,7 @@ export async function prepare(){
  require(preview?.d1_databases?.PORTAL_DB?.id===pilotDb,'Pilot identity changed.');
  const old=preview.env_vars||{};
  const requiredKeys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_API_KEY','GOOGLE_APP_ID','PORTAL_TOKEN_KEY'];
- for(const k of requiredKeys)require(old[k]?.value||process.env[k],'Google configuration is opaque or missing: '+k+'.');
+ const unavailable=requiredKeys.filter(k=>!old[k]?.value&&!process.env[k]);
  let project=await cf('/pages/projects/'+staging),db;
  if(project){
   require(!project.source&&!project.canonical_deployment,'Staging unexpectedly has an active app.');
@@ -44,13 +50,25 @@ export async function prepare(){
   const id=db.uuid;require(id&&id!==pilotDb,'Production database must differ from the pilot.');
   require(!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===id)),'Production database is already live; preparation stopped.');
   const variables={PORTAL_RUNTIME_MODE:plain('production'),PRODUCTION_ORIGIN:plain(origin),PORTAL_DB_ID:plain(id),ADMIN_EMAIL:plain('adsouza35@gmail.com'),GOOGLE_SPREADSHEET_ID:plain('1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ'),GOOGLE_CALENDAR_ID:plain('classroom107924035776692772286@group.calendar.google.com'),PRODUCTION_SYNC_ENABLED:plain('false'),PRODUCTION_AUTOMATION_ENABLED:plain('false'),PORTAL_TOKEN_KEY:secret(randomBytes(48).toString('base64url'))};
-  for(const k of requiredKeys.filter(k=>k!=='PORTAL_TOKEN_KEY'))variables[k]=secret(process.env[k]||old[k].value);
+  for(const k of requiredKeys.filter(k=>k!=='PORTAL_TOKEN_KEY'))if(process.env[k]||old[k]?.value)variables[k]=secret(process.env[k]||old[k].value);
   project=await cf('/pages/projects','POST',{name:staging,production_branch:'main',deployment_configs:{preview:{compatibility_date:'2026-10-08',d1_databases:{PORTAL_DB:{id}},env_vars:variables},production:{env_vars:{},d1_databases:{}}}});
   project=await cf('/pages/projects/'+staging);
  }
- const vars=project.deployment_configs?.preview?.env_vars||{},newKey=vars.PORTAL_TOKEN_KEY?.value;
- require(newKey&&newKey.length>=40,'Production encryption key is opaque; do not replace it.');
+ const vars=project.deployment_configs?.preview?.env_vars||{};
  require(vars.PRODUCTION_SYNC_ENABLED?.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Staging synchronization must stay disabled.');
+ preparedDbId=db.uuid;
+ require(preparedDbId&&preparedDbId!==pilotDb&&!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===preparedDbId)),'Migration transport key must remain isolated from live databases.');
+ await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:'CREATE TABLE IF NOT EXISTS portal_release_keys(id TEXT PRIMARY KEY,secret TEXT NOT NULL)'});
+ await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:"INSERT INTO portal_release_keys(id,secret) VALUES('migration-transport',?1) ON CONFLICT(id) DO NOTHING",params:[randomBytes(48).toString('base64url')]});
+ const keyRows=await cf('/d1/database/'+preparedDbId+'/query','POST',{sql:"SELECT secret FROM portal_release_keys WHERE id='migration-transport'"});
+ const transportKey=keyRows.flatMap(r=>r.results||[])[0]?.secret;require(transportKey,'Protected migration transport key is unavailable.');
+ const result={databaseId:db.uuid,stagingProject:staging,releasePublicKey:releaseKey(transportKey).publicKey,googleGrantReadAccess:false,productionCallback:callback,googleClientId:process.env.GOOGLE_CLIENT_ID||old.GOOGLE_CLIENT_ID?.value,appDeployed:false,synchronizationActivated:false,liveProjectUnchanged:true,unavailableCredentialNames:unavailable.filter(k=>k!=='PORTAL_TOKEN_KEY'),ownerProductionConsentRequired:true};
+ if(unavailable.length){
+  require(liveFingerprint(await cf('/pages/projects/auxesis-education'))===before,'Live project changed during preparation.');
+  console.log('::notice title=Auxesis production preparation::'+JSON.stringify(result));
+  if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Independent production database and encrypted transport prepared. Existing secrets remain protected. Owner production Google authorization is required. No app deployed and automation stays disabled.\n');
+  return result;
+ }
  const rows=await cf('/d1/database/'+pilotDb+'/query','POST',{sql:"SELECT account_id,email,refresh_token_ciphertext,scopes FROM google_connections WHERE lower(email)='adsouza35@gmail.com'"});
  const connections=rows.flatMap(r=>r.results||[]);require(connections.length===1,'The existing administrator connection is not unique.');
  const scopes=new Set(connections[0].scopes.split(/\s+/));require(scopes.has('https://www.googleapis.com/auth/calendar.readonly')&&scopes.has('https://www.googleapis.com/auth/drive.file'),'Existing Google grant lacks approved read scopes.');
@@ -61,7 +79,7 @@ export async function prepare(){
  const sourceUrls=[['tracker','https://sheets.googleapis.com/v4/spreadsheets/'+vars.GOOGLE_SPREADSHEET_ID.value+'/values/'+encodeURIComponent('Students!A1:AD1000')],['calendar','https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(vars.GOOGLE_CALENDAR_ID.value)+'/events?maxResults=1&timeMin=2026-10-01T00%3A00%3A00-04%3A00&singleEvents=true']];
  for(const [kind,url] of sourceUrls){const r=await fetch(url,{redirect:'error',headers:{Authorization:'Bearer '+access}});require(r.ok,'Existing grant cannot read the production '+kind+'. Owner source access is required.');const data=await r.json();require(kind==='tracker'?Array.isArray(data.values):Array.isArray(data.items),'Production '+kind+' source returned an incomplete read.');}
  require(liveFingerprint(await cf('/pages/projects/auxesis-education'))===before,'Live project changed during preparation.');
- const result={databaseId:db.uuid,stagingProject:staging,releasePublicKey:releaseKey(newKey).publicKey,googleGrantReadAccess:true,productionCallback:callback,googleClientId:vars.GOOGLE_CLIENT_ID.value,appDeployed:false,synchronizationActivated:false,liveProjectUnchanged:true};
+ result.googleGrantReadAccess=true;
  console.log('::notice title=Auxesis production preparation::'+JSON.stringify(result));
  if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,'Production database prepared separately. Existing Google grant reads Tracker and Calendar. No application deployed; automation and Apply remain disabled.\n');
  return result;
