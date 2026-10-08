@@ -104,6 +104,28 @@ test('failed roster read clears its stale report while preserving completed pilo
  assert.deepEqual(state.settings.syncHealth,health);assert.deepEqual(await p.records(),before);
 });
 
+test('mapping/balance review uses existing GET sources, preserves dry-run/pilot health and cannot create identities or infer balances',async t=>{
+ const p=await pilot(t);p.env.MIGRATION_PREVIEW_ONLY='true';
+ p.values.students=[['Student','Rate','Currency','Status','Package'],['Fixture Student','125','CAD','Active','Monthly'],['Second Student','90','USD','Active','Block']];
+ // The synthetic configured pilot is excluded by its configured name.
+ p.values.lessons.push(['Second Student','2026-10-08','Completed','PRIVATE SECOND NOTES','PRIVATE SECOND HOMEWORK']);
+ p.values.billing=[['Student','Invoice Date','Status','Amount Billed','Amount Received','# Lessons','Paid On'],['Second Student','2026-10-01','Paid','900','900','10','2026-10-01']];
+ p.setEvents([...p.getEvents(),{id:'second-event',summary:'Second Student Biology',status:'confirmed',start:{dateTime:'2026-10-08T12:00:00-04:00'},end:{dateTime:'2026-10-08T13:00:00-04:00'}}]);
+ await p.request('sync',{mode:'preview'});await p.request('roster-preview',{mode:'preview'});
+ const before=await p.records(),settingsBefore=JSON.parse(p.sqlite.prepare("SELECT data FROM portal_records WHERE id='settings'").get().data),businessRows=p.sqlite.prepare("SELECT id,data,revision FROM portal_records WHERE id!='settings' ORDER BY id").all();
+ const review=await p.request('roster-preview',{mode:'review'});assert.equal(review.status,200);
+ const s=review.data.summary;assert.equal(s.studentCount,1);assert.equal(s.readOnly,true);assert.equal(s.canApply,false);assert.ok(!('digest' in s));
+ assert.equal(s.students[0].openingBalance.value,null);assert.equal(s.students[0].openingBalance.verified,false);assert.equal(s.students[0].billingEvidence[0].lessonCount,'10');
+ assert.deepEqual(p.sqlite.prepare("SELECT id,data,revision FROM portal_records WHERE id!='settings' ORDER BY id").all(),businessRows);assert.deepEqual(await p.records(),before);
+ assert.equal(p.sqlite.prepare('SELECT COUNT(*) AS n FROM portal_audit').get().n,0);
+ const state=(await p.request('state')).data;assert.deepEqual(state.settings.syncHealth,settingsBefore.syncHealth);assert.deepEqual(state.settings.rosterDryRun,settingsBefore.rosterDryRun);assert.deepEqual(state.settings.rosterReview.summary,s);
+ assert.ok(p.calls.filter(c=>c.url.includes('googleapis.com')&&!c.url.includes('oauth2.')).every(c=>c.method==='GET'));
+ for(const value of ['PRIVATE SECOND NOTES','PRIVATE SECOND HOMEWORK','fixture-refresh','fixture-access','fixture-secret'])assert.ok(!JSON.stringify(review.data).includes(value));
+ p.values.students=[];assert.equal((await p.request('roster-preview',{mode:'review'})).status,503);
+ const failed=(await p.request('state')).data;assert.equal(failed.settings.rosterReview.state,'error');assert.equal(failed.settings.rosterReview.summary.students,undefined);assert.deepEqual(failed.settings.rosterDryRun,settingsBefore.rosterDryRun);assert.deepEqual(await p.records(),before);
+ assert.equal((await p.request('roster-preview',{mode:'review',digest:'attempted-apply'})).status,400);
+});
+
 test('preview, delayed apply, Portal state and replay reconcile without debiting balances',async t=>{
  const p=await pilot(t),before=await p.records(),preview=await p.request('sync',{mode:'preview'});
  assert.equal(preview.status,200);assert.equal(preview.data.canApply,true);assert.ok(preview.data.changedRecords>0);

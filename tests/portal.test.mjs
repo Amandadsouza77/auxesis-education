@@ -15,6 +15,9 @@ test('roster controls are absent without preview capability and escape saved rev
  ctx.moveTest('/portal/students/');
  assert.ok(root.innerHTML.includes('Preview active roster (read-only)'));assert.ok(root.innerHTML.includes('&lt;script&gt;private&lt;/script&gt;'));assert.ok(root.innerHTML.includes('Mapping &lt;needs&gt; review'));assert.ok(!root.innerHTML.includes('data-action="source-sync-apply"'));
  assert.ok(!root.innerHTML.includes('<script>private</script>'));
+ assert.ok(root.innerHTML.includes('Review mappings and balances (read-only)'));
+ ctx.fixture.settings.rosterReview={state:'review',summary:{studentCount:1,supportedProposalStudents:1,verifiedOpeningBalances:0,students:[{name:'<review name>',calendarCandidates:[{}],proposedCalendarGroups:['series:fixture']}]}};
+ ctx.moveTest('/portal/students/');assert.ok(root.innerHTML.includes('&lt;review name&gt;'));assert.ok(root.innerHTML.includes('0 opening balances verified.'));assert.ok(!root.innerHTML.includes('data-action="source-sync-apply"'));
 });
 test('resource forms start blank and save specified Other subjects and curricula',async()=>{
   const {ctx,root}=screen('admin',false);ctx.moveTest('/resources/manage/');

@@ -6,6 +6,7 @@ import {syncPlan} from './sync-plan.js';
 import {pilotSeed} from './pilot-seed.js';
 import {pilotDiagnostics} from './sync-diagnostics.js';
 import {rosterDryRun} from './roster-dry-run.js';
+import {rosterReview} from './roster-review.js';
 
 const SESSION='__Host-auxesis_session',enc=new TextEncoder();
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});
@@ -57,22 +58,23 @@ async function oauthCallback(request,env){
 function snapshot(actor,all,enableRoster=false){
  const state={me:actor,students:[],parents:[],lessons:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],notifications:[],onboardings:[],billingHistory:[],billingArchive:[],importReviews:[],settings:{transfer:'',paypal:''},entitled:true,policyVersion:'2026-10-03',preview:null},settings=all.find(r=>r._kind==='settings'),pilot=settings?.syncConfig?.studentId,student=all.find(r=>r._kind==='students'&&r.id===pilot);
  for(const raw of all){if(raw._kind!=='settings'&&raw.id!==pilot&&raw.studentId!==pilot&&raw.id!==student?.parentId&&raw.parentId!==student?.parentId)continue;const r={...raw};delete r._kind;if(raw._kind==='settings')state.settings={transfer:r.transfer||'',paypal:r.paypal||'',reviewMode:r.reviewMode===true,syncHealth:r.syncHealth,syncPilot:r.syncConfig?{studentName:r.syncConfig.studentName}:null};else if(Array.isArray(state[raw._kind]))state[raw._kind].push(r);}
- if(actor.role==='admin'&&enableRoster){state.settings.rosterDryRunEnabled=true;state.settings.rosterDryRun=settings?.rosterDryRun;}
+ if(actor.role==='admin'&&enableRoster){state.settings.rosterDryRunEnabled=true;state.settings.rosterDryRun=settings?.rosterDryRun;state.settings.rosterReview=settings?.rosterReview;}
  return state;
 }
 
 async function runRosterPreview(request,env,actor,body){
  if(actor.role!=='admin'||!rosterEnabled(request,env))fail('Roster dry run is available only to the isolated preview administrator.',403);
- if(body.mode!=='preview'||Object.keys(body).some(k=>k!=='mode'))fail('The roster preview is read-only; imports and configuration changes are disabled.',400);
+ if(!['preview','review'].includes(body.mode)||Object.keys(body).some(k=>k!=='mode'))fail('The roster preview is read-only; imports and configuration changes are disabled.',400);
  const db=dbOf(env),all=await listRecords(db),settings=all.find(r=>r.id==='settings'),config=settings?.syncConfig;
  if(config?.mode!=='pilot')fail('The existing pilot configuration must remain in place.');
- const input=await readSyncSources(config,googleGet(await accessToken(env,actor))),summary=rosterDryRun(all,input,config);
+ const input=await readSyncSources(config,googleGet(await accessToken(env,actor))),summary=body.mode==='review'?rosterReview(all,input,config):rosterDryRun(all,input,config);
  summary.businessRecordsHash=await hex(JSON.stringify(all.filter(r=>r._kind!=='settings').sort((a,b)=>a.id.localeCompare(b.id))));
  // Save operational diagnostics only. No reconciliation changes are applied;
  // the existing one-student configuration, health and business records stay.
  const row=await db.prepare("SELECT data FROM portal_records WHERE id='settings'").first(),latest=JSON.parse(row.data);
- latest.rosterDryRun={state:'review',lastReadAt:new Date().toISOString(),summary,error:null};
- await putRecord(db,'settings',latest);return {ok:true,...latest.rosterDryRun};
+ const field=body.mode==='review'?'rosterReview':'rosterDryRun';
+ latest[field]={state:'review',lastReadAt:new Date().toISOString(),summary,error:null};
+ await putRecord(db,'settings',latest);return {ok:true,...latest[field]};
 }
 
 async function runSync(env,actor,body){
@@ -112,7 +114,7 @@ async function runCommand(env,actor,body){
 
 export async function handlePortalRequest(context){
  const {request}=context,env=context.env||{},url=new URL(request.url),route=(Array.isArray(context.params.path)?context.params.path:[]).join('/');
- let actor;
+ let actor,rosterField='rosterDryRun';
  try{
   if(url.hostname==='auxesis-education.pages.dev')return json({error:'The Cloudflare migration is preview-only.'},503);
   if(!['GET','POST'].includes(request.method))return json({error:'Method not allowed.'},405);
@@ -121,7 +123,7 @@ export async function handlePortalRequest(context){
   if(route==='auth/callback'&&request.method==='GET')return await oauthCallback(request,env);
   actor=await account(request,env);if(route==='state'&&request.method==='GET')return json(snapshot(actor,await listRecords(dbOf(env)),rosterEnabled(request,env)));
   let body={};if(request.method==='POST'){const raw=await request.text();if(raw.length>150000)return json({error:'This request is too large.'},413);body=raw?JSON.parse(raw):{};}
-  if(route==='roster-preview'){if(request.method!=='POST')fail('Use the read-only roster preview control.',405);return json(await runRosterPreview(request,env,actor,body));}
+  if(route==='roster-preview'){rosterField=body.mode==='review'?'rosterReview':'rosterDryRun';if(request.method!=='POST')fail('Use the read-only roster preview control.',405);return json(await runRosterPreview(request,env,actor,body));}
   if(route==='sync')return json(await runSync(env,actor,body));if(route==='command')return json(await runCommand(env,actor,body));if(route==='google/start')return json({url:await startOAuth(request,env,true)});if(route==='google/picker')return json({accessToken:await accessToken(env,actor),apiKey:required(env,'GOOGLE_API_KEY'),appId:required(env,'GOOGLE_APP_ID')});
   if(route==='logout'){await dbOf(env).prepare('DELETE FROM portal_sessions WHERE token_hash=?1').bind(await sha256(cookies(request)[SESSION]||'')).run();return json({ok:true},200,{'Set-Cookie':cookie('',0)});}if(['upload','file','realtime'].includes(route))return json({error:'This feature is not enabled in the one-student migration pilot.'},409);return json({error:'This page is not available.'},404);
  }catch(error){
@@ -136,7 +138,7 @@ export async function handlePortalRequest(context){
   }catch{console.error(JSON.stringify({event:'sync_health_write_failed'}));}
   if(route==='roster-preview'&&actor?.role==='admin'&&rosterEnabled(request,env)&&status>=500)try{
    const db=dbOf(env),row=await db.prepare("SELECT data FROM portal_records WHERE id='settings'").first();
-   if(row){const settings=JSON.parse(row.data);settings.rosterDryRun={state:'error',lastAttemptedAt:new Date().toISOString(),error:message,summary:{readOnly:true,canApply:false}};await putRecord(db,'settings',settings);}
+   if(row){const settings=JSON.parse(row.data);settings[rosterField]={state:'error',lastAttemptedAt:new Date().toISOString(),error:message,summary:{readOnly:true,canApply:false}};await putRecord(db,'settings',settings);}
   }catch{console.error(JSON.stringify({event:'roster_health_write_failed'}));}
   return json({error:message},status);
  }
