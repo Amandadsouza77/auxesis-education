@@ -41,11 +41,11 @@ credentials or business rules were changed. Legacy Floot-helper edits started on
 Run from `/workspace/auxesis-education`:
 
 ```sh
-node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs
+node --test tests/cloudflare-first-sync.test.mjs tests/cloudflare-sync-flow.test.mjs tests/cloudflare-pilot-runtime.test.mjs tests/cloudflare-roster-dry-run.test.mjs tests/portal.test.mjs tests/cloudflare-ui-migration.test.mjs
 git diff --check
 ```
 
-Current result: **27 passed, 0 failed, 0 skipped** (earlier checkpoints had
+Current result: **47 passed, 0 failed, 0 skipped** (earlier checkpoints had
 17 and 23 passing tests). The new flow tests execute the actual
 Pages handler and SQL against an in-memory SQLite database, with synthetic
 students and Google HTTP fixtures. They cover delayed preview/apply, zero-change
@@ -58,7 +58,66 @@ These include synthetic integration tests; live evidence is distinguished below.
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused under the current Andie-only scope.
 
-## Current checkpoint — controlled Andie round trip proven end to end
+## Current checkpoint — authorized full active-roster dry run; authenticated read pending
+
+The owner authorized **full-roster dry run only, production unchanged** after
+the completed Andie round trip. Revision `a9007c4` adds an admin-only
+`POST /api/portal/roster-preview` accepting only `{mode:"preview"}` on the
+existing isolated migration preview, additionally guarded by its existing
+`MIGRATION_PREVIEW_ONLY=true` flag. No settings/credentials/security controls
+were replaced. Calendar remains read-only; the existing source reader and
+reconciliation planner are reused.
+
+Active Tracker rows are assessed in memory. Existing Andie mappings are reused;
+explicit Tracker event IDs and existing preview lesson links are distinguished
+from unapproved exact-full-name Calendar title/series candidates. Duplicates,
+shared events, missing mappings, attendance/cancellation conflicts, invalid
+rates and conflicting Tracker event IDs are reported. Missing preview identities
+and opening balances remain review items; unknown status is never assumed Active.
+No balances or new business identities are fabricated or imported.
+
+Only operational diagnostics under `settings.rosterDryRun` are saved. No
+non-pilot student/lesson/business record, billing rule or source cell is written.
+The existing pilot config and health are preserved. The report has `readOnly:true`,
+`canApply:false` and no Apply digest; neither its endpoint nor its UI offers
+an import path. Existing Andie-only mutation guards remain in place.
+Source window remains the verified whole Toronto days -7/+56; the report covers
+every explicitly Active roster row inside that lesson window. Production Portal
+records are not read by this isolated runtime; non-imported students are clearly
+marked as projections, not reconciliation with production data.
+
+Local validation passed **47 tests** across runtime/SQLite flows, planner,
+read-only/same-origin/admin/preview guards, no non-pilot imports, unchanged
+business revisions, GET-only Google business reads, failure visibility and
+Portal rendering/privacy. Both protected read-only workflow Python scripts
+compile; `git diff --check` passes. The existing deployment workflow now runs
+these targeted checks and packages the existing site for this actual change.
+[Deployment run 37709597189](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37709597189)
+completed successfully; verification details are recorded below.
+
+Revision `a9007c4c71d7dd7c10772ffd90c15bc06dbb0bb4` is deployed at
+`https://081acc2d.auxesis-migration-preview.pages.dev`; the stable alias is
+unchanged. All deployment steps passed, including targeted tests, actual D1
+session rejection, cross-origin rejection, Portal/callback/OAuth PKCE checks,
+and the unchanged live-project settings/deployment snapshot.
+[Read-only run 37709597195](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37709597195)
+confirmed the exact deployed revision, production binding isolation, unchanged
+completed Andie proof (two restored note saves, one import, 18 lessons, zero
+non-pilot students/lessons), and saved roster state **not-run**.
+Evidence is retained at `/workspace/auxesis-pilot-evidence/roster-deployment-proof.json`.
+The real roster dry run must not be claimed complete before the owner click.
+
+**Next authenticated owner action:** refresh the isolated Students page and click
+**Preview active roster (read-only)**, then reply done. This uses the already
+connected Google account and selected existing Tracker; do not reconnect,
+reselect, change Google settings or click Apply. The private browser session is
+not available to the agent; never retrieve it, fabricate a session or bypass
+security. No new owner authorization beyond this read is needed.
+Then read the saved roster report from the existing protected readiness workflow's
+separate fixed SELECT step and validate unchanged restored Andie/business counts.
+Do not expand imports, writes, unattended updates or production scope.
+
+## Completed checkpoint — controlled Andie round trip proven end to end
 
 The owner removed only the temporary marker, saved the lesson and ran Preview.
 [Read-only run 37704086813, attempt 4](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086813/attempts/4)
