@@ -60,6 +60,21 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner confirmation — Nina's 5 October replacement is pending
+
+Amanda confirmed the replacement lesson date is still unknown. Tracker Lessons
+row 67 says Rescheduled; the original 5 October Calendar occurrence is cancelled.
+These are compatible facts, not a schedule discrepancy. The local review records
+replacement date/start/end as null. No replacement event, lesson status, charge
+or financial treatment is inferred or changed. The pending makeup is explained;
+the regular-series proposal remains separate because the saved source inventory
+aggregates `Nina` and `Nina — rescheduled (TBD)` labels for the whole group.
+
+The local proposed-review count remains 12; all 14 balances remain unverified.
+The confirmation is retained in the existing external owner-confirmation JSON
+and Markdown addendum. No Google read, runtime change, deployment, live mapping,
+business-data write or production change was needed.
+
 ### Latest owner confirmation — Ari Figgs future series resolved in proposals
 
 Amanda confirmed the `Ari` Monday/Wednesday 16:00 Toronto series belongs to
