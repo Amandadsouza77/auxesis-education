@@ -249,6 +249,9 @@ jobs:
         run: |
           python3 - <<'PY'
           import base64, gzip, json, os, urllib.error, urllib.request
+          def stop(message):
+              print('::error title=Auxesis mapping review export::' + message)
+              raise SystemExit(1)
           class NoRedirect(urllib.request.HTTPRedirectHandler):
               def redirect_request(self, req, fp, code, msg, headers, newurl):
                   return None
@@ -264,20 +267,25 @@ jobs:
               if not data.get('success'):
                   raise ValueError()
           except (urllib.error.URLError, TimeoutError, ValueError):
-              raise SystemExit('Saved mapping review could not be read; no writes attempted.')
+              stop('Saved mapping review could not be read; no writes attempted.')
           rows = [row for item in data['result'] for row in item.get('results', [])]
           report = json.loads(rows[0]['report']) if rows and rows[0].get('report') else {'state': 'not-run'}
           if report.get('summary') and (report['summary'].get('readOnly') is not True or report['summary'].get('canApply') is not False):
-              raise SystemExit('Saved mapping review violates read-only scope.')
+              stop('Saved mapping review violates read-only scope.')
           # Lossless compression keeps full bounded evidence below GitHub's
           # annotation limits. The report already omits notes/contacts/secrets.
           payload = json.dumps(report, separators=(',', ':')).encode()
           if len(payload) > 1000000:
-              raise SystemExit('Saved mapping review exceeds the bounded read.')
+              stop('Saved mapping review exceeds the bounded read.')
           compact = base64.b64encode(gzip.compress(payload, mtime=0)).decode()
-          chunks = [compact[i:i+2800] for i in range(0, len(compact), 2800)]
+          # Retain the 1 MB input bound and at most eight payload notices.
+          # Slightly larger chunks accommodate recurring-event corrections.
+          chunks = [compact[i:i+3200] for i in range(0, len(compact), 3200)]
+          print('::notice title=Auxesis mapping review export size::' + json.dumps({
+              'lastReadAt': report.get('lastReadAt'), 'payloadBytes': len(payload),
+              'compressedChars': len(compact), 'chunks': len(chunks)}, separators=(',', ':')))
           if len(chunks) > 8:
-              raise SystemExit('Compressed mapping review exceeds the bounded export; no writes attempted.')
+              stop('Compressed mapping review exceeds the bounded export; no writes attempted.')
           for i, chunk in enumerate(chunks, 1):
               print('::notice title=Auxesis mapping review gzip ' + str(i) + '/' + str(len(chunks)) + '::' + chunk)
           PY
