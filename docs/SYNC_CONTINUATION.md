@@ -60,6 +60,31 @@ and unattended automation remain paused under the current Andie-only scope.
 
 ## Current checkpoint — remaining 14 students reviewed; no import authorized
 
+### Latest owner confirmation — Maya Hassan identity resolved in proposals
+
+Amanda explicitly confirmed **`Maya gr 11 chem` belongs to Maya Hassan**.
+The exact-title confirmation is attached to three retained Calendar groups in
+the local proposed review, using existing Students row 14. Those groups are
+excluded from Maya Keinan's proposed mapping; her full-name lessons and HOLD
+review remain separate. No student IDs or records were created.
+
+The owner-confirmed proposed review now has **11 students with at least one
+supported proposal**; Mireya, Nina and Ari still require further evidence or
+reconciliation. Other partial coverage/status issues and all 14 unverified
+opening balances remain. The saved Google-only report still records 10; it was
+not rewritten, and the Portal review UI has not been changed to consume owner
+confirmations. Every execution approval remains false, with readOnly true and
+canApply false. This is evidence for a future safe review, not a live mapping
+or import/configuration change.
+
+Owner evidence and assessed proposals are retained outside git:
+`/workspace/auxesis-pilot-evidence/OWNER_MAPPING_CONFIRMATIONS.md` and
+`/workspace/auxesis-pilot-evidence/owner-confirmed-mapping-proposals.json`.
+Assertions verified exact-title scope, exclusion from Maya Keinan, unchanged
+other students' proposals/business evidence, all unverified balances and the
+unchanged business-record hash. No runtime changes, deployments, Google reads,
+business-data writes or repeated tests were needed.
+
 ### Latest owner refresh — Maria/today discrepancy checked
 
 The owner clicked the read-only review again. Its fresh Google source read was
