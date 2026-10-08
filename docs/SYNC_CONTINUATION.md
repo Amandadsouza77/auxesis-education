@@ -58,7 +58,31 @@ These include synthetic integration tests; live evidence is distinguished below.
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused until the real pilot passes.
 
-## Current checkpoint — Andie import and replay passed; live note write pending
+## Current checkpoint — live Andie note write verified; exact restoration pending
+
+The owner saved the requested marker and ran Preview. [Read-only run
+37704086813, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37704086813)
+verified the actual Google-authorized Portal-to-Tracker write. The fresh source
+read at `2026-10-08T00:01:59.311Z` (**20:01 on 7 October in Toronto**) reports
+zero changes and zero conflicts across 18 Calendar occurrences. Tracker row 56's
+fresh covered-note hash equals the Portal hash; its original prefix hash equals
+the baseline. Outcome and Next Steps hashes are unchanged. Exactly one note-save
+audit is present; lesson identity/status/times, every Calendar occurrence,
+Tracker links, rates/package/balances and non-pilot isolation remain unchanged.
+Hash-only intermediate evidence and successful assertions are saved at
+`/workspace/auxesis-pilot-evidence/marker-write-proof.json`.
+
+**Next owner clicks:** reopen the linked 30 September lesson below, remove only
+the added `AUXESIS_PILOT_CHECK_20261007` line from What We Covered, leave the
+original text and other fields unchanged, click **Save lesson notes**, then
+**Preview pilot sync** on Students. Do not repeat Apply or the marker insertion.
+Read the changed diagnostics and require exact baseline hashes in both the
+Portal and fresh Tracker source, marker absent, two successful note saves,
+zero-change replay and unchanged Calendar/business/isolation. Full round-trip
+proof remains pending that restoration check. No application change or redeploy
+is required for this owner-session step.
+
+### Completed import and write-test preparation
 
 The owner's authenticated apply succeeded at `2026-10-07T23:23:51.667Z`
 (19:23 Toronto), followed by a fresh preview at `2026-10-07T23:24:12.331Z`.
