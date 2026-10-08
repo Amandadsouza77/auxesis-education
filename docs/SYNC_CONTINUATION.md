@@ -58,7 +58,56 @@ These include synthetic integration tests; live evidence is distinguished below.
 unchanged build/deployment checks were not repeated. Full-roster synchronization
 and unattended automation remain paused under the current Andie-only scope.
 
-## Current checkpoint — authorized full active-roster dry run; authenticated read pending
+## Current checkpoint — full active-roster dry run read and verified; no import authorized
+
+The owner clicked **Preview active roster (read-only)**. [Protected read-only
+run 37709597195, attempt 3](https://github.com/Amandadsouza77/auxesis-education/actions/runs/37709597195/attempts/3)
+completed successfully and exported the saved report without truncation. Its
+fresh Google-source read was `2026-10-08T01:45:24.060Z` (**21:45 on 7 October
+in Toronto**). Scope remains **dry run only, production unchanged**.
+
+Verified results:
+
+- **15 explicitly Active students** were assessed, against **340 Calendar
+  occurrences** in the existing 30 September–1 December Toronto lesson window.
+- Andie reuses 18 approved occurrence links and has **zero proposed changes or
+  individual source conflicts**. Rate/package/balances, original restored note
+  hashes, one source apply and two note-save audits remain identical to baseline.
+- Two other students have **23 unapproved title/series candidates** in total;
+  12 have no approved link or exact-full-name candidate in this report. Missing
+  conservative mappings do not prove that their lessons are absent in Calendar.
+- All 14 non-pilot students lack imported records in the isolated preview, as
+  intended. Their identity/opening balances require review before any future
+  import; these projections do not compare or replace production Portal records.
+- There is no Student ID column in the current Tracker roster and no Calendar
+  Event ID column in its Lessons tab. Existing approved series mappings remain
+  Andie-only. No source columns or source values were added or changed.
+- The Students read has 22 nonempty rows: 15 Active plus seven unrecorded or
+  non-active-status rows, including time-zone/DST annotations. A general status
+  warning currently makes the UI count all 15 as needing review; only **14 have
+  individual review issues**. Andie's clean result has not regressed.
+- **299 Calendar occurrences** are unassigned by this conservative report;
+  these may include other lessons or unrelated entries and are not automatically
+  synchronization errors. No event titles/aliases were fabricated or approved.
+- The report is `readOnly:true`, `canApply:false`, with no Apply digest. D1
+  still has **zero non-pilot students or lessons**, and completed Andie proof
+  exactly matches the restoration baseline. Production remains isolated and
+  unchanged. No business writes, merges, rebuilds or repeated tests were needed.
+
+Full safe diagnostics, verification assertions and the per-student review table
+are preserved outside the checkout in
+`/workspace/auxesis-pilot-evidence/latest-roster-report.json` and
+`/workspace/auxesis-pilot-evidence/ROSTER_DRY_RUN.md`. Real student fixtures,
+contacts, teaching text and credentials are not committed. The application
+remains deployed at `a9007c4`; the existing 47 relevant checks already passed.
+
+The authorized dry run is **complete**; no remaining authentication step is
+needed for it. Any next phase must preserve the source authority rules and begin
+with mapping/identity/balance review. No wider imports, writes, unattended
+automation or production rollout have been authorized. Do not repeat the owner
+clicks or the completed Andie pilot.
+
+### Completed read-only roster deployment and authenticated read preparation
 
 The owner authorized **full-roster dry run only, production unchanged** after
 the completed Andie round trip. Revision `a9007c4` adds an admin-only
