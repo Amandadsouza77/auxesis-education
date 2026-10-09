@@ -12,11 +12,12 @@ async function run(){
  const live=await cf('/pages/projects/auxesis-education');const before=JSON.stringify({deployment:live.canonical_deployment?.id,configs:live.deployment_configs});
  const stage=await cf('/pages/projects/'+project),vars=stage.deployment_configs?.preview?.env_vars;
  require(!stage.source&&!stage.canonical_deployment&&stage.deployment_configs.preview.d1_databases.PORTAL_DB.id===db&&vars.PORTAL_DB_ID.value===db&&vars.PRODUCTION_SYNC_ENABLED.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED.value==='false','Unsafe authorization target.');
- require(vars.GOOGLE_CLIENT_ID?.value&&vars.PORTAL_TOKEN_KEY&&vars.ADMIN_EMAIL?.value,'Existing staging identity or key binding unavailable.');
+ const clientId=process.env.GOOGLE_CLIENT_ID||vars.GOOGLE_CLIENT_ID?.value||(await cf('/pages/projects/auxesis-migration-preview')).deployment_configs?.preview?.env_vars?.GOOGLE_CLIENT_ID?.value;
+ require(clientId==='170955000028-cojekae97i6rnl4v8u1tefdehhtmeife.apps.googleusercontent.com'&&vars.PORTAL_TOKEN_KEY&&vars.ADMIN_EMAIL?.value,'Existing staging identity or key binding unavailable.');
  require(!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===db)),'Staging database is already bound to production.');
  for(const sql of readFileSync('scripts/staging-authorization/schema.sql','utf8').split(';').filter(s=>s.trim()))await cf('/d1/database/'+db+'/query','POST',{sql});
  // Same additive operation used by official Wrangler Pages secret put.
- await cf('/pages/projects/'+project,'PATCH',{deployment_configs:{preview:{env_vars:{GOOGLE_CLIENT_SECRET:{type:'secret_text',value:process.env.GOOGLE_CLIENT_SECRET}},wrangler_config_hash:stage.deployment_configs.preview.wrangler_config_hash}}});
+ await cf('/pages/projects/'+project,'PATCH',{deployment_configs:{preview:{env_vars:{GOOGLE_CLIENT_ID:{type:'plain_text',value:clientId},GOOGLE_CLIENT_SECRET:{type:'secret_text',value:process.env.GOOGLE_CLIENT_SECRET}},wrangler_config_hash:stage.deployment_configs.preview.wrangler_config_hash}}});
  const after=await cf('/pages/projects/'+project);require(after.deployment_configs.preview.env_vars.PORTAL_TOKEN_KEY&&after.deployment_configs.preview.env_vars.GOOGLE_CLIENT_SECRET&&after.deployment_configs.preview.d1_databases.PORTAL_DB.id===db,'Staging binding verification failed.');
  const current=await cf('/pages/projects/auxesis-education');require(JSON.stringify({deployment:current.canonical_deployment?.id,configs:current.deployment_configs})===before,'Production changed during preparation.');
  mkdirSync('work/staging-auth/site',{recursive:true});writeFileSync('work/staging-auth/site/index.html','<!doctype html><title>Auxesis staging authorization</title><p>Staging authorization service.</p>');writeFileSync('work/staging-auth/production-before.json',before,{mode:0o600});
