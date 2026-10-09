@@ -18,6 +18,9 @@ async function check(){
  const urls=[['Tracker','https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(vars.GOOGLE_SPREADSHEET_ID.value)+'/values/'+encodeURIComponent('Students!A1:AD1000')],['Calendar','https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(vars.GOOGLE_CALENDAR_ID.value)+'/events?maxResults=1&singleEvents=true&timeMin=2026-10-01T00%3A00%3A00-04%3A00']];
  for(const [kind,url] of urls){const r=await fetch(url,{redirect:'error',headers:{Authorization:'Bearer '+token}});require(r.ok,'Saved staging consent cannot read '+kind+': HTTP '+r.status);const j=await r.json();require(kind==='Tracker'?Array.isArray(j.values):Array.isArray(j.items),'Incomplete source response.');}
  const latest=await cf('/pages/projects/auxesis-education');require(JSON.stringify({deployment:latest.canonical_deployment?.id,configs:latest.deployment_configs})===before,'Production changed during verification.');
+ const packageTable=await query("SELECT name FROM sqlite_master WHERE type='table' AND name='migration_recovery_packages'");
+ const packageRow=packageTable.length?(await query("SELECT size,sha256 FROM migration_recovery_packages WHERE id='approved-baseline'"))[0]:null;
+ console.log('::notice title=Private staging recovery status::'+JSON.stringify({uploadTablePresent:packageTable.length===1,recoveryPackageSaved:!!packageRow,exactPackageMetadata:!!packageRow&&packageRow.size===72431&&packageRow.sha256==='557349cc77b364b156ed2fd839a144cd5048030e0d0bf781030286deedaeedf2'}));
  console.log('::notice title=Staging Google consent verified::'+JSON.stringify({ownerConsentSaved:true,tokenRefreshVerified:true,trackerReadVerified:true,calendarReadVerified:true,sourceRequestsReadOnly:true,originalPortalKeyUntouched:true,productionUnchanged:true,synchronizationEnabled:false}));
 }
 check().catch(e=>{console.error('::error title=Staging authorization verification::'+e.message);process.exitCode=1;});
