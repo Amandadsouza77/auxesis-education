@@ -6,7 +6,7 @@ function sealBackup(secret,text){const iv=randomBytes(12),cipher=createCipheriv(
 const account='2ac862d7c1f865935d185df59e7bd719',stageDb='4f12fc1d-3e0d-4a11-bd65-e577ce906114',project='auxesis-education',origin='https://auxesis-education.pages.dev';
 const dir='work/production-cutover',stageDir='work/staging-deployment';
 const require=(ok,s)=>{if(!ok)throw Error(s);};
-const canonical=v=>JSON.stringify(v&&typeof v==='object'?Array.isArray(v)?v.map(x=>JSON.parse(canonical(x))):Object.fromEntries(Object.keys(v).sort().map(k=>[k,JSON.parse(canonical(v[k]))])):v);
+const canonical=v=>v===undefined?'null':JSON.stringify(v&&typeof v==='object'?Array.isArray(v)?v.map(x=>JSON.parse(canonical(x))):Object.fromEntries(Object.keys(v).sort().map(k=>[k,JSON.parse(canonical(v[k]))])):v);
 let target,phase='initial';
 async function cf(path,method='GET',body){
  const allowed=method==='GET'||method==='POST'&&path==='/d1/database'&&body?.name==='auxesis-live-portal'||method==='POST'&&[stageDb,target].includes(path.split('/')[3])&&path.endsWith('/query')||method==='PATCH'&&path==='/pages/projects/'+project||method==='POST'&&path.startsWith('/pages/projects/'+project+'/deployments/')&&path.endsWith('/rollback');
