@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/auxesis-production-import.yml
       - scripts/production-import.mjs
+      - scripts/staging-grant-check.mjs
       - scripts/production-sync-schema.sql
       - scripts/production-prepare.mjs
 permissions:
@@ -25,6 +26,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify saved staging consent and read-only source access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: node scripts/staging-grant-check.mjs
       - name: Check private recovery variables after environment activation
         env:
           PRODUCTION_RECOVERY_DRIVE_FILE_ID: ${{ vars.PRODUCTION_RECOVERY_DRIVE_FILE_ID }}
