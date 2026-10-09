@@ -11,7 +11,8 @@ async function prepare(){
  const query=async(sql,params)=>(await cf('/d1/database/'+db+'/query',sql,params)).flatMap(x=>x.results||[]);
  const settings=(await query("SELECT data FROM portal_records WHERE id='settings'"))[0];require(settings&&JSON.parse(settings.data).productionRelease?.dataMigrationVerified,'Durable import is not verified.');
  await query('CREATE TABLE IF NOT EXISTS migration_artifacts(id TEXT PRIMARY KEY,file_id TEXT NOT NULL,created_at TEXT NOT NULL)');
- if((await query("SELECT file_id FROM migration_artifacts WHERE id='staging-runtime'"))[0]){console.log('::notice::Private staging artifact slot already exists; no new file created.');return;}
+ const existingSlot=(await query("SELECT file_id FROM migration_artifacts WHERE id='staging-runtime'"))[0];
+ if(existingSlot){console.log('::notice title=Private artifact locator::'+JSON.stringify({fileId:existingSlot.file_id,alreadyPrepared:true,noPrivateContentsLogged:true}));return;}
  const grant=(await query("SELECT email,client_id,refresh_token_ciphertext FROM migration_google_authorization WHERE id='owner'"))[0],key=(await query("SELECT secret FROM portal_release_keys WHERE id='migration-transport'"))[0]?.secret;
  require(grant&&key&&grant.email===vars.ADMIN_EMAIL.value,'Verified owner grant unavailable.');
  const response=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:grant.client_id,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:await open(key,grant.refresh_token_ciphertext)})});require(response.ok,'Private artifact authorization refresh failed.');const token=(await response.json()).access_token;
