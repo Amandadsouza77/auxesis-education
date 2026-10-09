@@ -63,7 +63,7 @@
     {
       "key": "how-tutoring-works-012",
       "label": "P: If it sounds as though I may be able to help, I arrange a Meet & Greet",
-      "text": "If it sounds as though I may be able to help, I arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work."
+      "text": "If it sounds as though I may be able to help, I arrange a complimentary 20-minute Meet & Greet with the student and parent together. This gives everyone a chance to ask questions and get a feel for how I work."
     },
     {
       "key": "how-tutoring-works-013",
@@ -128,7 +128,7 @@
     {
       "key": "how-tutoring-works-019",
       "label": "P: Sessions are live and one-to-one on Google Meet. This is an active learning sess",
-      "text": "Sessions are live and one-to-one on Google Meet. Students explain ideas, answer questions and work through problems with me throughout the session. Most sessions are 60 minutes, although longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a microphone and camera. Cameras are expected to stay on during tutoring."
+      "text": "Sessions are live and one-to-one on Google Meet. Students explain ideas, answer questions and work through problems with me throughout the session. Every standard lesson provides a full 60 minutes of teaching; longer sessions can be arranged. Students need a personal Gmail address, a stable internet connection and a computer or tablet with a microphone and camera. Cameras are expected to stay on during tutoring."
     },
     {
       "key": "how-tutoring-works-020",
@@ -168,12 +168,12 @@
     {
       "key": "how-tutoring-works-027",
       "label": "P: Fees",
-      "text": "Fees"
+      "text": "Pricing & Discounts"
     },
     {
       "key": "how-tutoring-works-028",
       "label": "H2: Confirmed before you decide whether to proceed.",
-      "text": "Confirmed before you decide whether to proceed."
+      "text": "A full hour of personalised teaching."
     },
     {
       "key": "how-tutoring-works-029",
@@ -183,7 +183,7 @@
     {
       "key": "how-tutoring-works-030",
       "label": "A: Enquire About Tutoring",
-      "text": "Enquire About Tutoring"
+      "text": "Book a Complimentary Meet & Greet"
     },
     {
       "key": "how-tutoring-works-031",
@@ -223,12 +223,67 @@
     {
       "key": "how-tutoring-works-044",
       "label": "A: Fees & policies",
-      "text": "Fees & policies"
+      "text": "Pricing & discounts"
     },
     {
       "key": "how-tutoring-works-045",
       "label": "H2: Communication with students and parents",
       "text": "Communication with students and parents"
+    },
+    {
+      "key": "how-tutoring-works-046",
+      "label": "US$100 per full 60-minute lesson",
+      "text": "US$100 per full 60-minute lesson"
+    },
+    {
+      "key": "how-tutoring-works-047",
+      "label": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula ",
+      "text": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment."
+    },
+    {
+      "key": "how-tutoring-works-048",
+      "label": "Regular Twice-Weekly Lessons — Save 5%",
+      "text": "Regular Twice-Weekly Lessons — Save 5%"
+    },
+    {
+      "key": "how-tutoring-works-049",
+      "label": "Book two or more regular lessons per week in the same subject and receive 5% off lessons i",
+      "text": "Book two or more regular lessons per week in the same subject and receive 5% off lessons in that subject."
+    },
+    {
+      "key": "how-tutoring-works-050",
+      "label": "Twelve-Week Advance Payment — Save 5%",
+      "text": "Twelve-Week Advance Payment — Save 5%"
+    },
+    {
+      "key": "how-tutoring-works-051",
+      "label": "Receive 5% off when you book and pay for your full agreed lesson schedule 12 weeks in adva",
+      "text": "Receive 5% off when you book and pay for your full agreed lesson schedule 12 weeks in advance."
+    },
+    {
+      "key": "how-tutoring-works-052",
+      "label": "Combine and Save Up to 10%",
+      "text": "Combine and Save Up to 10%"
+    },
+    {
+      "key": "how-tutoring-works-053",
+      "label": "Qualifying families can combine both 5% discounts to save up to 10% on eligible lessons.",
+      "text": "Qualifying families can combine both 5% discounts to save up to 10% on eligible lessons."
+    },
+    {
+      "key": "how-tutoring-works-054",
+      "label": "Sibling Introductory Offer — Save 50%",
+      "text": "Sibling Introductory Offer — Save 50%"
+    },
+    {
+      "key": "how-tutoring-works-055",
+      "label": "Siblings of currently enrolled Auxesis students receive 50% off their first full 60-minute",
+      "text": "Siblings of currently enrolled Auxesis students receive 50% off their first full 60-minute lesson."
+    },
+    {
+      "key": "how-tutoring-works-056",
+      "label": "This introductory offer is separate from the complimentary 20-minute meet and greet and ca",
+      "text": "This introductory offer is separate from the complimentary 20-minute meet and greet and cannot be combined with other discounts on that first lesson."
     }
   ],
   "title": "How Tutoring Works | Auxesis Education",

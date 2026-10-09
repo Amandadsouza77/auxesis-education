@@ -18,7 +18,7 @@
     {
       "key": "home-003",
       "label": "A: Enquire About Tutoring",
-      "text": "Enquire About Tutoring"
+      "text": "Book a Complimentary Meet & Greet"
     },
     {
       "key": "home-004",
@@ -179,6 +179,56 @@
       "key": "home-035",
       "label": "A: Next: About Auxesis",
       "text": "Next: About Auxesis"
+    },
+    {
+      "key": "home-036",
+      "label": "US$100 per full 60-minute lesson",
+      "text": "US$100 per full 60-minute lesson"
+    },
+    {
+      "key": "home-037",
+      "label": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula ",
+      "text": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment."
+    },
+    {
+      "key": "home-038",
+      "label": "Expert IB Tutoring. A Full 60 Minutes.",
+      "text": "Expert IB Tutoring. A Full 60 Minutes."
+    },
+    {
+      "key": "home-039",
+      "label": "Every Auxesis lesson provides a full hour of personalised, one-to-one teaching, giving stu",
+      "text": "Every Auxesis lesson provides a full hour of personalised, one-to-one teaching, giving students more time for explanations, questions, exam practice and meaningful progress."
+    },
+    {
+      "key": "home-040",
+      "label": "Teaching tailored to each student’s syllabus, learning needs and goals",
+      "text": "Teaching tailored to each student’s syllabus, learning needs and goals"
+    },
+    {
+      "key": "home-041",
+      "label": "Experienced international educator and IB examiner",
+      "text": "Experienced international educator and IB examiner"
+    },
+    {
+      "key": "home-042",
+      "label": "Personalised, one-to-one online tutoring",
+      "text": "Personalised, one-to-one online tutoring"
+    },
+    {
+      "key": "home-043",
+      "label": "A full 60 minutes dedicated to the student’s learning",
+      "text": "A full 60 minutes dedicated to the student’s learning"
+    },
+    {
+      "key": "home-044",
+      "label": "A full hour. Focused entirely on your learning.",
+      "text": "A full hour. Focused entirely on your learning."
+    },
+    {
+      "key": "home-045",
+      "label": "View Pricing & Discounts",
+      "text": "View Pricing & Discounts"
     }
   ],
   "title": "Auxesis Education | Online Science Tutoring",

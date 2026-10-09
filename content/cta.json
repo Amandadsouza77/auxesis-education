@@ -8,17 +8,17 @@
     {
       "key": "cta-001",
       "label": "H2: Let’s talk about the next step.",
-      "text": "Let’s talk about the next step."
+      "text": "Let’s discuss your student’s learning needs, goals and how Auxesis can help."
     },
     {
       "key": "cta-002",
       "label": "P: Tell me what the student is studying, what they would like to achieve and where ",
-      "text": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit."
+      "text": "Start with a complimentary 20-minute meet and greet, then decide whether Auxesis feels like the right fit."
     },
     {
       "key": "cta-003",
       "label": "A: Enquire About Tutoring",
-      "text": "Enquire About Tutoring"
+      "text": "Book a Complimentary Meet & Greet"
     }
   ]
 }
