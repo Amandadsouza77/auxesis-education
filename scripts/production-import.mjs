@@ -69,6 +69,7 @@ export async function importProduction(){
   if(upload){
    require(upload.owner_email===grant.email&&upload.sha256===process.env.PRODUCTION_RECOVERY_SHA256&&upload.size===72431,'Authenticated encrypted recovery upload metadata differs from the verified baseline.');
    encryptedBytes=Buffer.from(upload.encrypted_base64,'base64');
+   require(encryptedBytes.length===upload.size,'Saved encrypted package byte count differs from its verified upload.');
   }else{
   const driveBase='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(process.env.PRODUCTION_RECOVERY_DRIVE_FILE_ID),headers={Authorization:'Bearer '+access};
   const metadataResponse=await fetch(driveBase+'?fields=id,size,mimeType,ownedByMe,shared,permissions', {headers,redirect:'error'});
