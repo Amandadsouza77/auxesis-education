@@ -1,0 +1,43 @@
+name: Deploy and verify private complete-roster staging Portal
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - scripts/staging-deploy.mjs
+      - scripts/staging-live-verify.mjs
+      - .github/workflows/auxesis-full-staging.yml
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  complete-staging:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read checksum-pinned private runtime and preserve production boundary
+        run: node scripts/staging-deploy.mjs
+      - name: Verify changed staging authorization boundary
+        run: node work/staging-deployment/runtime/tests/production-sync.test.mjs
+      - name: Install staging build and browser tooling
+        run: npm install --no-save --ignore-scripts esbuild@0.25 playwright@1.56
+      - name: Bundle private staging runtime
+        run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Deploy complete Portal to isolated staging alias
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-production-staging --branch=migration-auth --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify live staging authentication, complete roster, read-only preview and browser
+        run: node scripts/staging-live-verify.mjs
