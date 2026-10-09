@@ -11,7 +11,6 @@ jobs:
   review:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: auxesis-migration-preview
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,9 +35,3 @@ jobs:
         with:
           name: auxesis-pricing-review-screenshots
           path: qa/*.png
-      - name: Deploy review branch to existing isolated preview only
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
-          WRANGLER_SEND_METRICS: 'false'
-        run: npx --yes wrangler@4 pages deploy dist --project-name=auxesis-migration-preview --branch=codex/website-pricing-discounts-2026-10-09 --commit-hash="$GITHUB_SHA" --commit-dirty=false
