@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   import-preserved-records:
-    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration' && vars.PRODUCTION_RECOVERY_DRIVE_FILE_ID != '' && vars.PRODUCTION_RECOVERY_SHA256 != ''
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: auxesis-migration-preview
@@ -25,6 +25,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check private recovery variables after environment activation
+        env:
+          PRODUCTION_RECOVERY_DRIVE_FILE_ID: ${{ vars.PRODUCTION_RECOVERY_DRIVE_FILE_ID }}
+          PRODUCTION_RECOVERY_SHA256: ${{ vars.PRODUCTION_RECOVERY_SHA256 }}
+        run: node -e "const missing=['PRODUCTION_RECOVERY_DRIVE_FILE_ID','PRODUCTION_RECOVERY_SHA256'].filter(k=>!process.env[k]);if(missing.length){console.error('Missing Actions variables '+missing.join(', '));process.exit(1)}console.log('Private recovery variables available; values omitted.')"
       - name: Validate migration safeguards
         run: node tests/production-import.test.mjs
       - name: Import preserved durable records into separate unpublished database
