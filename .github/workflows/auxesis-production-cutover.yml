@@ -1,0 +1,47 @@
+name: Authorized Cloudflare native production cutover
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - scripts/production-cutover.mjs
+      - .github/workflows/auxesis-production-cutover.yml
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  cutover:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reuse verified private staging release
+        run: node scripts/staging-deploy.mjs
+      - name: Verify callback, clone isolated live records and save encrypted private recovery
+        run: node scripts/production-cutover.mjs prepare
+      - name: Install existing deployment tooling
+        run: npm install --no-save --ignore-scripts esbuild@0.25 playwright@1.56
+      - name: Bundle native production boundary
+        run: npx esbuild work/staging-deployment/runtime/production-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Apply authorized production binding with synchronization off
+        run: node scripts/production-cutover.mjs activate
+      - name: Deploy verified Portal to production
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify live native Portal and unchanged business data
+        run: node scripts/production-cutover.mjs verify
+      - name: Restore original deployment if cutover checks fail
+        if: failure()
+        run: node scripts/production-cutover.mjs rollback
