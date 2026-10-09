@@ -37,20 +37,21 @@ async function verify(){
  const {chromium}=await import('playwright');
  browser=await chromium.launch({headless:true,executablePath:process.env.AUXESIS_CHROMIUM_PATH||'/usr/bin/google-chrome',args:['--no-sandbox']});
  const context=await browser.newContext({timezoneId:'America/Toronto'});await context.addCookies([{name:'__Host-auxesis_session',value:token,url:origin,secure:true,httpOnly:true,sameSite:'Lax'}]);
- const page=await context.newPage();let pageErrors=0,blockedMutations=0,checks=0;
+ const page=await context.newPage();let pageErrors=0,blockedMutations=0,checks=0,browserPhase='student-list';
  page.on('pageerror',()=>pageErrors++);
  await page.route('**/*',route=>{const r=route.request();if(new URL(r.url()).origin!==origin)return route.abort();if(r.method()!=='GET'){blockedMutations++;return route.abort();}return route.continue();});
  try{
   await page.goto(origin+'/portal/students/');await page.getByRole('heading',{name:'Students',exact:true}).waitFor({timeout:20000});require(await page.locator('.student-card').count()===15,'Staged roster display count differs.');checks++;
   for(const s of state.students){require((await page.locator('body').innerText()).includes(s.name),'Staged student name is missing.');checks++;}
+  browserPhase='sync-controls';
   require(await page.locator('[data-action="source-sync-apply"]').count()===0,'Apply control was visible.');checks++;
   require(await page.getByRole('button',{name:'Preview roster sync',exact:true}).count()===1,'Complete roster preview control is missing.');checks++;
   require((await page.locator('body').innerText()).includes('Automatic synchronization is paused'),'Automation status was not paused.');checks++;
   for(const path of ['/portal/dashboard/','/portal/lessons/','/portal/calendar/','/portal/billing/','/portal/messages/','/portal/account/','/resources/manage/',...state.students.map(s=>'/portal/student/?id='+s.id),...state.invoices.map(i=>'/portal/invoice/?id='+i.id)]){
-   await page.goto(origin+path);await page.locator('#main').waitFor({timeout:15000});require((await page.locator('body').innerText()).trim().length>80,'Staged Portal page did not render.');checks++;
+   browserPhase=path.split('?')[0];await page.goto(origin+path);await page.locator('[data-action="logout"]').waitFor({timeout:15000});await page.locator('#main').waitFor({timeout:15000});require((await page.locator('body').innerText()).trim().length>80,'Staged Portal page did not render.');checks++;
   }
   require(pageErrors===0&&blockedMutations===0,'Browser verification encountered errors or mutation requests.');checks+=2;
- }catch{throw new Error('Live staged Portal browser verification failed; private selector details omitted.');}finally{await browser.close();browser=null;}
+ }catch{throw new Error('Live staged Portal browser verification failed in '+browserPhase+'; page errors='+pageErrors+', blocked mutations='+blockedMutations+'. Private selector details omitted.');}finally{await browser.close();browser=null;}
  const after=await query('SELECT * FROM portal_records ORDER BY id');require(after.length===371,'Staging durable count changed.');
  for(const original of before.records){const current=after.find(r=>r.id===original.id);require(current,'Retained staging record is missing.');if(original.id!=='settings')require(canonical(current)===canonical(original),'Staging verification altered a business record.');else{const a=JSON.parse(original.data),b=JSON.parse(current.data);delete a.rosterSyncHealth;delete b.rosterSyncHealth;require(canonical(a)===canonical(b),'Staging settings changed beyond read-only preview health.');}}
  require(canonical(await query('SELECT * FROM portal_accounts ORDER BY id'))===canonical(before.accounts)&&canonical(await query('SELECT * FROM portal_audit ORDER BY id'))===canonical(before.audits),'Original account/audit inventory changed.');
