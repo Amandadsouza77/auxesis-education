@@ -11,7 +11,7 @@ const uploadCookie=(s,age)=>`${UPLOAD_COOKIE}=${s}; Path=/; Secure; HttpOnly; Sa
 const getCookie=(request,name)=>(request.headers.get('Cookie')||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(name+'='))?.slice(name.length+1)||'';
 const hex=async b=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('');
 const random=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const headers={'Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
+const headers={'Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",'Referrer-Policy':'same-origin','X-Content-Type-Options':'nosniff'};
 const html=(s,status=200,extra={})=>new Response('<!doctype html><meta charset="utf-8"><title>Auxesis staging authorization</title><main>'+s+'</main>',{status,headers:{...headers,'Content-Type':'text/html; charset=utf-8',...extra}});
 const cookie=(s,age)=>`${COOKIE}=${s}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${age}`;
 export async function handle(request,env){
