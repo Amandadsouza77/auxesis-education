@@ -1,0 +1,31 @@
+name: Read-only authorized production cutover preflight
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - scripts/production-cutover-preflight.mjs
+      - .github/workflows/auxesis-cutover-preflight.yml
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: auxesis-migration-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect protected production bindings without modifying production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          PORTAL_TOKEN_KEY: ${{ secrets.PORTAL_TOKEN_KEY }}
+        run: node scripts/production-cutover-preflight.mjs
