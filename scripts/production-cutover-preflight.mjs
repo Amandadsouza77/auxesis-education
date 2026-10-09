@@ -1,3 +1,4 @@
+import {randomBytes} from 'node:crypto';
 // Read-only protected cutover preflight. Never logs credentials or private records.
 const base='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/pages/projects/';
 async function project(name){const r=await fetch(base+name,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw Error('Cloudflare read failed: '+r.status);const j=await r.json();if(!j.success)throw Error('Cloudflare read rejected');return j.result;}
@@ -8,3 +9,17 @@ const report={productionBranch:live.production_branch,productionDeploymentPresen
 const client=process.env.GOOGLE_CLIENT_ID||stage.deployment_configs.preview.env_vars?.GOOGLE_CLIENT_ID?.value;
 if(client){const u=new URL('https://accounts.google.com/o/oauth2/v2/auth');u.search=new URLSearchParams({client_id:client,redirect_uri:'https://auxesis-education.pages.dev/api/portal/auth/callback',response_type:'code',scope:'openid email profile',state:'cutover-preflight',code_challenge:'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',code_challenge_method:'S256'});const r=await fetch(u,{redirect:'follow'});const text=await r.text();report.productionCallbackRejected=/redirect_uri_mismatch|invalid_client/.test(text+decodeURIComponent(r.url));report.googleAuthorizationHttpStatus=r.status;report.callbackRegistrationVerified=!report.productionCallbackRejected&&r.ok&&/accounts.google.com/.test(r.url);}
 console.log('::notice title=Production cutover read-only preflight::'+JSON.stringify(report));
+
+const vars=live.deployment_configs.production.env_vars||{}, additions={};
+if(!vars.GOOGLE_CLIENT_ID){if(!client)throw Error('Existing OAuth client ID unavailable');additions.GOOGLE_CLIENT_ID={type:'plain_text',value:client};}
+if(!vars.GOOGLE_CLIENT_SECRET){if(!process.env.GOOGLE_CLIENT_SECRET)throw Error('Existing protected OAuth secret unavailable');additions.GOOGLE_CLIENT_SECRET={type:'secret_text',value:process.env.GOOGLE_CLIENT_SECRET};}
+// This is the production project's first Portal key. Preserve every existing key.
+if(!vars.PORTAL_TOKEN_KEY)additions.PORTAL_TOKEN_KEY={type:'secret_text',value:randomBytes(48).toString('base64url')};
+for(const name of ['PRODUCTION_SYNC_ENABLED','PRODUCTION_AUTOMATION_ENABLED']){if(vars[name]?.value==='true')throw Error('Unexpected enabled production synchronization');if(!vars[name])additions[name]={type:'plain_text',value:'false'};}
+if(Object.keys(additions).length){
+ const r=await fetch(base+'auxesis-education',{method:'PATCH',redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({deployment_configs:{production:{env_vars:additions,wrangler_config_hash:live.deployment_configs.production.wrangler_config_hash}}})});if(!r.ok||(await r.json()).success!==true)throw Error('Additive production credential wiring rejected');
+}
+const current=await project('auxesis-education'),stageAfter=await project('auxesis-production-staging');
+if(current.canonical_deployment?.id!==live.canonical_deployment?.id||JSON.stringify(current.source)!==JSON.stringify(live.source)||JSON.stringify(current.deployment_configs.production.d1_databases)!==JSON.stringify(live.deployment_configs.production.d1_databases)||JSON.stringify(stageAfter.deployment_configs)!==JSON.stringify(stage.deployment_configs))throw Error('Unexpected deployment, database or staging change');
+if(!required.every(k=>current.deployment_configs.production.env_vars[k])||current.deployment_configs.production.env_vars.PRODUCTION_SYNC_ENABLED.value!=='false'||current.deployment_configs.production.env_vars.PRODUCTION_AUTOMATION_ENABLED.value!=='false')throw Error('Production bindings failed readback');
+console.log('::notice title=Production credentials configured::'+JSON.stringify({existingGoogleCredentialsReused:true,productionPortalKeyFirstProvisioned:!vars.PORTAL_TOKEN_KEY,existingSecretsPreserved:true,productionDeploymentUnchanged:true,stagingUnchanged:true,databaseBindingUnchanged:true,synchronizationEnabled:false,automationEnabled:false,cutoverComplete:false,callbackRequiresOwner:report.productionCallbackRejected}));
