@@ -66,7 +66,7 @@ export async function importProduction(){
   for(const [kind,url] of sourceUrls){const response=await fetch(url,{headers:{Authorization:'Bearer '+access},redirect:'error'});require(response.ok,'Fresh staging consent cannot read '+kind+': HTTP '+response.status+'.');const body=await response.json();require(kind==='Tracker'?Array.isArray(body.values):Array.isArray(body.items),'Source read returned incomplete data.');}
   const driveBase='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(process.env.PRODUCTION_RECOVERY_DRIVE_FILE_ID),headers={Authorization:'Bearer '+access};
   const metadataResponse=await fetch(driveBase+'?fields=id,size,mimeType,ownedByMe,shared,permissions', {headers,redirect:'error'});
-  require(metadataResponse.ok,'Private recovery package is not accessible to the Portal Google grant; owner must grant this file through Google Picker.');
+  require(metadataResponse.ok,'Private recovery package is not accessible to the staging Google grant: HTTP '+metadataResponse.status+'. File-specific Google Picker authorization may be required.');
   const metadata=await metadataResponse.json();require(metadata.ownedByMe===true&&metadata.shared!==true&&(metadata.permissions||[]).every(p=>p.type==='user'&&p.role==='owner'),'Private recovery package must be owned by the source administrator with no shared access.');
   require(Number(metadata.size)>0&&Number(metadata.size)<2*1024*1024,'Private recovery package size is outside the bounded import.');
   const raw=await fetch(driveBase+'?alt=media',{headers,redirect:'error'});require(raw.ok,'Private recovery package download failed.');encryptedBytes=Buffer.from(await raw.arrayBuffer());
