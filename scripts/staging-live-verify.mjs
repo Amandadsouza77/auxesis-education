@@ -43,6 +43,16 @@ async function verify(){
  try{
   await page.goto(origin+'/portal/students/');await page.getByRole('heading',{name:'Students',exact:true}).waitFor({timeout:20000});require(await page.locator('.student-card').count()===15,'Staged roster display count differs.');checks++;
   for(const s of state.students){require((await page.locator('body').innerText()).includes(s.name),'Staged student name is missing.');checks++;}
+  browserPhase='dashboard-chronological-order';
+  await page.clock.install({time:new Date('2026-10-09T12:00:00Z')});
+  await page.goto(origin+'/portal/dashboard/');await page.locator('[data-action="logout"]').waitFor({timeout:15000});
+  const todaySection=page.locator('section').filter({has:page.getByRole('heading',{name:'Today’s lessons',exact:true})});
+  const renderedIds=await todaySection.locator('a.lesson-row').evaluateAll(nodes=>nodes.map(n=>new URL(n.href).searchParams.get('id')));
+  const torontoDay=v=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(v));
+  const expectedToday=state.lessons.filter(l=>torontoDay(l.start)==='2026-10-09').sort((a,b)=>Date.parse(a.start)-Date.parse(b.start));
+  require(canonical(renderedIds)===canonical(expectedToday.map(l=>l.id)),'Dashboard lesson order is not chronological.');
+  require(expectedToday.length>=2&&new Date(expectedToday[0].start).getUTCHours()===8,'Expected morning lesson was not first.');checks++;
+  await page.goto(origin+'/portal/students/');await page.getByRole('heading',{name:'Students',exact:true}).waitFor({timeout:15000});
   browserPhase='sync-controls';
   require(await page.locator('[data-action="source-sync-apply"]').count()===0,'Apply control was visible.');checks++;
   require(await page.getByRole('button',{name:'Preview roster sync',exact:true}).count()===1,'Complete roster preview control is missing.');checks++;
@@ -56,7 +66,7 @@ async function verify(){
  for(const original of before.records){const current=after.find(r=>r.id===original.id);require(current,'Retained staging record is missing.');if(original.id!=='settings')require(canonical(current)===canonical(original),'Staging verification altered a business record.');else{const a=JSON.parse(original.data),b=JSON.parse(current.data);delete a.rosterSyncHealth;delete b.rosterSyncHealth;require(canonical(a)===canonical(b),'Staging settings changed beyond read-only preview health.');}}
  require(canonical(await query('SELECT * FROM portal_accounts ORDER BY id'))===canonical(before.accounts)&&canonical(await query('SELECT * FROM portal_audit ORDER BY id'))===canonical(before.audits),'Original account/audit inventory changed.');
  const live=await cf('/pages/projects/auxesis-education');require(canonical({configs:live.deployment_configs,deployment:live.canonical_deployment?.id})===canonical(before.production),'Production changed during staging verification.');
- const result={verifiedAt:new Date().toISOString(),stagingUrl:origin,productionUnchanged:true,preservedRecords:371,preservedStudents:15,preservedLessons:200,preservedInvoices:16,preservedPayments:9,oauthPkceVerified:true,unauthenticatedAccessBlocked:true,authenticatedStateExact:true,applyBlocked:true,financialCommandsBlocked:true,crossOriginBlocked:true,browserChecks:checks,browserErrors:pageErrors,browserMutations:blockedMutations,sourcePreview:preview,financialChanges:0,historicalDebits:0,originalPortalKeyUntouched:true,liveSynchronizationEnabled:false};
+ const result={verifiedAt:new Date().toISOString(),stagingUrl:origin,productionUnchanged:true,preservedRecords:371,preservedStudents:15,preservedLessons:200,preservedInvoices:16,preservedPayments:9,oauthPkceVerified:true,unauthenticatedAccessBlocked:true,authenticatedStateExact:true,applyBlocked:true,financialCommandsBlocked:true,crossOriginBlocked:true,dashboardChronologicalOrderVerified:true,browserChecks:checks,browserErrors:pageErrors,browserMutations:blockedMutations,sourcePreview:preview,financialChanges:0,historicalDebits:0,originalPortalKeyUntouched:true,liveSynchronizationEnabled:false};
  writeFileSync('work/staging-deployment/private-results.json',JSON.stringify(result,null,2),{mode:0o600});
  const refreshed=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:grant.client_id,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:await open(key,grant.refresh_token_ciphertext)})});require(refreshed.ok,'Private result authorization refresh failed.');const access=(await refreshed.json()).access_token;
  const boundary='auxesis-'+randomBytes(12).toString('hex');const report=Buffer.from(JSON.stringify(result));const body=Buffer.concat([Buffer.from('--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify({name:'Auxesis private staging verification.json',mimeType:'application/json',appProperties:{auxesisPurpose:'staging-verification'}})+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'),report,Buffer.from('\r\n--'+boundary+'--\r\n')]);
