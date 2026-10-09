@@ -1,0 +1,41 @@
+name: Establish separate staging Google consent
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - scripts/staging-authorization/**
+      - tests/staging-authorization.test.mjs
+      - .github/workflows/auxesis-staging-authorization.yml
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  staging-consent:
+    if: github.repository == 'Amandadsouza77/auxesis-education' && github.ref == 'refs/heads/codex/cloudflare-backend-migration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: auxesis-migration-preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify isolated consent safeguards
+        run: node tests/staging-authorization.test.mjs
+      - name: Configure separate consent tables and existing credential binding
+        run: node scripts/staging-authorization/setup.mjs
+      - name: Bundle consent-only worker
+        run: npx --yes esbuild@0.25 scripts/staging-authorization/worker.js --bundle --format=esm --outfile=work/staging-auth/site/_worker.js
+      - name: Deploy consent-only staging preview
+        run: npx --yes wrangler@4 pages deploy work/staging-auth/site --project-name=auxesis-production-staging --branch=migration-auth --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify observed staging URL and unchanged production
+        run: node scripts/staging-authorization/verify.mjs

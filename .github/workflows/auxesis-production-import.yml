@@ -30,7 +30,6 @@ jobs:
       - name: Import preserved durable records into separate unpublished database
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          PORTAL_TOKEN_KEY: ${{ secrets.PORTAL_TOKEN_KEY }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           PRODUCTION_RECOVERY_DRIVE_FILE_ID: ${{ vars.PRODUCTION_RECOVERY_DRIVE_FILE_ID }}
           PRODUCTION_RECOVERY_SHA256: ${{ vars.PRODUCTION_RECOVERY_SHA256 }}

@@ -1,0 +1,10 @@
+import {readFileSync} from 'node:fs';
+const base='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719';
+const get=async path=>{const r=await fetch(base+path,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw new Error('Verification failed: '+r.status);const j=await r.json();if(!j.success)throw new Error('Verification rejected.');return j.result;};
+try{
+ const live=await get('/pages/projects/auxesis-education');if(JSON.stringify({deployment:live.canonical_deployment?.id,configs:live.deployment_configs})!==readFileSync('work/staging-auth/production-before.json','utf8'))throw new Error('Production changed.');
+ const stage=await get('/pages/projects/auxesis-production-staging');if(stage.canonical_deployment||stage.deployment_configs.preview.env_vars.PRODUCTION_SYNC_ENABLED.value!=='false'||stage.deployment_configs.preview.env_vars.PRODUCTION_AUTOMATION_ENABLED.value!=='false')throw new Error('Staging isolation changed.');
+ const deployments=await get('/pages/projects/auxesis-production-staging/deployments');const d=deployments.find(x=>x.environment==='preview'&&x.deployment_trigger?.metadata?.branch==='migration-auth'&&x.deployment_trigger?.metadata?.commit_hash===process.env.GITHUB_SHA);if(!d||!d.aliases?.includes('https://migration-auth.auxesis-production-staging.pages.dev'))throw new Error('Exact staging deployment alias was not verified.');
+ const url=d.aliases.find(s=>s==='https://migration-auth.auxesis-production-staging.pages.dev');const response=await fetch(url,{redirect:'error'});if(!response.ok||!(await response.text()).includes('Continue with Google'))throw new Error('Staging consent page failed.');
+ console.log('::notice title=Staging consent deployed::'+JSON.stringify({url,callback:url+'/api/portal/auth/callback',productionUnchanged:true,originalPortalKeyUntouched:true,businessRecordsChanged:false,synchronizationEnabled:false,ownerConsentRequired:true}));
+}catch(e){console.error('::error::'+e.message);process.exitCode=1;}

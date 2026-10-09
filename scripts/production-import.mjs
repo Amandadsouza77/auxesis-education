@@ -49,17 +49,21 @@ export async function importProduction(){
  }else{
   require(process.env.PRODUCTION_RECOVERY_DRIVE_FILE_ID,'Private recovery-package Drive file ID is required.');
   require(process.env.GOOGLE_CLIENT_SECRET,'Protected Google client secret is required to read the private recovery package.');
-  const preview=await api('/pages/projects/auxesis-migration-preview'),vars=preview.deployment_configs?.preview?.env_vars||{};
-  const existingTokenKey=process.env.PORTAL_TOKEN_KEY||vars.PORTAL_TOKEN_KEY?.value;
-  require(existingTokenKey&&vars.GOOGLE_CLIENT_ID?.value,'Existing Google connection key or client identity is unavailable; owner authorization is required.');
-  // Google tokens are decrypted and used only inside the protected runner.
-  const response=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+'/d1/database/'+pilotDb+'/query',{method:'POST',redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({sql:"SELECT refresh_token_ciphertext,scopes FROM google_connections WHERE lower(email)='adsouza35@gmail.com'"})});
-  require(response.ok,'Existing Google connection could not be read.');const json=await response.json();require(json.success,'Existing Google connection read was rejected.');
-  const connections=json.result.flatMap(r=>r.results||[]);require(connections.length===1,'Existing Google connection is not unique.');
-  const refreshToken=await open(existingTokenKey,connections[0].refresh_token_ciphertext);
-  const refreshed=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:vars.GOOGLE_CLIENT_ID.value,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:refreshToken})});
-  require(refreshed.ok,'Existing Google authorization cannot be refreshed; owner consent is required.');
+  // Fresh, owner-verified staging consent is encrypted with the independent
+  // private migration key. The original Portal key is never read or changed.
+  const tables=await query("SELECT name FROM sqlite_master WHERE type='table' AND name='migration_google_authorization'");
+  require(tables.length===1,'Open the isolated staging authorization page and complete owner Google consent.');
+  const grant=(await query("SELECT email,refresh_token_ciphertext,scopes,client_id FROM migration_google_authorization WHERE id='owner'"))[0];
+  require(grant&&grant.email===config.env_vars.ADMIN_EMAIL.value&&grant.client_id===config.env_vars.GOOGLE_CLIENT_ID.value,'Verified owner staging Google consent is required.');
+  const scopes=new Set(grant.scopes.split(/\s+/));
+  require(scopes.has('https://www.googleapis.com/auth/drive.file')&&scopes.has('https://www.googleapis.com/auth/calendar.readonly'),'Staging consent lacks approved read scopes.');
+  const refreshToken=await open(transport,grant.refresh_token_ciphertext);
+  const refreshed=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:grant.client_id,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:refreshToken})});
+  require(refreshed.ok,'Fresh staging Google authorization could not refresh; owner consent requires diagnosis.');
   const access=(await refreshed.json()).access_token;require(access,'Google returned no usable access token.');
+  // Verify existing source access with GET only, before durable import writes.
+  const sourceUrls=[['Tracker','https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(config.env_vars.GOOGLE_SPREADSHEET_ID.value)+'/values/'+encodeURIComponent('Students!A1:AD1000')],['Calendar','https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(config.env_vars.GOOGLE_CALENDAR_ID.value)+'/events?maxResults=1&singleEvents=true&timeMin=2026-10-01T00%3A00%3A00-04%3A00']];
+  for(const [kind,url] of sourceUrls){const response=await fetch(url,{headers:{Authorization:'Bearer '+access},redirect:'error'});require(response.ok,'Fresh staging consent cannot read '+kind+': HTTP '+response.status+'.');const body=await response.json();require(kind==='Tracker'?Array.isArray(body.values):Array.isArray(body.items),'Source read returned incomplete data.');}
   const driveBase='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(process.env.PRODUCTION_RECOVERY_DRIVE_FILE_ID),headers={Authorization:'Bearer '+access};
   const metadataResponse=await fetch(driveBase+'?fields=id,size,mimeType,ownedByMe,shared,permissions', {headers,redirect:'error'});
   require(metadataResponse.ok,'Private recovery package is not accessible to the Portal Google grant; owner must grant this file through Google Picker.');
