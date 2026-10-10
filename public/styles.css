@@ -233,3 +233,6 @@ body#top main [id]{scroll-margin-top:6.5rem}
 }
 .header .brand{padding:0!important;overflow:visible}
 .header .brand:before,.header .brand:after{content:none!important}
+
+/* Public lesson value and pricing: retain Auxesis typography and palette. */
+.lesson-price{font-weight:700;font-size:clamp(1.15rem,2vw,1.5rem);line-height:1.4;margin:1.5rem 0 .75rem}.rate-note{font-size:.9rem;max-width:42rem;line-height:1.6}.lesson-highlight{border-bottom:1px solid var(--line)}.lesson-benefits{padding-left:1.2rem;margin:0 0 1.5rem}.lesson-benefits li{padding-left:.3rem;margin-bottom:.8rem}.lesson-benefits li::marker{color:var(--peacock-teal)}.lesson-promise{font-family:var(--serif);font-size:1.5rem;line-height:1.35}.discount-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin:2rem 0}.discount-card{border:1px solid rgba(248,246,240,.3);padding:1.5rem}.discount-card h3{font-size:1.45rem;line-height:1.25}.discount-card p:last-child{margin-bottom:0}.discount-note{font-size:.92rem}.cta-inner>.button{max-width:100%;text-align:center;flex-shrink:0}@media(max-width:650px){.discount-grid{grid-template-columns:1fr}.discount-card{padding:1.2rem}.lesson-price{font-size:1.2rem}}

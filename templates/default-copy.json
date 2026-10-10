@@ -1174,5 +1174,97 @@
   "privacy-consent-007": {
     "raw": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable.",
     "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
+  },
+  "home-036": {
+    "text": "US$100 per full 60-minute lesson",
+    "raw": "US$100 per full 60-minute lesson"
+  },
+  "home-037": {
+    "text": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment.",
+    "raw": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment."
+  },
+  "home-038": {
+    "text": "Expert IB Tutoring. A Full 60 Minutes.",
+    "raw": "Expert IB Tutoring. A Full 60 Minutes."
+  },
+  "home-039": {
+    "text": "Every Auxesis lesson provides a full hour of personalised, one-to-one teaching, giving students more time for explanations, questions, exam practice and meaningful progress.",
+    "raw": "Every Auxesis lesson provides a full hour of personalised, one-to-one teaching, giving students more time for explanations, questions, exam practice and meaningful progress."
+  },
+  "home-040": {
+    "text": "Teaching tailored to each student’s syllabus, learning needs and goals",
+    "raw": "Teaching tailored to each student’s syllabus, learning needs and goals"
+  },
+  "home-041": {
+    "text": "Experienced international educator and IB examiner",
+    "raw": "Experienced international educator and IB examiner"
+  },
+  "home-042": {
+    "text": "Personalised, one-to-one online tutoring",
+    "raw": "Personalised, one-to-one online tutoring"
+  },
+  "home-043": {
+    "text": "A full 60 minutes dedicated to the student’s learning",
+    "raw": "A full 60 minutes dedicated to the student’s learning"
+  },
+  "home-044": {
+    "text": "A full hour. Focused entirely on your learning.",
+    "raw": "A full hour. Focused entirely on your learning."
+  },
+  "home-045": {
+    "text": "View Pricing & Discounts",
+    "raw": "View Pricing &amp; Discounts"
+  },
+  "how-tutoring-works-046": {
+    "text": "US$100 per full 60-minute lesson",
+    "raw": "US$100 per full 60-minute lesson"
+  },
+  "how-tutoring-works-047": {
+    "text": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment.",
+    "raw": "The advertised US$100 rate applies to international IB tutoring. Fees for other curricula and regions may vary and are confirmed individually before enrolment."
+  },
+  "how-tutoring-works-048": {
+    "text": "Regular Twice-Weekly Lessons — Save 5%",
+    "raw": "Regular Twice-Weekly Lessons — Save 5%"
+  },
+  "how-tutoring-works-049": {
+    "text": "Book two or more regular lessons per week in the same subject and receive 5% off lessons in that subject.",
+    "raw": "Book two or more regular lessons per week in the same subject and receive 5% off lessons in that subject."
+  },
+  "how-tutoring-works-050": {
+    "text": "Twelve-Week Advance Payment — Save 5%",
+    "raw": "Twelve-Week Advance Payment — Save 5%"
+  },
+  "how-tutoring-works-051": {
+    "text": "Receive 5% off when you book and pay for your full agreed lesson schedule 12 weeks in advance.",
+    "raw": "Receive 5% off when you book and pay for your full agreed lesson schedule 12 weeks in advance."
+  },
+  "how-tutoring-works-052": {
+    "text": "Combine and Save Up to 10%",
+    "raw": "Combine and Save Up to 10%"
+  },
+  "how-tutoring-works-053": {
+    "text": "Qualifying families can combine both 5% discounts to save up to 10% on eligible lessons.",
+    "raw": "Qualifying families can combine both 5% discounts to save up to 10% on eligible lessons."
+  },
+  "how-tutoring-works-054": {
+    "text": "Sibling Introductory Offer — Save 50%",
+    "raw": "Sibling Introductory Offer — Save 50%"
+  },
+  "how-tutoring-works-055": {
+    "text": "Siblings of currently enrolled Auxesis students receive 50% off their first full 60-minute lesson.",
+    "raw": "Siblings of currently enrolled Auxesis students receive 50% off their first full 60-minute lesson."
+  },
+  "how-tutoring-works-056": {
+    "text": "This introductory offer is separate from the complimentary 20-minute meet and greet and cannot be combined with other discounts on that first lesson.",
+    "raw": "This introductory offer is separate from the complimentary 20-minute meet and greet and cannot be combined with other discounts on that first lesson."
+  },
+  "subjects-programmes-048": {
+    "text": "Every IB lesson provides a full 60 minutes of personalised, one-to-one online teaching.",
+    "raw": "Every IB lesson provides a full 60 minutes of personalised, one-to-one online teaching."
+  },
+  "subjects-programmes-049": {
+    "text": "View Pricing & Discounts",
+    "raw": "View Pricing &amp; Discounts"
   }
 }
