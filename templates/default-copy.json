@@ -1172,8 +1172,8 @@
     "raw": "Read the academic-integrity policy"
   },
   "privacy-consent-007": {
-    "raw": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable.",
-    "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
+    "text": "The Auxesis Education website and live private Portal run on Cloudflare Pages and Workers. Cloudflare D1 stores Portal accounts, lesson records, messages, progress reports, invoices and payment records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring. The live Portal no longer runs on Floot.",
+    "raw": "The Auxesis Education website and live private Portal run on Cloudflare Pages and Workers. Cloudflare D1 stores Portal accounts, lesson records, messages, progress reports, invoices and payment records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring. The live Portal no longer runs on Floot."
   },
   "about-auxesis-007-1": {
     "raw": "Growth looks different for every student. For one, it might mean building the foundations needed to move from struggling to succeeding. For another, it might mean moving from meeting expectations to exceeding them. Sometimes the most important progress is less immediately visible: asking a better question, making a connection between ideas, challenging an assumption or approaching an unfamiliar problem with confidence.",
@@ -1206,5 +1206,25 @@
   "enquire-016": {
     "raw": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal.",
     "text": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal."
+  },
+  "privacy-consent-008": {
+    "text": "Google provides Portal sign-in and processes the account information used to identify authorised users. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database.",
+    "raw": "Google provides Portal sign-in and processes the account information used to identify authorised users. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database."
+  },
+  "privacy-consent-009": {
+    "text": "Reviews submitted through the website are stored in Cloudflare D1. Your comment, chosen public name or description, any optional star rating and permission to publish are recorded. A review remains private until I approve it; only approved reviews with publication consent are displayed publicly. The review service does not email submissions. It uses a hidden spam field, a one-use form check and submission limits, including an IP-derived identifier for rate limiting.",
+    "raw": "Reviews submitted through the website are stored in Cloudflare D1. Your comment, chosen public name or description, any optional star rating and permission to publish are recorded. A review remains private until I approve it; only approved reviews with publication consent are displayed publicly. The review service does not email submissions. It uses a hidden spam field, a one-use form check and submission limits, including an IP-derived identifier for rate limiting."
+  },
+  "privacy-consent-010": {
+    "text": "The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website.",
+    "raw": "The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website."
+  },
+  "privacy-consent-011": {
+    "text": "The Portal uses necessary sign-in and session cookies. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking.",
+    "raw": "The Portal uses necessary sign-in and session cookies. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking."
+  },
+  "privacy-consent-012": {
+    "text": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository.",
+    "raw": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository."
   }
 }

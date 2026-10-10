@@ -18,7 +18,7 @@
     {
       "key": "privacy-consent-003",
       "label": "P: Auxesis Education collects only the information needed to respond to an enqu",
-      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resources and attachments, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
+      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resource links, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
     },
     {
       "key": "privacy-consent-004",
@@ -38,7 +38,32 @@
     {
       "key": "privacy-consent-007",
       "label": "P: Website submissions and delivery",
-      "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
+      "text": "The Auxesis Education website and live private Portal run on Cloudflare Pages and Workers. Cloudflare D1 stores Portal accounts, lesson records, messages, progress reports, invoices and payment records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring. The live Portal no longer runs on Floot."
+    },
+    {
+      "key": "privacy-consent-008",
+      "label": "P: Google provides Portal sign-in and processes the account information u",
+      "text": "Google provides Portal sign-in and processes the account information used to identify authorised users. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database."
+    },
+    {
+      "key": "privacy-consent-009",
+      "label": "P: Reviews submitted through the website are stored in Cloudflare D1. You",
+      "text": "Reviews submitted through the website are stored in Cloudflare D1. Your comment, chosen public name or description, any optional star rating and permission to publish are recorded. A review remains private until I approve it; only approved reviews with publication consent are displayed publicly. The review service does not email submissions. It uses a hidden spam field, a one-use form check and submission limits, including an IP-derived identifier for rate limiting."
+    },
+    {
+      "key": "privacy-consent-010",
+      "label": "P: The online enquiry service is currently unavailable. Please send enqui",
+      "text": "The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website."
+    },
+    {
+      "key": "privacy-consent-011",
+      "label": "P: The Portal uses necessary sign-in and session cookies. Cloudflare proc",
+      "text": "The Portal uses necessary sign-in and session cookies. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking."
+    },
+    {
+      "key": "privacy-consent-012",
+      "label": "P: GitHub Actions is used for controlled deployment and migration workflo",
+      "text": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository."
     }
   ],
   "title": "Privacy & Consent | Auxesis Education",
