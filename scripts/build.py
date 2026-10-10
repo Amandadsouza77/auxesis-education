@@ -24,7 +24,14 @@ def recommendation_cards(items, short=False):
         quote=item.get('short_quote',item['quote']) if short else item['quote']
         quote_html=re.sub(r'(\S+\s+\S+)$',r'<span class="keep-together">\1</span>',e(quote))
         cards.append(f'<figure class="recommendation-card"><p class="eyebrow">{e(item["topic"])}</p><blockquote><p>“{quote_html}”</p></blockquote><figcaption><strong>{e(item["name"])}</strong><span>{e(item["relationship"])}</span><span class="recommendation-source">LinkedIn recommendation · <time datetime="{e(item["date"])}">{e(item["display_date"])}</time></span></figcaption></figure>')
-    return '<div class="recommendation-grid'+(' home-recommendations' if short else '')+'">'+''.join(cards)+'</div>'
+    if not cards: return '<p>No recommendations available yet.</p>'
+    # Accessible, manual carousel; no automatic rotation or external dependencies.
+    slides=''.join('<div class="recommendation-slide"'+('' if i==0 else ' hidden')+'>'+card+'</div>' for i,card in enumerate(cards))
+    return ('''<div class="auxesis-carousel" aria-label="Testimonials">
+<style>.auxesis-carousel{max-width:760px;margin-inline:auto}.auxesis-carousel .recommendation-slide[hidden]{display:none!important}.auxesis-carousel .recommendation-grid{display:block}.auxesis-carousel .recommendation-card{height:auto}.auxesis-carousel-controls{display:flex;align-items:center;justify-content:center;gap:1.25rem;margin-top:1.25rem}.auxesis-carousel-controls button{cursor:pointer;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;min-width:44px;min-height:44px;font-size:1.4rem}.auxesis-carousel-count{font-size:.9rem}</style>
+<div class="recommendation-grid">''' + slides + '''</div>
+<div class="auxesis-carousel-controls"><button type="button" data-move="-1" aria-label="Previous testimonial">‹</button><span class="auxesis-carousel-count" aria-live="polite">1 of '''+str(len(cards))+'''</span><button type="button" data-move="1" aria-label="Next testimonial">›</button></div>
+<script>(function(){const root=document.currentScript.parentElement,slides=[...root.querySelectorAll('.recommendation-slide')],count=root.querySelector('.auxesis-carousel-count');let current=0;root.querySelectorAll('[data-move]').forEach(button=>button.addEventListener('click',()=>{slides[current].hidden=true;current=(current+Number(button.dataset.move)+slides.length)%slides.length;slides[current].hidden=false;count.textContent=(current+1)+' of '+slides.length;}));let start=null;root.addEventListener('touchstart',e=>{start=e.changedTouches[0].screenX},{passive:true});root.addEventListener('touchend',e=>{if(start===null)return;const delta=e.changedTouches[0].screenX-start;start=null;if(Math.abs(delta)>60)root.querySelector('[data-move="'+(delta<0?'1':'-1')+'"]').click()},{passive:true});})();</script></div>''')
 def render(template, data, defaults):
     values = {b['key']: b['text'] for b in data['blocks']}
     def replace(match):
