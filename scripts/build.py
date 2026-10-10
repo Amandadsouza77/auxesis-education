@@ -110,6 +110,10 @@ def build():
         # Original programme links use short aliases; normalize them in app.js without rewriting content.
         if re.search(r'%%[A-Z_]+',doc): raise ValueError('Unresolved template in '+route['name'])
         doc=visual_grouping(doc)
+        if route["name"] == "subjects-programmes":
+            doc=doc.replace('href="/styles.css"', 'href="/styles.css?v=programmes-accordion-1"')
+        if route["name"] == "recommendations":
+            doc=doc.replace('href="/styles.css"', 'href="/styles.css?v=single-review-1"')
         out=target/route['path'];out.parent.mkdir(parents=True,exist_ok=True);out.write_text(doc,encoding='utf-8')
     from build_portal import build_portal
     build_portal(ROOT,target)

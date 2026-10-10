@@ -33,7 +33,7 @@
     {
       "key": "enquire-006",
       "label": "P: I will arrange a phone conversation with the parent. If it makes sens",
-      "text": "I will arrange a phone conversation with the parent. If it makes sense to continue, I will arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives us time to talk about the student’s goals, answer questions and let the student get a sense of how I work. Take time to decide. If you would like to proceed, message me and I will arrange the first session. Once tutoring is confirmed, Auxesis provides access to the private Auxesis Portal."
+      "text": "After receiving your enquiry, I'll arrange a conversation with the parent to learn more about the student's needs and goals. If Auxesis seems suitable, we'll arrange a free, approximately 20-minute Meet & Greet with the student and parent."
     },
     {
       "key": "enquire-007",
@@ -79,8 +79,13 @@
       "key": "enquire-015",
       "label": "A: Go to the enquiry form",
       "text": "Go to the enquiry form"
+    },
+    {
+      "key": "enquire-016",
+      "label": "P: There's no pressure to commit. If you decide to proceed, I'll arrange ",
+      "text": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal."
     }
   ],
   "title": "Enquire About Tutoring | Auxesis Education",
-  "description": "Tell Amanda what the student is studying and where support would help. Start with a free parent conversation and student-and-parent Meet & Greet."
+  "description": "Tell me about the student’s course, needs and goals. Begin with a parent conversation, followed by a free student-and-parent Meet & Greet."
 }

@@ -216,12 +216,12 @@
     "text": "The name"
   },
   "about-auxesis-006": {
-    "raw": "Growth is the thread running through the business.",
-    "text": "Growth is the thread running through the business."
+    "raw": "Auxesis means growth.",
+    "text": "Auxesis means growth."
   },
   "about-auxesis-007": {
-    "raw": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress.",
-    "text": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress."
+    "raw": "Education is, at its heart, about growth. Not simply acquiring knowledge or achieving a particular grade, but developing the understanding, skills, confidence and independence to keep learning.",
+    "text": "Education is, at its heart, about growth. Not simply acquiring knowledge or achieving a particular grade, but developing the understanding, skills, confidence and independence to keep learning."
   },
   "about-auxesis-008": {
     "raw": "What that looks like in practice",
@@ -1174,5 +1174,37 @@
   "privacy-consent-007": {
     "raw": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable.",
     "text": "Website enquiries and reviews are processed through the Auxesis portal service hosted by Floot and emailed to Amanda. The service stores the submission and its consent confirmation for tutoring administration. Website forms use a hidden spam field, a one-use form check and submission limits. Reviews are checked before publication. Google provides the portal sign-in; private portal records and attachments are held in the portal service. Use the contact email if a form is unavailable."
+  },
+  "about-auxesis-007-1": {
+    "raw": "Growth looks different for every student. For one, it might mean building the foundations needed to move from struggling to succeeding. For another, it might mean moving from meeting expectations to exceeding them. Sometimes the most important progress is less immediately visible: asking a better question, making a connection between ideas, challenging an assumption or approaching an unfamiliar problem with confidence.",
+    "text": "Growth looks different for every student. For one, it might mean building the foundations needed to move from struggling to succeeding. For another, it might mean moving from meeting expectations to exceeding them. Sometimes the most important progress is less immediately visible: asking a better question, making a connection between ideas, challenging an assumption or approaching an unfamiliar problem with confidence."
+  },
+  "about-auxesis-007-2": {
+    "raw": "At Auxesis Education, I believe learning should be active, purposeful and increasingly independent. Students should not simply memorise scientific facts or follow procedures without understanding why they work. They should learn to think critically, explore evidence, recognise patterns, apply knowledge in new situations and develop the confidence to question what they encounter.",
+    "text": "At Auxesis Education, I believe learning should be active, purposeful and increasingly independent. Students should not simply memorise scientific facts or follow procedures without understanding why they work. They should learn to think critically, explore evidence, recognise patterns, apply knowledge in new situations and develop the confidence to question what they encounter."
+  },
+  "about-auxesis-007-3": {
+    "raw": "That philosophy shapes how I facilitate learning. Rather than simply providing answers or delivering information, I create opportunities for students to question, investigate, make connections and construct their own understanding. I meet learners where they are, providing appropriate guidance, challenge and support while gradually encouraging greater independence. The aim is not to remove every difficulty, but to help students develop the confidence, curiosity and skills to navigate challenges themselves.",
+    "text": "That philosophy shapes how I facilitate learning. Rather than simply providing answers or delivering information, I create opportunities for students to question, investigate, make connections and construct their own understanding. I meet learners where they are, providing appropriate guidance, challenge and support while gradually encouraging greater independence. The aim is not to remove every difficulty, but to help students develop the confidence, curiosity and skills to navigate challenges themselves."
+  },
+  "about-auxesis-007-4": {
+    "raw": "Growth is not always linear, and it cannot always be measured by a grade. Progress can involve uncertainty, mistakes, revisiting old ideas and discovering new ways of thinking. These experiences are not obstacles to learning; they are often an essential part of it.",
+    "text": "Growth is not always linear, and it cannot always be measured by a grade. Progress can involve uncertainty, mistakes, revisiting old ideas and discovering new ways of thinking. These experiences are not obstacles to learning; they are often an essential part of it."
+  },
+  "about-auxesis-007-5": {
+    "raw": "Ultimately, Auxesis is about more than helping students succeed in their next examination. It is about helping them become curious, capable and reflective learners who understand not only what they know, but how to continue learning.",
+    "text": "Ultimately, Auxesis is about more than helping students succeed in their next examination. It is about helping them become curious, capable and reflective learners who understand not only what they know, but how to continue learning."
+  },
+  "about-auxesis-007-6": {
+    "raw": "Because the real value of education is not just what students achieve today, but what they become capable of tomorrow.",
+    "text": "Because the real value of education is not just what students achieve today, but what they become capable of tomorrow."
+  },
+  "about-amanda-029": {
+    "raw": "My approach is responsive and collaborative. I use questions, discussion, carefully chosen activities and constructive feedback to help students move forward while maintaining high expectations.",
+    "text": "My approach is responsive and collaborative. I use questions, discussion, carefully chosen activities and constructive feedback to help students move forward while maintaining high expectations."
+  },
+  "enquire-016": {
+    "raw": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal.",
+    "text": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal."
   }
 }

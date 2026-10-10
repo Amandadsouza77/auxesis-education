@@ -18,12 +18,7 @@
     {
       "key": "about-auxesis-003",
       "label": "P: Auxesis Education grew from a simple idea: tutoring should help a student become",
-      "text": "Auxesis Education grew from a simple idea: tutoring should help a student become more capable, not more dependent. I want students to understand the science they are studying, but I also want them to become better at learning it. That means learning how to question an idea, make connections, recognise a gap, choose a useful strategy and work out what to do when the answer is not immediately obvious."
-    },
-    {
-      "key": "about-auxesis-004",
-      "label": "P: It’s not what you learn. It’s how you learn.",
-      "text": "It’s not what you learn. It’s how you learn."
+      "text": "I founded Auxesis Education to help students make progress in science and become more capable, rather than more dependent on tutoring. I support their academic goals while helping them tackle the challenges in front of them."
     },
     {
       "key": "about-auxesis-005",
@@ -37,8 +32,38 @@
     },
     {
       "key": "about-auxesis-007",
-      "label": "P: Growth can mean moving towards meeting expectations, or moving from meeting to e",
-      "text": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress."
+      "label": "P: Education is, at its heart, about growth. Not simply acquiring knowledge",
+      "text": "Education is, at its heart, about growth. Not simply acquiring knowledge or achieving a particular grade, but developing the understanding, skills, confidence and independence to keep learning."
+    },
+    {
+      "key": "about-auxesis-007-1",
+      "label": "P: Growth looks different for every student. For one, it might mean buildin",
+      "text": "Growth looks different for every student. For one, it might mean building the foundations needed to move from struggling to succeeding. For another, it might mean moving from meeting expectations to exceeding them. Sometimes the most important progress is less immediately visible: asking a better question, making a connection between ideas, challenging an assumption or approaching an unfamiliar problem with confidence."
+    },
+    {
+      "key": "about-auxesis-007-2",
+      "label": "P: At Auxesis Education, I believe learning should be active, purposeful an",
+      "text": "At Auxesis Education, I believe learning should be active, purposeful and increasingly independent. Students should not simply memorise scientific facts or follow procedures without understanding why they work. They should learn to think critically, explore evidence, recognise patterns, apply knowledge in new situations and develop the confidence to question what they encounter."
+    },
+    {
+      "key": "about-auxesis-007-3",
+      "label": "P: That philosophy shapes how I facilitate learning. Rather than simply pro",
+      "text": "That philosophy shapes how I facilitate learning. Rather than simply providing answers or delivering information, I create opportunities for students to question, investigate, make connections and construct their own understanding. I meet learners where they are, providing appropriate guidance, challenge and support while gradually encouraging greater independence. The aim is not to remove every difficulty, but to help students develop the confidence, curiosity and skills to navigate challenges themselves."
+    },
+    {
+      "key": "about-auxesis-007-4",
+      "label": "P: Growth is not always linear, and it cannot always be measured by a grade",
+      "text": "Growth is not always linear, and it cannot always be measured by a grade. Progress can involve uncertainty, mistakes, revisiting old ideas and discovering new ways of thinking. These experiences are not obstacles to learning; they are often an essential part of it."
+    },
+    {
+      "key": "about-auxesis-007-5",
+      "label": "P: Ultimately, Auxesis is about more than helping students succeed in their",
+      "text": "Ultimately, Auxesis is about more than helping students succeed in their next examination. It is about helping them become curious, capable and reflective learners who understand not only what they know, but how to continue learning."
+    },
+    {
+      "key": "about-auxesis-007-6",
+      "label": "P: Because the real value of education is not just what students achieve to",
+      "text": "Because the real value of education is not just what students achieve today, but what they become capable of tomorrow."
     },
     {
       "key": "about-auxesis-008",
@@ -48,12 +73,12 @@
     {
       "key": "about-auxesis-009",
       "label": "P: I do not assume that a grade or label tells me what a student needs. A student c",
-      "text": "I do not assume that a grade or label tells me what a student needs. A student can be struggling because of a missing foundation, a misconception, weak study strategies, lack of confidence, difficulty applying what they know, or some combination of those things. I ask questions, watch how the student approaches a problem and test what they understand. If an explanation is not working, I change the explanation — not the expectation that they can learn it."
+      "text": "I ask questions and observe how a student approaches problems to identify misconceptions, missing foundations and difficulties applying knowledge. I adjust the pace, prompts and practice to their needs while keeping expectations high."
     },
     {
       "key": "about-auxesis-010",
       "label": "P: I also do not take “that makes sense” as the end point. It is a start, but ",
-      "text": "I also do not take “that makes sense” as the end point. It is a start, but understanding has to survive when the example changes. Can the student explain the idea in their own words? Can they recognise when it applies? Can they use it in an unfamiliar situation? That is where we begin to see whether the learning belongs to the student rather than to the explanation they have just heard."
+      "text": "I check understanding by asking students to explain ideas in their own words, recognise when they apply and use them in unfamiliar situations. Their responses help me decide what to address next."
     },
     {
       "key": "about-auxesis-012",
@@ -68,22 +93,12 @@
     {
       "key": "about-auxesis-014",
       "label": "P: High expectations and strong support belong together. Students need to be able t",
-      "text": "High expectations and strong support belong together. Students need to be able to say, “I don’t understand,” without feeling embarrassed, and they deserve honest feedback about what needs work. Mistakes are useful because they show us where to look next. Sometimes I will break a problem into smaller steps or give a prompt or keyword; at other times I will deliberately step back and give the student more time to work through it independently. The amount of support should change as the learner changes."
-    },
-    {
-      "key": "about-auxesis-015",
-      "label": "P: The bigger goal",
-      "text": "The bigger goal"
+      "text": "I maintain high expectations while making it safe to ask questions and acknowledge uncertainty. I give constructive feedback and adjust support, from breaking a problem into smaller steps to allowing more time to work through it. Mistakes show me what to address next."
     },
     {
       "key": "about-auxesis-016",
       "label": "P: I guide the learning, parents provide support and structure, and the student rem",
-      "text": "I guide the learning, parents provide support and structure, and the student remains actively responsible for their learning. That balance matters. Independence does not mean never asking for help; it means recognising when help is useful, using it well and gradually becoming more able to make decisions for yourself."
-    },
-    {
-      "key": "about-auxesis-017",
-      "label": "P: My vision for Auxesis is bigger than improving a mark, although marks ",
-      "text": "My vision for Auxesis is bigger than improving a mark, although marks matter and academic goals are taken seriously. I want students to leave tutoring better able to question, think, set goals and direct their own learning. Those are skills they can carry into another science course, university and situations well beyond school."
+      "text": "I facilitate learning and provide guidance; parents support routines and preparation; students take an active part in sessions and practise between them."
     },
     {
       "key": "about-auxesis-018",
@@ -106,6 +121,6 @@
       "text": "Next: About Amanda"
     }
   ],
-  "title": "Our Approach | Auxesis Education",
-  "description": "Learn how Auxesis approaches tutoring: strong subject knowledge, high expectations, responsive teaching and a clear goal of student independence."
+  "title": "About Auxesis | Auxesis Education",
+  "description": "My approach to science tutoring: active learning, high expectations, responsive support and meaningful growth."
 }
