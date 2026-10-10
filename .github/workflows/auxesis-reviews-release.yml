@@ -1,0 +1,52 @@
+name: Approved website reviews release with Portal safeguards
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - scripts/reviews-release.mjs
+      - scripts/reviews-artifact-prepare.mjs
+      - .github/workflows/auxesis-reviews-release.yml
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  website-reviews:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read private verified website package
+        run: node scripts/reviews-artifact-prepare.mjs
+      - name: Test consent, private pending submissions and owner-only publication
+        working-directory: work/staging-deployment/runtime
+        run: node tests/website-reviews.test.mjs
+      - name: Preserve native records and add review tables
+        run: node scripts/reviews-release.mjs prepare
+      - name: Install existing build and browser tooling
+        run: npm install --no-save --ignore-scripts esbuild@0.25 playwright@1.56
+      - name: Bundle native website and Portal boundary
+        run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Deploy isolated website preview
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-production-staging --branch=migration-auth --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify staging submission, owner moderation and page layout
+        run: node scripts/reviews-release.mjs stage
+      - name: Deploy approved website changes to native production
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify live public form and retained Portal data
+        run: node scripts/reviews-release.mjs production
+      - name: Restore prior releases if verification fails
+        if: failure()
+        run: node scripts/reviews-release.mjs rollback
