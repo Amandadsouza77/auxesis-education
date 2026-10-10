@@ -37,8 +37,38 @@
     },
     {
       "key": "about-auxesis-007",
-      "label": "P: Growth can mean moving towards meeting expectations, or moving from meeting to e",
-      "text": "Growth can mean moving towards meeting expectations, or moving from meeting to exceeding them. The starting points and ambitions may be different; the aim is meaningful progress."
+      "label": "P: Education is, at its heart, about growth. Not simply acquiring knowledge",
+      "text": "Education is, at its heart, about growth. Not simply acquiring knowledge or achieving a particular grade, but developing the understanding, skills, confidence and independence to keep learning."
+    },
+    {
+      "key": "about-auxesis-007-1",
+      "label": "P: Growth looks different for every student. For one, it might mean buildin",
+      "text": "Growth looks different for every student. For one, it might mean building the foundations needed to move from struggling to succeeding. For another, it might mean moving from meeting expectations to exceeding them. Sometimes the most important progress is less immediately visible: asking a better question, making a connection between ideas, challenging an assumption or approaching an unfamiliar problem with confidence."
+    },
+    {
+      "key": "about-auxesis-007-2",
+      "label": "P: At Auxesis Education, I believe learning should be active, purposeful an",
+      "text": "At Auxesis Education, I believe learning should be active, purposeful and increasingly independent. Students should not simply memorise scientific facts or follow procedures without understanding why they work. They should learn to think critically, explore evidence, recognise patterns, apply knowledge in new situations and develop the confidence to question what they encounter."
+    },
+    {
+      "key": "about-auxesis-007-3",
+      "label": "P: That philosophy shapes how I facilitate learning. Rather than simply pro",
+      "text": "That philosophy shapes how I facilitate learning. Rather than simply providing answers or delivering information, I create opportunities for students to question, investigate, make connections and construct their own understanding. I meet learners where they are, providing appropriate guidance, challenge and support while gradually encouraging greater independence. The aim is not to remove every difficulty, but to help students develop the confidence, curiosity and skills to navigate challenges themselves."
+    },
+    {
+      "key": "about-auxesis-007-4",
+      "label": "P: Growth is not always linear, and it cannot always be measured by a grade",
+      "text": "Growth is not always linear, and it cannot always be measured by a grade. Progress can involve uncertainty, mistakes, revisiting old ideas and discovering new ways of thinking. These experiences are not obstacles to learning; they are often an essential part of it."
+    },
+    {
+      "key": "about-auxesis-007-5",
+      "label": "P: Ultimately, Auxesis is about more than helping students succeed in their",
+      "text": "Ultimately, Auxesis is about more than helping students succeed in their next examination. It is about helping them become curious, capable and reflective learners who understand not only what they know, but how to continue learning."
+    },
+    {
+      "key": "about-auxesis-007-6",
+      "label": "P: Because the real value of education is not just what students achieve to",
+      "text": "Because the real value of education is not just what students achieve today, but what they become capable of tomorrow."
     },
     {
       "key": "about-auxesis-008",
@@ -107,5 +137,5 @@
     }
   ],
   "title": "Our Approach | Auxesis Education",
-  "description": "Learn how Auxesis approaches tutoring: strong subject knowledge, high expectations, responsive teaching and a clear goal of student independence."
+  "description": "Explore the Auxesis philosophy: facilitating active, purposeful learning, scientific thinking, meaningful growth and increasing student independence."
 }
