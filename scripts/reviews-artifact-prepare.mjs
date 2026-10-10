@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {open} from '../cloudflare/crypto.js';
 const account='2ac862d7c1f865935d185df59e7bd719',db='4f12fc1d-3e0d-4a11-bd65-e577ce906114',project='auxesis-production-staging',origin='https://migration-auth.auxesis-production-staging.pages.dev';
-const expected='7569cf65927906128cb9aabe5fdd12fad5314ad84e815048b70d7acefceefc78';
+const expected='97a6693ffa2065d02169ee6a7a4f237397f66fc876a3393d98119902da1828d6';
 const require=(ok,s)=>{if(!ok)throw new Error(s);};
 async function cf(path,sql,params,patch){const method=patch?'PATCH':sql?'POST':'GET';require(method==='GET'||sql&&path==='/d1/database/'+db+'/query'||patch&&path==='/pages/projects/'+project,'Deployment write outside isolated staging rejected.');const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+path,{method,redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(patch||sql?{body:JSON.stringify(patch||{sql,...(params?{params}:{})})}:{})});require(r.ok,'Staging deployment provider failed: '+r.status);const j=await r.json();require(j.success,'Staging deployment request rejected.');return j.result;}
 async function prepare(){
