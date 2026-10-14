@@ -38,3 +38,17 @@ test('intake captures Tracker identity fields and offers location time zones wit
  assert.ok(root.innerHTML.includes('name="nationality"'));assert.ok(root.innerHTML.includes('Country of residence'));assert.match(root.innerHTML,/<select name="zone" required>/);
  const admin=screen('admin');admin.ctx.moveTest('/portal/student/?id=s&tab=arrangements');assert.ok(admin.root.innerHTML.includes('name="package"'));assert.ok(admin.root.innerHTML.includes('name="status"'));
 });
+
+test('source sync and Google connection routes use the authenticated first-party boundary',async()=>{
+ const previous=globalThis.fetch;globalThis.crypto??=webcrypto;
+ try{for(const path of [['sync'],['google','start'],['google','picker']]){
+  const route=path.join('/');let forwarded;
+  globalThis.fetch=async(url,options)=>{forwarded={url,options};return Response.json({ok:true});};
+  const request=new Request('https://auxesis-education.pages.dev/api/portal/'+route,{method:'POST',headers:{Origin:'https://auxesis-education.pages.dev','Content-Type':'application/json',Cookie:'__Host-auxesis_session='+'a'.repeat(43)},body:'{"mode":"preview"}'});
+  const r=await onRequest({request,params:{path}});assert.equal(r.status,200);
+  assert.equal(forwarded.url,'https://auxesis-portal-service.floot.app/_api/portal/'+route);
+  assert.equal(forwarded.options.headers['x-auxesis-session'],'a'.repeat(43));
+  const anonymous=await onRequest({request:new Request(request.url,{method:'POST',headers:{Origin:'https://auxesis-education.pages.dev','Content-Type':'application/json'},body:'{}'}),params:{path}});
+  assert.equal(anonymous.status,401);
+ }}finally{globalThis.fetch=previous;}
+});
