@@ -1,0 +1,340 @@
+{
+  "all": [
+    {
+      "id": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+      "day": "Tue, Wed",
+      "exam": "",
+      "name": "Andie Ng",
+      "rate": 125,
+      "time": "Tue 5:15 AM, Wed 4:45 AM",
+      "used": 0,
+      "year": "",
+      "zone": "Asia/Manila",
+      "board": "",
+      "email": "",
+      "goals": "",
+      "level": "",
+      "length": 60,
+      "status": "Active",
+      "country": "Philippines",
+      "endDate": null,
+      "package": "Monthly",
+      "subject": "Bio HL",
+      "currency": "CAD",
+      "discount": 0,
+      "parentId": "eb38c8fd-0eb7-5fe2-8b63-6892d0213426",
+      "pronouns": "",
+      "challenge": "",
+      "frequency": "2 per week",
+      "migration": {
+        "batch": "2026-10-03-owner-review",
+        "sourceRow": 9,
+        "sourceUrl": "https://docs.google.com/spreadsheets/d/1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ/edit",
+        "importedAt": "2026-10-03T12:00:00+00:00",
+        "balanceBasis": "Billing records CAD 1,125 for Sep 30 and eight October dates; Sep 30 is completed."
+      },
+      "preferred": "Andie",
+      "programme": "IB",
+      "purchased": 8,
+      "startDate": "2026-08-18T12:00:00Z",
+      "sourceData": {
+        "Rate": "125.00",
+        "Status": "Active",
+        "Package": "Monthly",
+        "Student": "Andie Ng",
+        "Currency": "CAD",
+        "Discount": "N/A",
+        "Schedule": "Tue 5:15 AM, Wed 4:45 AM",
+        "Curriculum": "IB",
+        "Start date": "Aug 18, 2026",
+        "Nationality": "Canadian",
+        "Subject / Level": "Bio HL",
+        "Current Local Time": "Tue 5:15 PM, Wed 4:45 PM",
+        "Proposed Local Time": "Tue 6:15 PM, Wed 5:45 PM",
+        "Country of Residence": "Philippines"
+      },
+      "reviewFlags": [
+        "Parent and student sign-in emails are not yet recorded; no access accounts were created.",
+        "Parent country, contact details and time zone still require confirmation.",
+        "Opening balance excludes earlier completed lessons; imported history was not charged again."
+      ],
+      "accessStatus": "Disabled for private review",
+      "balanceVerified": true,
+      "_kind": "students"
+    },
+    {
+      "id": "300e998c-60fb-5fd7-b57b-ef631e5a3022",
+      "hours": 1,
+      "notes": {
+        "next": "",
+        "covered": "",
+        "outcome": ""
+      },
+      "start": "2026-10-13T09:15:00.000Z",
+      "status": "Scheduled",
+      "subject": "IB Bio HL",
+      "planning": [],
+      "migration": {
+        "batch": "2026-10-03-owner-review",
+        "historyDoesNotDebitBalance": true
+      },
+      "resources": [],
+      "studentId": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+      "chargeable": null,
+      "sourceMeta": {
+        "row": 80,
+        "sync": {
+          "source": "connected-app-snapshot",
+          "syncedAt": "2026-10-06T19:49:53.987Z",
+          "calendarId": "classroom107924035776692772286@group.calendar.google.com",
+          "trackerRow": 81,
+          "fingerprint": "2adf84142174e25b855d824ea495e94cea0856c27f4507c804ddb13bc5a89d1e",
+          "recurringEventId": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco",
+          "originalStartTime": "2026-10-13T09:15:00.000Z"
+        },
+        "sheet": "Lessons",
+        "original": {
+          "Status": "Scheduled",
+          "Student": "Andie Ng",
+          "Lesson Date": "Oct 13, 2026"
+        },
+        "sourceUrl": "https://docs.google.com/spreadsheets/d/1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ/edit",
+        "calendarEventId": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco_20261013T091500Z"
+      },
+      "cancelledAt": null,
+      "cancelledBy": "",
+      "privateNotes": "",
+      "timeVerified": true,
+      "durationVerified": true,
+      "rescheduleRequired": false,
+      "_kind": "lessons"
+    },
+    {
+      "id": "50f5e66f-ae05-51a3-b97a-42d03129c2e5",
+      "hours": 1,
+      "notes": {
+        "next": "",
+        "covered": "",
+        "outcome": ""
+      },
+      "start": "2026-10-14T08:45:00.000Z",
+      "status": "Scheduled",
+      "subject": "IB Bio HL",
+      "planning": [],
+      "migration": {
+        "batch": "2026-10-03-owner-review",
+        "historyDoesNotDebitBalance": true
+      },
+      "resources": [],
+      "studentId": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+      "chargeable": null,
+      "sourceMeta": {
+        "row": 82,
+        "sync": {
+          "source": "connected-app-snapshot",
+          "syncedAt": "2026-10-06T19:49:53.987Z",
+          "calendarId": "classroom107924035776692772286@group.calendar.google.com",
+          "trackerRow": 83,
+          "fingerprint": "78d79f3954360e34867f606449150b26a613bd29ba52d29eacacdfbd0748a411",
+          "recurringEventId": "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68",
+          "originalStartTime": "2026-10-14T08:45:00.000Z"
+        },
+        "sheet": "Lessons",
+        "original": {
+          "Status": "Scheduled",
+          "Student": "Andie Ng",
+          "Lesson Date": "Oct 14, 2026"
+        },
+        "sourceUrl": "https://docs.google.com/spreadsheets/d/1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ/edit",
+        "calendarEventId": "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68_20261014T084500Z"
+      },
+      "cancelledAt": null,
+      "cancelledBy": "",
+      "privateNotes": "",
+      "timeVerified": true,
+      "durationVerified": true,
+      "rescheduleRequired": false,
+      "_kind": "lessons"
+    }
+  ],
+  "input": {
+    "complete": true,
+    "calendarId": "classroom107924035776692772286@group.calendar.google.com",
+    "spreadsheetId": "1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ",
+    "students": [
+      {
+        "Student": "Andie Ng",
+        "Nationality": "Canadian",
+        "Country of Residence": "Philippines",
+        "Status": "Active",
+        "Curriculum": "IB",
+        "Subject / Level": "Bio HL",
+        "Rate": "125.00",
+        "Currency": "CAD",
+        "Package": "Monthly",
+        "Discount": "N/A",
+        "Start date": "Aug 18, 2026",
+        "Schedule": "Tue 5:15 AM, Wed 4:45 AM",
+        "Current Local Time": "Tue 5:15 PM, Wed 4:45 PM",
+        "Proposed Local Time": "Tue 6:15 PM, Wed 5:45 PM",
+        "Oct 25–31 Local Time": "Unknown",
+        "Parent / Guardian": "Unknown",
+        "Pronouns": "Unknown",
+        "Parent / Guardian Mobile": "Unknown",
+        "Student ID": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+        "_row": 9
+      }
+    ],
+    "lessons": [
+      {
+        "Lesson Date": "Oct 13, 2026",
+        "Student": "Andie Ng",
+        "Status": "Cancelled",
+        "Lesson Focus": "Holiday cancellation; no charge.",
+        "Homework / Next Step": "Does not consume a prepaid lesson. Resume regular lessons Oct 20/21; carry two unused credits forward.",
+        "Student ID": "",
+        "_row": 37
+      },
+      {
+        "Lesson Date": "Oct 14, 2026",
+        "Student": "Andie Ng",
+        "Status": "Completed",
+        "Lesson Focus": "Membranes and membrane transport practice questions.",
+        "Homework / Next Step": "Initially described as cancelled, but Andie called the next day to take the 6:30 AM slot. Treat as one rescheduled lesson, not a cancelled or additional lesson; no extra credit owed for this move.",
+        "Student ID": "",
+        "_row": 40
+      }
+    ],
+    "events": [
+      {
+        "guests_can_modify": null,
+        "locked": null,
+        "id": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco_20261013T091500Z",
+        "summary": "Andie",
+        "status": "cancelled",
+        "organizer": {
+          "is_self": true,
+          "email": "classroom107924035776692772286@group.calendar.google.com",
+          "display_name": "Amanda's Tutoring"
+        },
+        "description": "\n\n",
+        "location": null,
+        "color_id": null,
+        "event_label_id": null,
+        "start": {
+          "dateTime": "2026-10-13T09:15:00Z"
+        },
+        "end": {
+          "dateTime": "2026-10-13T10:15:00Z"
+        },
+        "attendees": [],
+        "url": "https://www.google.com/calendar/event?eid=NjByM2lvaGk2b3E2OGI5bzZzcmo2YjlrNjFoNjJiOXA3MG9qNGI5bTZsaWppY2I0Y2txbWFlOW1jb18yMDI2MTAxM1QwOTE1MDBaIGNsYXNzcm9vbTEwNzkyNDAzNTc3NjY5Mjc3MjI4NkBn",
+        "hangout_link": null,
+        "event_type": "default",
+        "transparency": "opaque",
+        "visibility": null,
+        "attachments": null,
+        "reminders": {
+          "use_default": false,
+          "overrides": []
+        },
+        "recurrence": null,
+        "recurring_event_id": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco",
+        "original_start_time": "2026-10-13T09:15:00Z",
+        "display_url": "https://www.google.com/calendar/event?eid=NjByM2lvaGk2b3E2OGI5bzZzcmo2YjlrNjFoNjJiOXA3MG9qNGI5bTZsaWppY2I0Y2txbWFlOW1jb18yMDI2MTAxM1QwOTE1MDBaIGNsYXNzcm9vbTEwNzkyNDAzNTc3NjY5Mjc3MjI4NkBn",
+        "display_title": "Andie",
+        "recurringEventId": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco"
+      },
+      {
+        "guests_can_modify": null,
+        "locked": null,
+        "id": "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68_20261014T084500Z",
+        "summary": "Andie ",
+        "status": "cancelled",
+        "organizer": {
+          "is_self": true,
+          "email": "classroom107924035776692772286@group.calendar.google.com",
+          "display_name": "Amanda's Tutoring"
+        },
+        "description": "\n\n",
+        "location": null,
+        "color_id": null,
+        "event_label_id": null,
+        "start": {
+          "dateTime": "2026-10-14T08:45:00Z"
+        },
+        "end": {
+          "dateTime": "2026-10-14T09:45:00Z"
+        },
+        "attendees": [],
+        "url": "https://www.google.com/calendar/event?eid=YzVoMzZkcGg3MWdtYWJiNWM1Z2o2YjlrNjhzajhiYjFja28zZ2I5bjZzc2o2YzluNzBvbTZvcG42OF8yMDI2MTAxNFQwODQ1MDBaIGNsYXNzcm9vbTEwNzkyNDAzNTc3NjY5Mjc3MjI4NkBn",
+        "hangout_link": null,
+        "event_type": "default",
+        "transparency": "opaque",
+        "visibility": null,
+        "attachments": null,
+        "reminders": {
+          "use_default": false,
+          "overrides": []
+        },
+        "recurrence": null,
+        "recurring_event_id": "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68",
+        "original_start_time": "2026-10-14T08:45:00Z",
+        "display_url": "https://www.google.com/calendar/event?eid=YzVoMzZkcGg3MWdtYWJiNWM1Z2o2YjlrNjhzajhiYjFja28zZ2I5bjZzc2o2YzluNzBvbTZvcG42OF8yMDI2MTAxNFQwODQ1MDBaIGNsYXNzcm9vbTEwNzkyNDAzNTc3NjY5Mjc3MjI4NkBn",
+        "display_title": "Andie ",
+        "recurringEventId": "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68"
+      },
+      {
+        "guests_can_modify": null,
+        "locked": null,
+        "id": "6osm2e1mc4oj0b9n6ksjgb9kckp36b9p6pgm4b9p6phjgc9p6cp3gpj6cg",
+        "summary": "Andie ",
+        "status": "confirmed",
+        "organizer": {
+          "is_self": true,
+          "email": "classroom107924035776692772286@group.calendar.google.com",
+          "display_name": "Amanda's Tutoring"
+        },
+        "description": "\n\n",
+        "location": null,
+        "color_id": null,
+        "event_label_id": null,
+        "start": {
+          "dateTime": "2026-10-14T10:30:00Z"
+        },
+        "end": {
+          "dateTime": "2026-10-14T11:30:00Z"
+        },
+        "attendees": [],
+        "url": "https://www.google.com/calendar/event?eid=Nm9zbTJlMW1jNG9qMGI5bjZrc2pnYjlrY2twMzZiOXA2cGdtNGI5cDZwaGpnYzlwNmNwM2dwajZjZyBjbGFzc3Jvb20xMDc5MjQwMzU3NzY2OTI3NzIyODZAZw",
+        "hangout_link": null,
+        "event_type": "default",
+        "transparency": "opaque",
+        "visibility": null,
+        "attachments": null,
+        "reminders": {
+          "use_default": false,
+          "overrides": []
+        },
+        "recurrence": null,
+        "recurring_event_id": null,
+        "original_start_time": null,
+        "display_url": "https://www.google.com/calendar/event?eid=Nm9zbTJlMW1jNG9qMGI5bjZrc2pnYjlrY2twMzZiOXA2cGdtNGI5cDZwaGpnYzlwNmNwM2dwajZjZyBjbGFzc3Jvb20xMDc5MjQwMzU3NzY2OTI3NzIyODZAZw",
+        "display_title": "Andie ",
+        "recurringEventId": null
+      }
+    ]
+  },
+  "config": {
+    "mode": "pilot",
+    "seriesIds": [
+      "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco",
+      "c5h36dph71gmabb5c5gj6b9k68sj8bb1cko3gb9n6ssj6c9n70om6opn68"
+    ],
+    "studentId": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+    "calendarId": "classroom107924035776692772286@group.calendar.google.com",
+    "googleEmail": "adsouza35@gmail.com",
+    "studentName": "Andie Ng",
+    "spreadsheetId": "1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ"
+  }
+}
