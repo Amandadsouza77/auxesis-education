@@ -252,4 +252,3 @@ window.addEventListener('popstate',()=>refresh().catch(()=>render()));
 setInterval(()=>document.querySelectorAll('[data-countdown]').forEach(el=>el.textContent=countdown(el.dataset.countdown)),60000);
 initialise();
 })();
-
