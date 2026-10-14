@@ -20,5 +20,3 @@ export async function onRequest(context){const request=context.request,url=new U
  let body;if(request.method==='POST'){const raw=await request.text();if(raw.length>150000)return json({error:'This request is too large.'},413);body=JSON.parse(raw);}
  const r=await remote(request,route,body,jar[SESSION]),data=await r.json(),response=json(data,r.status);if(route==='logout'||r.status===401)response.headers.append('Set-Cookie',cookie(SESSION,'',0));return response;
  }catch{return json({error:'The portal could not complete this request. Please try again.'},503);}}
-
-
