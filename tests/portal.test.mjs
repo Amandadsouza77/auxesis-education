@@ -5,7 +5,7 @@ import {test} from 'node:test';
 import {webcrypto} from 'node:crypto';
 import {onRequest} from '../functions/api/portal/[[path]].js';
 const source=fs.readFileSync(new URL('../public/portal.js',import.meta.url),'utf8');
-function screen(role='admin',hasFamily=true){const root={innerHTML:'',querySelectorAll(){return [];},addEventListener(){}};const location={origin:'https://auxesis-education.pages.dev',pathname:'/portal/dashboard/',search:'',hash:''};const move=u=>{const p=new URL(u,location.origin);location.pathname=p.pathname;location.search=p.search;};const document={getElementById:id=>id==='portal-app'?root:null,querySelector:q=>q==='h1'?{textContent:'Portal'}:null,querySelectorAll:()=>[]};const ctx=vm.createContext({document,location,history:{replaceState:(_a,_b,u)=>move(u),pushState:(_a,_b,u)=>move(u)},window:{scrollTo(){},addEventListener(){},print(){}},crypto:webcrypto,URL,URLSearchParams,Intl,Date,Math,JSON,setInterval(){},setTimeout(){},console,Blob,fetch:async()=>new Response('{}',{status:401})});const fixture={me:{id:'actor',name:'Test person',role,parentId:'p',studentId:'s'},students:hasFamily?[{id:'s',parentId:'p',name:'Test student',preferred:'Student',zone:'America/Toronto',email:'student@example.invalid',programme:'IB',subject:'Biology',level:'HL',year:'DP2',exam:'May 2027',currency:'USD',rate:100,discount:0,purchased:4,used:1,length:60,day:'Monday',time:'4 PM',frequency:'Weekly',startDate:'2026-09-01T00:00:00Z',goals:'Understand',challenge:'Practice'}]:[],parents:hasFamily?[{id:'p',name:'Parent',billingName:'Parent',email:'parent@example.invalid',zone:'America/Toronto'}]:[],lessons:hasFamily?[{id:'l',studentId:'s',start:'2026-11-01T20:00:00Z',subject:'Biology',hours:1,status:'Scheduled',planning:[],notes:{covered:'',outcome:'',next:''},resources:[],privateNotes:'Private'}]:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],onboardings:hasFamily?[{id:'onboarding-s',studentId:'s',step:0,parent:{name:'Parent',email:'parent@example.invalid'},student:{name:'Student',email:'student@example.invalid'},learning:{},agreements:[],complete:false}]:[],notifications:[],settings:{},entitled:true,calendarView:'Week',calendarOffset:0};ctx.fixture=fixture;vm.runInContext(source.replace('initialise();\n})();',"db=fixture;me=db.me;activeChild=db.students[0]?.id||'';selectOnboarding();globalThis.renderTest=render;globalThis.moveTest=go;globalThis.submitTest=onSubmit;render();\n})();"),ctx);return {ctx,root,location};}
+function screen(role='admin',hasFamily=true){const root={innerHTML:'',querySelectorAll(){return [];},addEventListener(){}};const location={origin:'https://auxesis-education.pages.dev',pathname:'/portal/dashboard/',search:'',hash:''};const move=u=>{const p=new URL(u,location.origin);location.pathname=p.pathname;location.search=p.search;};const document={getElementById:id=>id==='portal-app'?root:null,querySelector:q=>q==='h1'?{textContent:'Portal'}:null,querySelectorAll:()=>[]};const ctx=vm.createContext({document,location,history:{replaceState:(_a,_b,u)=>move(u),pushState:(_a,_b,u)=>move(u)},window:{scrollTo(){},addEventListener(){},print(){}},crypto:webcrypto,URL,URLSearchParams,Intl,Date,Math,JSON,setInterval(){},setTimeout(){},console,Blob,fetch:async()=>new Response('{}',{status:401})});const fixture={me:{id:'actor',name:'Test person',role,parentId:'p',studentId:'s'},students:hasFamily?[{id:'s',parentId:'p',name:'Test student',preferred:'Student',zone:'America/Toronto',email:'student@example.invalid',programme:'IB',subject:'Biology',level:'HL',year:'DP2',exam:'May 2027',currency:'USD',rate:100,discount:0,purchased:4,used:1,length:60,day:'Monday',time:'4 PM',frequency:'Weekly',startDate:'2026-09-01T00:00:00Z',goals:'Understand',challenge:'Practice'}]:[],parents:hasFamily?[{id:'p',name:'Parent',billingName:'Parent',email:'parent@example.invalid',zone:'America/Toronto'}]:[],lessons:hasFamily?[{id:'l',studentId:'s',start:'2026-11-01T20:00:00Z',subject:'Biology',hours:1,status:'Scheduled',planning:[],notes:{covered:'',outcome:'',next:''},resources:[],privateNotes:'Private'}]:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],onboardings:hasFamily?[{id:'onboarding-s',studentId:'s',step:0,parent:{name:'Parent',email:'parent@example.invalid'},student:{name:'Student',email:'student@example.invalid'},learning:{},agreements:[],complete:false}]:[],notifications:[],settings:{},entitled:true,calendarView:'Week',calendarOffset:0};ctx.fixture=fixture;vm.runInContext(source.replace('initialise();\n})();',"db=fixture;me=db.me;activeChild=db.students[0]?.id||'';selectOnboarding();globalThis.renderTest=render;globalThis.moveTest=go;globalThis.submitTest=onSubmit;globalThis.actionTest=onAction;globalThis.googleMessageTest=googleMessage;render();\n})();"),ctx);return {ctx,root,location};}
 test('all main portal and library screens render with live-style records',()=>{for(const role of ['admin','parent','student']){const {ctx,root}=screen(role);for(const route of ['/portal/dashboard/','/portal/lessons/','/portal/lesson/?id=l','/portal/messages/','/portal/account/','/portal/reports/','/portal/billing/','/portal/calendar/','/portal/students/','/portal/student/?id=s','/portal/student/?id=s&tab=arrangements','/portal/student/?id=s&tab=reports','/portal/onboarding/','/resources/','/resources/manage/']){ctx.moveTest(route);assert.ok(root.innerHTML.includes('Auxesis'));assert.ok(!root.innerHTML.includes('Prototype preview'));assert.ok(!root.innerHTML.includes('example.test'));}}});
 test('new administrator can open overview, calendar and empty lists',()=>{const {ctx,root}=screen('admin',false);for(const route of ['/portal/dashboard/','/portal/calendar/','/portal/students/','/portal/billing/','/resources/manage/','/portal/account/']){assert.doesNotThrow(()=>ctx.moveTest(route));assert.ok(root.innerHTML.includes('Auxesis'));}});
 test('resource forms start blank and save specified Other subjects and curricula',async()=>{
@@ -41,7 +41,7 @@ test('intake captures Tracker identity fields and offers location time zones wit
 
 test('source sync and Google connection routes use the authenticated first-party boundary',async()=>{
  const previous=globalThis.fetch;globalThis.crypto??=webcrypto;
- try{for(const path of [['sync'],['google','start'],['google','picker']]){
+ try{for(const path of [['sync'],['google','start'],['google','picker'],['google','status'],['google','disconnect']]){
   const route=path.join('/');let forwarded;
   globalThis.fetch=async(url,options)=>{forwarded={url,options};return Response.json({ok:true});};
   const request=new Request('https://auxesis-education.pages.dev/api/portal/'+route,{method:'POST',headers:{Origin:'https://auxesis-education.pages.dev','Content-Type':'application/json',Cookie:'__Host-auxesis_session='+'a'.repeat(43)},body:'{"mode":"preview"}'});
@@ -51,4 +51,35 @@ test('source sync and Google connection routes use the authenticated first-party
   const anonymous=await onRequest({request:new Request(request.url,{method:'POST',headers:{Origin:'https://auxesis-education.pages.dev','Content-Type':'application/json'},body:'{}'}),params:{path}});
   assert.equal(anonymous.status,401);
  }}finally{globalThis.fetch=previous;}
+});
+
+
+test('owner connection and preview controls are absent from family views',()=>{
+ const owner=screen('admin');owner.ctx.moveTest('/portal/account/');
+ assert.ok(owner.root.innerHTML.includes('Tracker & Calendar'));assert.ok(owner.root.innerHTML.includes('Preview October 13–14'));
+ assert.ok(!owner.root.innerHTML.includes('data-action="sync-apply"'));
+ for(const role of ['parent','student']){const family=screen(role);family.ctx.moveTest('/portal/account/');assert.ok(!family.root.innerHTML.includes('data-action="google-connect"'));assert.ok(!family.root.innerHTML.includes('data-action="sync-october"'));}
+});
+
+test('Google popup messages require the service origin and the exact opened window',async()=>{
+ const {ctx,root}=screen('admin');ctx.moveTest('/portal/account/');
+ const popup={location:{},close(){}};ctx.window.open=()=>popup;ctx.window.removeEventListener=()=>{};
+ let statusReads=0;ctx.fetch=async(url)=>{
+  if(url.endsWith('/google/start'))return Response.json({url:'https://auxesis-portal-service.floot.app/_api/auth/google_integrations_authorize?handoff=opaque'});
+  if(url.endsWith('/google/status')){statusReads++;return Response.json({connected:true,email:'owner@example.invalid',trackerAccessible:true,calendarAccessible:true,pickerReady:true});}
+  return Response.json({});
+ };
+ const event={target:{closest:()=>({dataset:{action:'google-connect'}})},preventDefault(){}};
+ await ctx.actionTest(event);assert.match(popup.location.href,/^https:\/\/auxesis-portal-service.floot.app/);
+ ctx.googleMessageTest({origin:'https://attacker.invalid',source:popup,data:{type:'GOOGLE_INTEGRATION_SUCCESS'}});
+ ctx.googleMessageTest({origin:'https://auxesis-portal-service.floot.app',source:{},data:{type:'GOOGLE_INTEGRATION_SUCCESS'}});
+ assert.equal(statusReads,0);
+ ctx.googleMessageTest({origin:'https://auxesis-portal-service.floot.app',source:popup,data:{type:'GOOGLE_INTEGRATION_SUCCESS'}});
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(statusReads,1);assert.ok(root.innerHTML.includes('owner@example.invalid'));
+});
+test('sync controls submit preview mode and never send an apply request',async()=>{
+ const {ctx}=screen('admin');let sent;
+ ctx.fetch=async(url,options)=>{sent={url,value:JSON.parse(options.body)};return Response.json({previewOnly:true,studentName:'Andie Ng',changedRecords:0,issues:[]});};
+ await ctx.actionTest({target:{closest:()=>({dataset:{action:'sync-october'}})},preventDefault(){}});
+ assert.equal(sent.url,'/api/portal/sync');assert.deepEqual(sent.value,{mode:'preview',scope:'october13-14'});
 });
