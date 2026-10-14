@@ -37,6 +37,8 @@ No new checkpoint or publish could be created after the limit was reached. Exist
 
 ## Frontend continuation branch
 
+Draft PR: https://github.com/Amandadsouza77/auxesis-education/pull/16. Keep it draft until the backend checks and publish are complete. The local checkout is an older work branch with selected current frontend files restored; use the remote continuation branch for integration and do not push the old local branch over main.
+
 Branch: codex/owner-google-sync-preview-2026-10-14 (based on current main b1e4c3f1b30864814e7cc54404d051f702258c5b).
 
 - public/portal.js: owner-only Connections & settings panel; Check connection, Authorize/Reconnect, Google Picker selection, Disconnect, October 13–14 preview and full-pilot conflict check. No apply control. Popup messages require exact service origin and the opened window. Account state and preview clear on sign-out/disconnect. Check connection can recover after closing the consent popup.
