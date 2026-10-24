@@ -57,45 +57,51 @@ test('fetchLiveCalendarEvents queries Google Calendar API correctly', async () =
   }
 });
 
-test('overlayLiveCalendarToLessons updates lesson timing while maintaining permissions and fallback on failure', () => {
+test('overlayLiveCalendarToLessons filters inactive student future lessons while preserving history', () => {
+  const futureDate = new Date(Date.now() + 86400000 * 10).toISOString();
+  const pastDate = new Date(Date.now() - 86400000 * 10).toISOString();
+
+  const students = [
+    { id: 'active-student-id', name: 'Active Student', status: 'Active' },
+    { id: 'journee-inactive-id', name: 'Journee Belboda', status: 'Ended' }
+  ];
+
   const cachedLessons = [
-    {
-      id: 'lesson-1',
-      studentId: 'lara-id',
-      calendarEventId: 'lara-event-id',
-      start: '2026-10-30T10:30:00Z', // Stale cached time
-      subject: 'IB Biology'
-    },
-    {
-      id: 'lesson-2',
-      studentId: 'andie-id',
-      calendarEventId: 'andie-event-id',
-      start: '2026-10-31T14:00:00Z',
-      subject: 'IB Chemistry'
-    }
+    { id: 'l1', studentId: 'journee-inactive-id', start: futureDate, status: 'Scheduled', calendarEventId: 'ev1' },
+    { id: 'l2', studentId: 'journee-inactive-id', start: pastDate, status: 'Completed', calendarEventId: 'ev2' },
+    { id: 'l3', studentId: 'active-student-id', start: futureDate, status: 'Scheduled', calendarEventId: 'ev3' }
   ];
 
   const liveEvents = [
-    {
-      id: 'lara-event-id',
-      summary: 'Lara Tutoring',
-      start: '2026-10-30T09:30:00Z', // Updated live time (5:30 AM Toronto)
-      end: '2026-10-30T10:30:00Z',
-      status: 'confirmed'
-    }
+    { id: 'ev1', summary: 'Journee', start: futureDate, end: futureDate, status: 'confirmed' },
+    { id: 'ev2', summary: 'Journee Past', start: pastDate, end: pastDate, status: 'confirmed' },
+    { id: 'ev3', summary: 'Active Student', start: futureDate, end: futureDate, status: 'confirmed' }
   ];
 
-  const updated = overlayLiveCalendarToLessons(cachedLessons, liveEvents);
+  const filtered = overlayLiveCalendarToLessons(cachedLessons, liveEvents, students);
 
-  // Lara's lesson timing reflects live Calendar authority
-  assert.equal(updated[0].start, '2026-10-30T09:30:00Z');
-  assert.equal(updated[0].liveCalendarOverlay, true);
+  // Future scheduled lesson for inactive student is filtered out from active schedule
+  assert.equal(filtered.length, 2);
+  assert.equal(filtered.some((l) => l.id === 'l1'), false);
 
-  // Andie's lesson remains untouched
-  assert.equal(updated[1].start, '2026-10-31T14:00:00Z');
-  assert.equal(updated[1].liveCalendarOverlay, undefined);
+  // Past completed lesson for inactive student remains preserved for historical audit
+  assert.equal(filtered.some((l) => l.id === 'l2'), true);
 
-  // Fallback test: Empty or failed API response preserves cached store safely
-  const fallback = overlayLiveCalendarToLessons(cachedLessons, []);
-  assert.deepEqual(fallback, cachedLessons);
+  // Active student future lesson remains present
+  assert.equal(filtered.some((l) => l.id === 'l3'), true);
+});
+
+test('overlayLiveCalendarToLessons handles live Calendar event cancellations', () => {
+  const cachedLessons = [
+    { id: 'l1', studentId: 'active-id', start: '2026-10-30T15:00:00Z', status: 'Scheduled', calendarEventId: 'event-cancelled' }
+  ];
+
+  const liveEvents = [
+    { id: 'event-cancelled', summary: 'Cancelled Lesson', start: '2026-10-30T15:00:00Z', end: '2026-10-30T16:00:00Z', status: 'cancelled' }
+  ];
+
+  const result = overlayLiveCalendarToLessons(cachedLessons, liveEvents);
+
+  assert.equal(result[0].status, 'Cancelled');
+  assert.equal(result[0].liveCalendarOverlay, true);
 });

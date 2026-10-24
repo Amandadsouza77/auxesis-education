@@ -89,33 +89,65 @@ export async function fetchLiveCalendarEvents(
 }
 
 /**
- * Overlay live Google Calendar event timing onto cached portal lesson records safely.
- * Preserves role permissions and student identity while reflecting Google Calendar scheduling authority.
+ * Overlay live Google Calendar event timing and cancellation status onto cached portal lesson records safely.
+ * Filters out upcoming/future scheduled lessons for inactive students while preserving historical completed records.
  */
 export function overlayLiveCalendarToLessons(
   cachedLessons: any[],
-  liveEvents: CalendarEventRead[]
+  liveEvents: CalendarEventRead[],
+  studentsList: any[] = []
 ): any[] {
-  if (!Array.isArray(cachedLessons) || !Array.isArray(liveEvents) || liveEvents.length === 0) {
+  if (!Array.isArray(cachedLessons)) {
     return cachedLessons;
   }
 
-  return cachedLessons.map((lesson) => {
-    if (!lesson.calendarEventId) return lesson;
+  const inactiveStudentIds = new Set(
+    Array.isArray(studentsList)
+      ? studentsList.filter((s) => s.status && String(s.status).toLowerCase() !== 'active').map((s) => s.id)
+      : []
+  );
 
-    const matchedEvent = liveEvents.find((e) => e.id === lesson.calendarEventId);
-    if (!matchedEvent) return lesson;
+  const now = new Date();
 
-    // Overlay live start time if different from cached store
-    if (matchedEvent.start && matchedEvent.start !== lesson.start) {
-      return {
-        ...lesson,
-        start: matchedEvent.start,
-        calendarSyncedAt: new Date().toISOString(),
-        liveCalendarOverlay: true
-      };
-    }
+  return cachedLessons
+    .filter((lesson) => {
+      // Rule 1: Exclude upcoming/future scheduled lessons for inactive students from active portal view
+      const isInactive = inactiveStudentIds.has(lesson.studentId);
+      const isFuture = new Date(lesson.start) > now;
+      if (isInactive && isFuture && lesson.status === 'Scheduled') {
+        return false;
+      }
+      return true;
+    })
+    .map((lesson) => {
+      if (!lesson.calendarEventId || !Array.isArray(liveEvents) || liveEvents.length === 0) {
+        return lesson;
+      }
 
-    return lesson;
-  });
+      const matchedEvent = liveEvents.find((e) => e.id === lesson.calendarEventId);
+      if (!matchedEvent) return lesson;
+
+      // Rule 2: Handle live Calendar event cancellation / status change
+      if (matchedEvent.status === 'cancelled') {
+        return {
+          ...lesson,
+          status: 'Cancelled',
+          cancelledAt: lesson.cancelledAt || new Date().toISOString(),
+          calendarSyncedAt: new Date().toISOString(),
+          liveCalendarOverlay: true
+        };
+      }
+
+      // Rule 3: Overlay live start time if different from cached store
+      if (matchedEvent.start && matchedEvent.start !== lesson.start) {
+        return {
+          ...lesson,
+          start: matchedEvent.start,
+          calendarSyncedAt: new Date().toISOString(),
+          liveCalendarOverlay: true
+        };
+      }
+
+      return lesson;
+    });
 }
