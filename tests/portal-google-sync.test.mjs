@@ -127,3 +127,40 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('completion requires both Calendar identifiers before any Google write, including partial retry', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('Unexpected Google request'); };
+  try {
+    for (const [calendarId, calendarEventId] of [['', ''], ['cal123', ''], ['', 'event456']]) {
+      const result = await syncLessonCompletionToGoogle({
+        spreadsheetId: 'sheet123', calendarId, calendarEventId,
+        accessToken: 'token123', lessonRowIndex: 37,
+        expectedStudentId: 'student-123', existingSheetsSynced: true
+      });
+      assert.equal(result.ok, false);
+      assert.equal(result.status, 'failed');
+      assert.match(result.error || '', /both calendarId and calendarEventId/);
+    }
+    assert.equal(calls, 0, 'invalid configuration must never write to Sheets');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('status-cell write guard requires an exact Lessons Column C row', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('Unexpected Sheets write'); };
+  try {
+    for (const range of ['Lessons!C37:E37', 'Lessons!C37junk', 'Lessons!C1', 'Lessons!C0', 'Lessons!C37!G37']) {
+      const result = await updateGoogleSheetCell('sheet123', range, 'Completed', 'token123');
+      assert.equal(result.ok, false, range);
+      assert.match(result.error || '', /Blocked write to range/);
+    }
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
