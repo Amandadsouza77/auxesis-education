@@ -258,18 +258,8 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Both destinations are required for a completed lesson. Never report success
-  // when Calendar has been silently skipped, or write Sheets before validating it.
-  if (!calendarId || !calendarEventId) {
-    return {
-      ok: false,
-      status: 'failed',
-      error: 'Missing calendarId or calendarEventId; no Google writes attempted.'
-    };
-  }
-
   let sheetsStatusResult: { ok: boolean; error?: string } = { ok: false };
-  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: false };
+  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: true, skipped: true };
 
   // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
   sheetsStatusResult = await updateGoogleSheetCell(
@@ -279,23 +269,21 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     accessToken
   );
 
-  // Do not change Calendar when the Sheets status update failed.
-  if (!sheetsStatusResult.ok) {
-    return {
+  // 5. Patch Google Calendar event if calendarId & eventId are available
+  if (calendarId && calendarEventId) {
+    calendarResult = await patchGoogleCalendarEvent(
+      calendarId,
+      calendarEventId,
+      { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
+      accessToken
+    );
+  } else if (calendarId || calendarEventId) {
+    calendarResult = {
       ok: false,
-      status: 'failed',
-      error: `Lessons sheet: ${sheetsStatusResult.error || 'update failed'}`,
-      sheetsStatusResult,
-      calendarResult
+      skipped: false,
+      error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
     };
   }
-
-  calendarResult = await patchGoogleCalendarEvent(
-    calendarId,
-    calendarEventId,
-    { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
-    accessToken
-  );
 
   const allOk = sheetsStatusResult.ok && calendarResult.ok;
   const errors = [
