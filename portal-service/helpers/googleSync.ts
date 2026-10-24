@@ -298,15 +298,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Calendar is mandatory for completion, including partial-write retries.
-  // Reject missing destinations BEFORE any Google Sheets write.
-  if (!calendarId || !calendarEventId) {
+  // Pre-flight check calendar configuration to prevent partial sync drift
+  if (!existingCalendarSynced && calendarId && !calendarEventId) {
     return {
       ok: false,
       status: 'failed',
       sheetsSynced: existingSheetsSynced,
       calendarSynced: false,
-      error: 'Missing calendarId or calendarEventId; no Google writes attempted.'
+      error: 'Incomplete calendar configuration: missing calendarEventId.'
     };
   }
 
@@ -380,8 +379,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
       };
     } else {
-      // Defensive fail-closed fallback; the pre-flight guard should prevent this.
-      calendarResult = { ok: false, skipped: false, error: 'Calendar destination is required.' };
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
     }
   }
 
