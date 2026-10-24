@@ -138,7 +138,13 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
  if(action==='invite'){admin(a);if(all.find(r=>r.id==='settings')?.reviewMode)fail('Family access is paused during private review. Imported records can be previewed without invitations.',403);const pe=email(v.parentEmail),se=email(v.studentEmail);if(pe===se)fail('Use separate parent and student email addresses.',400);const existing=await cx.selectFrom('portalAccounts').selectAll().where('email','=',pe).executeTakeFirst();if(existing&&existing.role!=='parent')fail('This email already has a different role.',409);if(await cx.selectFrom('portalAccounts').select('id').where('email','=',se).executeTakeFirst())fail('The student email is already assigned.',409);
  const pid=existing?.parentId||id(),sid=id(),pn=text(v.parentName,200,true),sn=text(v.studentName,200,true);const p=existing?find('parents',pid):{id:pid,name:pn,email:pe,mobile:'',country:'',zone:'America/Toronto',contact:'Email',billingName:pn};const s={id:sid,parentId:pid,name:sn,preferred:text(v.preferred||sn.split(' ')[0],200),pronouns:'',email:se,country:'',zone:'America/Toronto',year:'',programme:text(v.programme||'',100),subject:text(v.subject||'',200),level:'',board:'',exam:'',rate:num(v.rate,0,10000),currency:['USD','CAD','GBP','EUR','AUD'].includes(v.currency)?v.currency:'USD',discount:0,purchased:0,used:0,day:'',time:'',length:60,frequency:'Weekly',startDate:new Date().toISOString(),endDate:null,goals:'',challenge:''};await save('parents',p);await save('students',s);if(!existing)await cx.insertInto('portalAccounts').values({id:id(),email:pe,name:pn,role:'parent',parentId:pid}).execute();await cx.insertInto('portalAccounts').values({id:id(),email:se,name:sn,role:'student',studentId:sid}).execute();await save('threads',{id:sid+'-student',kind:'student',studentId:sid,name:sn,messages:[],unreadBy:[]});if(!existing)await save('threads',{id:pid+'-parent',kind:'parent',parentId:pid,name:pn,messages:[],unreadBy:[]});await save('onboardings',{id:'onboarding-'+sid,studentId:sid,parentId:pid,step:0,parent:{...p},student:{...s},learning:{help:'',challenge:'',goals:'',dates:'',other:''},agreements:[],complete:false,arrangementsConfirmed:false});out.studentId=sid;out.invitation=SITE+'/portal/';
  }else if(action==='schedule'){admin(a);const s=student(v.studentId),start=date(v.start),count=num(v.count,1,24),hours=num(v.hours,.25,3);if(!Number.isInteger(count))fail('Enter a whole number of lessons.',400);for(let n=0;n<count;n++){const startAt=weekly(start,zone(v.zone||'America/Toronto'),n);if(all.some(r=>r._kind==='lessons'&&r.status==='Scheduled'&&r.studentId===s.id&&r.start===startAt))continue;await save('lessons',{id:id(),studentId:s.id,start:startAt,subject:text(v.subject||s.programme+' '+s.subject,200,true),hours,status:'Scheduled',planning:[],notes:{covered:'',outcome:'',next:''},resources:[],privateNotes:''});}
- }else if(['planning','notes','privateNotes','attachResource','complete','cancel','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
+ }else if(action==='requestExtraLesson'){
+   const s=student(v.studentId);
+   const requestedStart=date(v.requestedStart);
+   const notes=text(v.notes||'',1000);
+   await notifyAdmin(`${a.name} requested an extra lesson for ${s.name}`,{type:'extraLessonRequest',studentId:s.id,requestedStart,notes});
+   out.requested=true;
+ }else if(['planning','notes','privateNotes','attachResource','complete','cancel','requestCancellation','requestReschedule','approveRequest','rejectRequest','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
  if(action==='planning'){if(a.role==='parent'||target.status!=='Scheduled')fail();target.planning.push({id:id(),author:a.name,authorId:a.id,at:new Date().toISOString(),text:text(v.text,10000,true),files:await checkedFiles(cx,a,v.files||[],'lesson',target.id)});await notifyAdmin(s.name+' added lesson planning.',{lessonId:target.id,type:'planning'});}
  if(action==='notes'){admin(a);target.notes=pick(v,['covered','outcome','next']);for(const k of ['covered','outcome','next'])target.notes[k]||='';}
  if(action==='privateNotes'){admin(a);target.privateNotes=text(v.text,20000);}
@@ -205,9 +211,60 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      out.googleSync = 'synced';
    }
  }
- if(action==='cancel'){if(a.role!=='parent'||target.status!=='Scheduled'||Date.parse(target.start)<=Date.now())fail();const hours=(Date.parse(target.start)-Date.now())/3600000;target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=hours<12;target.rescheduleRequired=hours>=12&&hours<168;if(target.chargeable){s.used+=1;await save('students',s);}await notifyAdmin(s.name+' cancelled a lesson · '+(target.chargeable?'Chargeable':target.rescheduleRequired?'Rescheduling applies':'No charge'),{type:'cancellation',lessonId:target.id});}
- if(action==='reschedule'){admin(a);if(target.status==='Completed')fail('Completed lessons retain their original dates.',409);target.start=date(v.start);target.hours=num(v.hours,.25,3);if(target.status==='Cancelled'){if(target.chargeable){s.used=Math.max(0,s.used-1);await save('students',s);}target.status='Scheduled';target.rescheduledAt=new Date().toISOString();target.chargeable=false;target.rescheduleRequired=false;}}
- if(action==='noShow'){admin(a);if(target.status!=='Scheduled'||Date.parse(target.start)>Date.now())fail();target.status='No-show';target.completedAt=new Date().toISOString();s.used+=1;await save('students',s);}
+ if(action==='cancel'||action==='requestCancellation'){
+   if(a.role!=='admin'){
+     if(target.status!=='Scheduled')fail('Only scheduled lessons can be requested for cancellation.',400);
+     target.pendingRequest={type:'cancellation',requestedBy:a.name,requestedById:a.id,requestedAt:new Date().toISOString(),reason:text(v.reason||'',1000)};
+     await notifyAdmin(`${a.name} requested cancellation for ${s.name}'s lesson`,{type:'cancellationRequest',lessonId:target.id});
+   }else{
+     target.status='Cancelled';
+     target.cancelledAt=new Date().toISOString();
+     target.cancelledBy=a.name;
+     const hours=(Date.parse(target.start)-Date.now())/3600000;
+     target.chargeable=v.chargeable!==undefined?!!v.chargeable:(hours<12);
+     if(target.chargeable&&!target.usedIncremented){
+       s.used+=1;
+       target.usedIncremented=true;
+       await save('students',s);
+     }
+   }
+ }
+ if(action==='requestReschedule'){
+   if(target.status!=='Scheduled'&&target.status!=='Cancelled')fail('Cannot request reschedule for this lesson.',400);
+   const requestedStart=date(v.requestedStart);
+   target.pendingRequest={type:'reschedule',requestedBy:a.name,requestedById:a.id,requestedAt:new Date().toISOString(),requestedStart,reason:text(v.reason||'',1000)};
+   await notifyAdmin(`${a.name} requested reschedule for ${s.name}'s lesson`,{type:'rescheduleRequest',lessonId:target.id});
+ }
+ if(action==='approveRequest'){
+   admin(a);
+   if(!target.pendingRequest)fail('No pending request found for this lesson.',404);
+   const req=target.pendingRequest;
+   if(req.type==='cancellation'){
+     const hours=(Date.parse(target.start)-Date.parse(req.requestedAt))/3600000;
+     const chargeable=v.chargeable!==undefined?!!v.chargeable:(hours<12);
+     target.status='Cancelled';
+     target.cancelledAt=req.requestedAt;
+     target.cancelledBy=req.requestedBy;
+     target.chargeable=chargeable;
+     if(chargeable&&!target.usedIncremented){
+       s.used+=1;
+       target.usedIncremented=true;
+       await save('students',s);
+     }
+   }else if(req.type==='reschedule'){
+     if(req.requestedStart)target.start=req.requestedStart;
+     target.status='Scheduled';
+     target.rescheduledAt=new Date().toISOString();
+   }
+   delete target.pendingRequest;
+ }
+ if(action==='rejectRequest'){
+   admin(a);
+   if(!target.pendingRequest)fail('No pending request found for this lesson.',404);
+   delete target.pendingRequest;
+ }
+ if(action==='reschedule'){admin(a);if(target.status==='Completed')fail('Completed lessons retain their original dates.',409);target.start=date(v.start);target.hours=num(v.hours,.25,3);if(target.status==='Cancelled'){if(target.chargeable&&target.usedIncremented){s.used=Math.max(0,s.used-1);delete target.usedIncremented;await save('students',s);}target.status='Scheduled';target.rescheduledAt=new Date().toISOString();target.chargeable=false;target.rescheduleRequired=false;}}
+ if(action==='noShow'){admin(a);if(target.status!=='Scheduled'||Date.parse(target.start)>Date.now())fail();target.status='No-show';target.completedAt=new Date().toISOString();if(!target.usedIncremented){s.used+=1;target.usedIncremented=true;await save('students',s);}}
  if(action==='tutorCancel'){admin(a);if(target.status!=='Scheduled')fail();target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=false;}
  await save('lessons',target);
  }else if(action==='message'||action==='markRead'){target=find('threads',v.id);if(target.kind==='student')student(target.studentId);else if(a.role!=='admin'&&!(a.role==='parent'&&target.parentId===a.parentId))fail();if(action==='message'){if(a.role==='parent'&&target.kind==='student'||a.role==='student'&&target.kind!=='student')fail();target.messages.push({id:id(),author:a.name,authorId:a.id,at:new Date().toISOString(),text:text(v.text,10000,true),files:await checkedFiles(cx,a,v.files||[],'thread',target.id)});const recipients=await cx.selectFrom('portalAccounts').selectAll().where('enabled','=',true).execute();target.unreadBy=recipients.filter(r=>r.id!==a.id&&(r.role==='admin'||target.kind==='parent'&&r.role==='parent'&&r.parentId===target.parentId||target.kind==='student'&&r.role==='student'&&r.studentId===target.studentId)).map(r=>r.id);for(const recipient of target.unreadBy)await notify(recipient,'New message from '+a.name,{type:'message',threadId:target.id});}else target.unreadBy=(target.unreadBy||[]).filter((rid:string)=>rid!==a.id);await save('threads',target);
