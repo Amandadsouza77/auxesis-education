@@ -127,3 +127,53 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('sync fails closed without a Calendar event and never writes Sheets', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+  };
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      lessonSubject: 'IB Biology'
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'failed');
+    assert.match(result.error, /calendarEventId/);
+    assert.equal(calls.length, 1);
+    assert.match(calls[0], /Lessons!G37/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('sync does not patch Calendar when Sheets update fails', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), method: init?.method || 'GET' });
+    if (String(url).includes('Lessons!G37')) {
+      return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    }
+    return new Response('Sheet unavailable', { status: 503 });
+  };
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123', calendarId: 'cal123', calendarEventId: 'event456',
+      accessToken: 'mock-token', lessonRowIndex: 37,
+      expectedStudentId: 'student-123', lessonSubject: 'IB Biology'
+    });
+    assert.equal(result.ok, false);
+    assert.equal(calls.length, 2);
+    assert.ok(calls.every(call => !call.url.includes('/calendars/')));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
