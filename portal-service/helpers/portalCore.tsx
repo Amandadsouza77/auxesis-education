@@ -155,14 +155,14 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      lessonSubject: target.subject
    });
 
-   if (!syncRes.ok || syncRes.status !== 'synced' || syncRes.calendarResult?.skipped) {
+   if (!syncRes.ok) {
      target.googleSyncStatus = syncRes.status;
      target.googleSyncError = syncRes.error;
      out.googleSyncStatus = syncRes.status;
      out.googleSyncError = syncRes.error;
      console.warn('Google sync failed:', syncRes.error);
    } else {
-     // Apply local changes only after both Google destinations confirm success
+     // Apply local changes only when external write succeeds or is intentionally skipped
      target.status='Completed';
      target.completedAt=new Date().toISOString();
      s.used+=1;
