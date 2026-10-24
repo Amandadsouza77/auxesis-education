@@ -12,18 +12,25 @@ export interface GoogleSyncParams {
   expectedStudentId: string; // Required for fail-closed identity verification
   calendarEventId?: string;
   lessonSubject?: string;
+  existingSyncState?: 'pending' | 'partial' | 'failed' | 'synced';
+  existingSheetsSynced?: boolean;
+  existingCalendarSynced?: boolean;
 }
 
 export interface GoogleSyncResult {
   ok: boolean;
-  status: 'synced' | 'failed' | 'skipped' | 'identity_mismatch';
+  status: 'synced' | 'partial' | 'failed' | 'skipped' | 'identity_mismatch';
+  sheetsSynced: boolean;
+  calendarSynced: boolean;
   error?: string;
   sheetsStatusResult?: { ok: boolean; error?: string };
   calendarResult?: { ok: boolean; skipped?: boolean; error?: string };
+  newAccessToken?: string;
 }
 
 /**
  * Refreshes an expired Google OAuth2 access token using a stored refresh_token.
+ * Redacts secret token values from any returned or logged errors.
  */
 export async function refreshGoogleAccessToken(
   refreshToken: string,
@@ -47,14 +54,16 @@ export async function refreshGoogleAccessToken(
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      return { ok: false, error: `Token refresh failed (${res.status}): ${errText}` };
+      return { ok: false, error: `Google OAuth refresh failed with status ${res.status}` };
     }
 
     const data = (await res.json()) as any;
+    if (!data.access_token) {
+      return { ok: false, error: 'Google OAuth refresh response did not contain access_token.' };
+    }
     return { ok: true, accessToken: data.access_token };
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Network error refreshing Google access token' };
+    return { ok: false, error: 'Network error during Google OAuth token refresh.' };
   }
 }
 
@@ -66,7 +75,7 @@ export async function verifyLessonRowIdentity(
   lessonRowIndex: number,
   expectedStudentId: string,
   accessToken: string
-): Promise<{ match: boolean; foundStudentId?: string; error?: string }> {
+): Promise<{ match: boolean; foundStudentId?: string; error?: string; status?: number }> {
   if (!spreadsheetId || !lessonRowIndex || !expectedStudentId || !accessToken) {
     return { match: false, error: 'Missing parameters for identity verification.' };
   }
@@ -80,7 +89,7 @@ export async function verifyLessonRowIdentity(
     });
 
     if (!res.ok) {
-      return { match: false, error: `Identity verify read failed with status ${res.status}` };
+      return { match: false, status: res.status, error: `Identity verify read failed with status ${res.status}` };
     }
 
     const data = (await res.json()) as any;
@@ -92,11 +101,12 @@ export async function verifyLessonRowIdentity(
 
     return {
       match: false,
+      status: 200,
       foundStudentId,
       error: `Row identity mismatch: Lessons!G${lessonRowIndex} contains "${foundStudentId}", expected "${expectedStudentId}".`
     };
   } catch (err: any) {
-    return { match: false, error: err?.message || 'Network error verifying row identity' };
+    return { match: false, error: 'Network error verifying row identity.' };
   }
 }
 
@@ -109,7 +119,7 @@ export async function updateGoogleSheetCell(
   range: string,
   value: string | number,
   accessToken: string
-): Promise<{ ok: boolean; updatedCells?: number; error?: string }> {
+): Promise<{ ok: boolean; status?: number; updatedCells?: number; error?: string }> {
   if (!spreadsheetId || !accessToken) {
     return { ok: false, error: 'Missing spreadsheetId or Google accessToken' };
   }
@@ -136,14 +146,13 @@ export async function updateGoogleSheetCell(
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      return { ok: false, error: `Google Sheets API error (${res.status}): ${errText}` };
+      return { ok: false, status: res.status, error: `Google Sheets API error (${res.status})` };
     }
 
     const data = (await res.json()) as any;
-    return { ok: true, updatedCells: data.updatedCells || 1 };
+    return { ok: true, status: 200, updatedCells: data.updatedCells || 1 };
   } catch (err: any) {
-    return { ok: false, error: err.message || 'Network error updating Google Sheets' };
+    return { ok: false, error: 'Network error updating Google Sheets.' };
   }
 }
 
@@ -155,7 +164,7 @@ export async function patchGoogleCalendarEvent(
   eventId: string,
   updates: { summary?: string; description?: string; colorId?: string },
   accessToken: string
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; status?: number; error?: string }> {
   if (!calendarId || !eventId || !accessToken) {
     return { ok: false, error: 'Missing calendarId, eventId, or accessToken' };
   }
@@ -173,19 +182,18 @@ export async function patchGoogleCalendarEvent(
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      return { ok: false, error: `Google Calendar API error (${res.status}): ${errText}` };
+      return { ok: false, status: res.status, error: `Google Calendar API error (${res.status})` };
     }
 
-    return { ok: true };
+    return { ok: true, status: 200 };
   } catch (err: any) {
-    return { ok: false, error: err.message || 'Network error patching Google Calendar event' };
+    return { ok: false, error: 'Network error patching Google Calendar event.' };
   }
 }
 
 /**
  * Synchronizes a lesson completion event to both Google Sheets and Google Calendar.
- * Strictly verifies identity before writing and accurately tracks Sheets & Calendar outcomes.
+ * Supports per-destination sync recovery, 401 automatic refresh/retry, and fail-closed state tracking.
  */
 export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Promise<GoogleSyncResult> {
   let {
@@ -198,28 +206,37 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     lessonRowIndex,
     expectedStudentId,
     calendarEventId,
-    lessonSubject
+    lessonSubject,
+    existingSheetsSynced = false,
+    existingCalendarSynced = false
   } = params;
+
+  let newAccessToken: string | undefined;
 
   // 1. Fail closed if expectedStudentId is missing
   if (!expectedStudentId) {
     return {
       ok: false,
       status: 'failed',
+      sheetsSynced: existingSheetsSynced,
+      calendarSynced: existingCalendarSynced,
       error: 'Missing expectedStudentId. Pre-flight identity verification failed closed.'
     };
   }
 
-  // 2. Attempt token refresh if accessToken is missing, and refresh credentials exist
+  // 2. Refresh token if accessToken is absent but refresh credentials exist
   if (!accessToken && refreshToken && clientId && clientSecret) {
     const refreshRes = await refreshGoogleAccessToken(refreshToken, clientId, clientSecret);
     if (refreshRes.ok && refreshRes.accessToken) {
       accessToken = refreshRes.accessToken;
+      newAccessToken = accessToken;
     } else {
       return {
         ok: false,
         status: 'failed',
-        error: `Token refresh failed: ${refreshRes.error}`
+        sheetsSynced: existingSheetsSynced,
+        calendarSynced: existingCalendarSynced,
+        error: refreshRes.error || 'Initial token refresh failed.'
       };
     }
   }
@@ -228,6 +245,8 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     return {
       ok: false,
       status: 'skipped',
+      sheetsSynced: existingSheetsSynced,
+      calendarSynced: existingCalendarSynced,
       error: 'No valid Google access token configured; external sync skipped.'
     };
   }
@@ -236,6 +255,8 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     return {
       ok: false,
       status: 'failed',
+      sheetsSynced: existingSheetsSynced,
+      calendarSynced: existingCalendarSynced,
       error: 'Missing Google Spreadsheet ID for synchronization.'
     };
   }
@@ -244,48 +265,91 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     return {
       ok: false,
       status: 'failed',
+      sheetsSynced: existingSheetsSynced,
+      calendarSynced: existingCalendarSynced,
       error: 'Invalid or missing lesson source row index.'
     };
   }
 
-  // 3. Identity Verification Pre-flight: Mandatory check of Column G Student ID
-  const verifyRes = await verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, accessToken);
-  if (!verifyRes.match) {
-    return {
-      ok: false,
-      status: 'identity_mismatch',
-      error: verifyRes.error || 'Lesson row identity verification failed.'
-    };
-  }
+  // Helper for 401 retry wrapper
+  const execWith401Retry = async <T extends { ok: boolean; status?: number }>(
+    fn: (token: string) => Promise<T>
+  ): Promise<T> => {
+    let res = await fn(accessToken!);
+    if (!res.ok && res.status === 401 && refreshToken && clientId && clientSecret) {
+      const refresh = await refreshGoogleAccessToken(refreshToken, clientId, clientSecret);
+      if (refresh.ok && refresh.accessToken) {
+        accessToken = refresh.accessToken;
+        newAccessToken = accessToken;
+        res = await fn(accessToken);
+      }
+    }
+    return res;
+  };
 
-  let sheetsStatusResult: { ok: boolean; error?: string } = { ok: false };
-  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: true, skipped: true };
+  // 3. Mandatory Identity Verification Pre-flight (read Column G) if Sheets write is required
+  let sheetsSynced = existingSheetsSynced;
+  let sheetsStatusResult: { ok: boolean; error?: string } = { ok: sheetsSynced };
 
-  // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
-  sheetsStatusResult = await updateGoogleSheetCell(
-    spreadsheetId,
-    `Lessons!C${lessonRowIndex}`,
-    'Completed',
-    accessToken
-  );
-
-  // 5. Patch Google Calendar event if calendarId & eventId are available
-  if (calendarId && calendarEventId) {
-    calendarResult = await patchGoogleCalendarEvent(
-      calendarId,
-      calendarEventId,
-      { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
-      accessToken
+  if (!sheetsSynced) {
+    const verifyRes = await execWith401Retry((token) =>
+      verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, token)
     );
-  } else if (calendarId || calendarEventId) {
-    calendarResult = {
-      ok: false,
-      skipped: false,
-      error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
-    };
+
+    if (!verifyRes.match) {
+      return {
+        ok: false,
+        status: 'identity_mismatch',
+        sheetsSynced: false,
+        calendarSynced: existingCalendarSynced,
+        error: verifyRes.error || 'Lesson row identity verification failed.',
+        newAccessToken
+      };
+    }
+
+    // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
+    sheetsStatusResult = await execWith401Retry((token) =>
+      updateGoogleSheetCell(spreadsheetId, `Lessons!C${lessonRowIndex}`, 'Completed', token)
+    );
+
+    if (sheetsStatusResult.ok) {
+      sheetsSynced = true;
+    }
   }
 
-  const allOk = sheetsStatusResult.ok && calendarResult.ok;
+  // 5. Update Google Calendar event if Sheets succeeded and Calendar update is needed
+  let calendarSynced = existingCalendarSynced;
+  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: calendarSynced, skipped: calendarSynced };
+
+  if (sheetsSynced && !calendarSynced) {
+    if (calendarId && calendarEventId) {
+      calendarResult = await execWith401Retry((token) =>
+        patchGoogleCalendarEvent(
+          calendarId,
+          calendarEventId,
+          { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
+          token
+        )
+      );
+      if (calendarResult.ok) {
+        calendarSynced = true;
+      }
+    } else if (calendarId || calendarEventId) {
+      calendarResult = {
+        ok: false,
+        skipped: false,
+        error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
+      };
+    } else {
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
+    }
+  }
+
+  const allOk = sheetsSynced && calendarSynced;
+  const status = allOk ? 'synced' : sheetsSynced ? 'partial' : 'failed';
+
   const errors = [
     !sheetsStatusResult.ok ? `Lessons sheet: ${sheetsStatusResult.error}` : '',
     !calendarResult.ok ? `Calendar: ${calendarResult.error}` : ''
@@ -293,9 +357,12 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
 
   return {
     ok: allOk,
-    status: allOk ? 'synced' : 'failed',
+    status,
+    sheetsSynced,
+    calendarSynced,
     error: errors || undefined,
     sheetsStatusResult,
-    calendarResult
+    calendarResult,
+    newAccessToken
   };
 }

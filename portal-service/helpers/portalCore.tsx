@@ -57,16 +57,31 @@ async function state(request:Request){
  const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
  const calendarId=settings.calendarId;
  const accessToken=settings.googleAccessToken;
+ const refreshToken=settings.googleRefreshToken;
+ const clientId=settings.googleClientId;
+ const clientSecret=settings.googleClientSecret;
 
- // Server-side read-only live Google Calendar overlay for authorized snapshot lessons
+ // Server-side read-only live Google Calendar overlay for authorized snapshot lessons with 401 refresh
  if(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length>0){
   try {
    const now = new Date();
    const timeMin = new Date(now.getTime() - 30*86400000).toISOString();
    const timeMax = new Date(now.getTime() + 60*86400000).toISOString();
-   const calRes = await fetchLiveCalendarEvents(calendarId, accessToken, timeMin, timeMax);
+   const calRes = await fetchLiveCalendarEvents(
+     calendarId,
+     accessToken,
+     timeMin,
+     timeMax,
+     refreshToken,
+     clientId,
+     clientSecret
+   );
    if(calRes.ok && calRes.events){
     snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events);
+    if(calRes.newAccessToken){
+     settings.googleAccessToken = calRes.newAccessToken;
+     await put(db, 'settings', settings);
+    }
    }
   } catch (e) {
    console.warn('Live calendar overlay skipped:', e);
@@ -130,9 +145,13 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
  if(action==='attachResource'){admin(a);find('resources',v.resourceId);if(!target.resources.includes(v.resourceId))target.resources.push(v.resourceId);}
  if(action==='complete'){
    admin(a);
+   // Prevent duplicate completion or double-deduction on retry
+   if(target.status==='Completed') {
+     out.googleSync = 'already_completed';
+     return out;
+   }
    if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);
 
-   // Attempt Google Sheets and Calendar write-through sync if configured
    const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
    const accessToken=settings.googleAccessToken;
    const refreshToken=settings.googleRefreshToken;
@@ -141,7 +160,7 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    const spreadsheetId=settings.spreadsheetId;
    const calendarId=settings.calendarId;
 
-   // Require student identity for pre-flight verification
+   // Pass existing destination sync state for partial retry reconciliation
    const syncRes = await syncLessonCompletionToGoogle({
      spreadsheetId,
      calendarId,
@@ -152,24 +171,38 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      lessonRowIndex: target.sourceRow,
      expectedStudentId: s.id,
      calendarEventId: target.calendarEventId,
-     lessonSubject: target.subject
+     lessonSubject: target.subject,
+     existingSyncState: target.googleSyncStatus,
+     existingSheetsSynced: target.googleSheetsSynced === true,
+     existingCalendarSynced: target.googleCalendarSynced === true
    });
 
+   // Persist updated token if refreshed
+   if (syncRes.newAccessToken) {
+     settings.googleAccessToken = syncRes.newAccessToken;
+     await save('settings', settings);
+   }
+
+   target.googleSyncStatus = syncRes.status;
+   target.googleSheetsSynced = syncRes.sheetsSynced;
+   target.googleCalendarSynced = syncRes.calendarSynced;
+
    if (!syncRes.ok) {
-     target.googleSyncStatus = syncRes.status;
      target.googleSyncError = syncRes.error;
      out.googleSyncStatus = syncRes.status;
      out.googleSyncError = syncRes.error;
-     console.warn('Google sync failed:', syncRes.error);
+     console.warn('Google sync incomplete:', syncRes.error);
    } else {
-     // Apply local changes only when external write succeeds or is intentionally skipped
+     // Apply local changes ONLY when full sync succeeds (or is cleanly skipped when unconfigured)
      target.status='Completed';
      target.completedAt=new Date().toISOString();
-     s.used+=1;
-     target.googleSyncStatus = 'synced';
+     if (!target.usedIncremented) {
+       s.used += 1;
+       target.usedIncremented = true;
+       await save('students', s);
+     }
      delete target.googleSyncError;
-     out.googleSync = 'success';
-     await save('students',s);
+     out.googleSync = 'synced';
    }
  }
  if(action==='cancel'){if(a.role!=='parent'||target.status!=='Scheduled'||Date.parse(target.start)<=Date.now())fail();const hours=(Date.parse(target.start)-Date.now())/3600000;target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=hours<12;target.rescheduleRequired=hours>=12&&hours<168;if(target.chargeable){s.used+=1;await save('students',s);}await notifyAdmin(s.name+' cancelled a lesson · '+(target.chargeable?'Chargeable':target.rescheduleRequired?'Rescheduling applies':'No charge'),{type:'cancellation',lessonId:target.id});}
