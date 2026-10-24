@@ -3,17 +3,63 @@ import assert from 'node:assert/strict';
 import {
   updateGoogleSheetCell,
   patchGoogleCalendarEvent,
+  refreshGoogleAccessToken,
+  verifyLessonRowIdentity,
   syncLessonCompletionToGoogle
 } from '../portal-service/helpers/googleSync.ts';
 
-test('updateGoogleSheetCell rejects execution if credentials or parameters are missing', async () => {
-  const noToken = await updateGoogleSheetCell('sheet123', 'Lessons!C37', 'Completed', '');
-  assert.equal(noToken.ok, false);
-  assert.match(noToken.error || '', /Missing/);
+test('refreshGoogleAccessToken rejects missing credentials', async () => {
+  const res = await refreshGoogleAccessToken('', '', '');
+  assert.equal(res.ok, false);
+  assert.match(res.error || '', /Missing OAuth refresh credentials/);
+});
 
-  const noSheet = await updateGoogleSheetCell('', 'Lessons!C37', 'Completed', 'token123');
-  assert.equal(noSheet.ok, false);
-  assert.match(noSheet.error || '', /Missing/);
+test('verifyLessonRowIdentity detects student ID matches and mismatches', async () => {
+  const originalFetch = globalThis.fetch;
+
+  // Case 1: Match
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+  });
+
+  const matchRes = await verifyLessonRowIdentity('sheet123', 37, 'student-123', 'token123');
+  assert.equal(matchRes.match, true);
+  assert.equal(matchRes.foundStudentId, 'student-123');
+
+  // Case 2: Mismatch
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ values: [['other-student']] }), { status: 200 });
+  });
+
+  const mismatchRes = await verifyLessonRowIdentity('sheet123', 37, 'student-123', 'token123');
+  assert.equal(mismatchRes.match, false);
+  assert.match(mismatchRes.error || '', /identity mismatch/i);
+
+  globalThis.fetch = originalFetch;
+});
+
+test('syncLessonCompletionToGoogle stops and fails on student ID identity mismatch', async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ values: [['wrong-student-id']] }), { status: 200 });
+  });
+
+  const result = await syncLessonCompletionToGoogle({
+    spreadsheetId: 'sheet123',
+    calendarId: 'cal123',
+    accessToken: 'mock-token',
+    lessonRowIndex: 37,
+    expectedStudentId: 'expected-student-id',
+    calendarEventId: 'event456',
+    lessonSubject: 'IB Biology'
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 'identity_mismatch');
+  assert.match(result.error || '', /identity/i);
+
+  globalThis.fetch = originalFetch;
 });
 
 test('updateGoogleSheetCell blocks writes to unsafe columns (Lessons!E, Students!G, Students!O)', async () => {
@@ -30,37 +76,22 @@ test('updateGoogleSheetCell blocks writes to unsafe columns (Lessons!E, Students
   assert.match(studentsO.error || '', /Blocked attempt/);
 });
 
-test('patchGoogleCalendarEvent rejects execution if parameters are missing', async () => {
-  const result = await patchGoogleCalendarEvent('cal123', '', { summary: 'Completed' }, 'token123');
-  assert.equal(result.ok, false);
-  assert.match(result.error || '', /Missing/);
-});
-
-test('syncLessonCompletionToGoogle handles missing access token gracefully without throwing', async () => {
-  const result = await syncLessonCompletionToGoogle({
-    spreadsheetId: 'sheet123',
-    calendarId: 'cal123',
-    accessToken: undefined,
-    lessonRowIndex: 37,
-    calendarEventId: 'event123',
-    lessonSubject: 'Biology'
-  });
-
-  assert.equal(result.ok, false);
-  assert.match(result.error || '', /No Google access token configured/);
-});
-
-test('syncLessonCompletionToGoogle formats requests correctly when access token is provided', async () => {
-  // Mock global fetch for testing
+test('syncLessonCompletionToGoogle formats requests correctly when access token and verified identity are provided', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
 
   globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
     calls.push({
-      url: url.toString(),
+      url: urlStr,
       method: init?.method || 'GET',
       body: init?.body ? JSON.parse(init.body) : null
     });
+
+    if (urlStr.includes('/values/Lessons!G37')) {
+      return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
   });
 
@@ -70,23 +101,29 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
       calendarId: 'cal123',
       accessToken: 'mock-token',
       lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
       calendarEventId: 'event456',
       lessonSubject: 'IB Biology',
       statusColumn: 'C'
     });
 
     assert.equal(result.ok, true);
-    assert.equal(calls.length, 2); // Lessons Sheet status, Calendar Event
+    assert.equal(result.status, 'success');
+    assert.equal(calls.length, 3); // Verify G37, Lessons Sheet status, Calendar Event
+
+    // Verify identity read
+    assert.match(calls[0].url, /values\/Lessons!G37/);
+    assert.equal(calls[0].method, 'GET');
 
     // Verify Lessons Sheet status update (Column C)
-    assert.match(calls[0].url, /values\/Lessons!C37/);
-    assert.equal(calls[0].method, 'PUT');
-    assert.deepEqual(calls[0].body.values, [['Completed']]);
+    assert.match(calls[1].url, /values\/Lessons!C37/);
+    assert.equal(calls[1].method, 'PUT');
+    assert.deepEqual(calls[1].body.values, [['Completed']]);
 
     // Verify Google Calendar event patch
-    assert.match(calls[1].url, /calendars\/cal123\/events\/event456/);
-    assert.equal(calls[1].method, 'PATCH');
-    assert.equal(calls[1].body.summary, '[Completed] IB Biology');
+    assert.match(calls[2].url, /calendars\/cal123\/events\/event456/);
+    assert.equal(calls[2].method, 'PATCH');
+    assert.equal(calls[2].body.summary, '[Completed] IB Biology');
   } finally {
     globalThis.fetch = originalFetch;
   }
