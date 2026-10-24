@@ -78,6 +78,22 @@ test('updateGoogleSheetCell blocks writes to non-Column C ranges (Lessons!E, Stu
   assert.match(studentsO.error || '', /Blocked write to range/);
 });
 
+test('Lessons status writer rejects suffixes, multi-cell ranges and header rows without issuing requests', async () => {
+  const originalFetch = globalThis.fetch;
+  let requests = 0;
+  globalThis.fetch = async () => { requests++; throw new Error('Unexpected Google API call'); };
+  try {
+    for (const range of ['Lessons!C37:D37', 'Lessons!C37garbage', 'Lessons!C37:C38', 'Lessons!C1', 'Lessons!C0', 'Lessons!C-3']) {
+      const result = await updateGoogleSheetCell('sheet123', range, 'Completed', 'token123');
+      assert.equal(result.ok, false, `Expected rejection for ${range}`);
+      assert.match(result.error || '', /Blocked write to range/);
+    }
+    assert.equal(requests, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('syncLessonCompletionToGoogle formats requests correctly when access token and verified identity are provided', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
