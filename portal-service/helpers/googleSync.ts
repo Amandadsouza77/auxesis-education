@@ -258,8 +258,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
+  // A completion requires both destinations. Fail before writing anything if the
+  // Calendar event is not identified; a skipped Calendar update is never success.
+  if (!calendarId || !calendarEventId) {
+    return { ok: false, status: 'failed', error: 'Missing calendarId or calendarEventId; no Google writes attempted.' };
+  }
+
   let sheetsStatusResult: { ok: boolean; error?: string } = { ok: false };
-  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: true, skipped: true };
+  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: false };
 
   // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
   sheetsStatusResult = await updateGoogleSheetCell(
@@ -269,21 +275,20 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     accessToken
   );
 
-  // 5. Patch Google Calendar event if calendarId & eventId are available
-  if (calendarId && calendarEventId) {
-    calendarResult = await patchGoogleCalendarEvent(
-      calendarId,
-      calendarEventId,
-      { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
-      accessToken
-    );
-  } else if (calendarId || calendarEventId) {
-    calendarResult = {
-      ok: false,
-      skipped: false,
-      error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
+  // A failed Sheets update must not trigger a Calendar write.
+  if (!sheetsStatusResult.ok) {
+    return {
+      ok: false, status: 'failed',
+      error: `Lessons sheet: ${sheetsStatusResult.error || 'update failed'}`,
+      sheetsStatusResult, calendarResult
     };
   }
+
+  calendarResult = await patchGoogleCalendarEvent(
+    calendarId, calendarEventId,
+    { summary: `[Completed] ${lessonSubject || 'Tutoring Lesson'}` },
+    accessToken
+  );
 
   const allOk = sheetsStatusResult.ok && calendarResult.ok;
   const errors = [
