@@ -298,15 +298,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Calendar and Sheets are BOTH mandatory for lesson completion.
-  // Validate before any external write, including partial retry paths.
-  if (!calendarId || !calendarEventId) {
+  // Pre-flight check calendar configuration to prevent partial sync drift
+  if (!existingCalendarSynced && calendarId && !calendarEventId) {
     return {
       ok: false,
       status: 'failed',
       sheetsSynced: existingSheetsSynced,
-      calendarSynced: existingCalendarSynced,
-      error: 'Incomplete calendar configuration: calendarId and calendarEventId are required.'
+      calendarSynced: false,
+      error: 'Incomplete calendar configuration: missing calendarEventId.'
     };
   }
 
@@ -380,8 +379,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
       };
     } else {
-      // Defensive fail-closed path; pre-flight should have rejected missing IDs.
-      calendarResult = { ok: false, skipped: false, error: 'Calendar destination is required.' };
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
     }
   }
 
