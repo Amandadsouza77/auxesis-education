@@ -7,7 +7,7 @@ const source = readFileSync(new URL('../portal-service/helpers/portalCore.tsx', 
 // Source-level regression tripwires only. These do NOT replace authenticated
 // endpoint tests or live Calendar verification.
 test('unverified admin Calendar mutations are explicitly disabled', () => {
-  assert.match(source, /a\.role==='admin'&&\['schedule','cancel','requestCancellation','reschedule','tutorCancel','approveRequest'\]\.includes\(action\)\)fail\(/);
+  assert.match(source, /a\.role==='admin'&&\['schedule','cancel','requestCancellation','reschedule','tutorCancel','approveRequest','noShow'\]\.includes\(action\)\)fail\(/);
 });
 
 test('extra-lesson requests persist a durable pending record', () => {
