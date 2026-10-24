@@ -5,6 +5,7 @@ import { upload, getUrl, getInfo } from '@floot/storage';
 import { createToken, publish } from '@floot/realtime';
 import { FlootOAuthProvider } from './FlootOAuthProvider';
 import { syncLessonCompletionToGoogle } from './googleSync';
+import { fetchLiveCalendarEvents, overlayLiveCalendarToLessons } from './calendarReadSync';
 
 const SITE='https://auxesis-education.pages.dev';
 const VERSION='2026-10-03';
@@ -51,7 +52,28 @@ async function viewer(request:Request,all:Item[]){
  return {actor,preview:{role,studentId:s.id,studentName:s.name,ownerName:owner.name,readOnly:true}};
 }
 function previewReadOnly(request:Request){if(request.headers.has('x-auxesis-preview-role')||request.headers.has('x-auxesis-preview-student'))fail('This is a read-only preview. Return to Amanda’s workspace to make changes.',403);}
-async function state(request:Request){const all=await records(),v=await viewer(request,all);return {...snapshot(v.actor,all),preview:v.preview};}
+async function state(request:Request){
+ const all=await records(),v=await viewer(request,all),snap=snapshot(v.actor,all);
+ const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
+ const calendarId=settings.calendarId;
+ const accessToken=settings.googleAccessToken;
+
+ // Server-side read-only live Google Calendar overlay for authorized snapshot lessons
+ if(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length>0){
+  try {
+   const now = new Date();
+   const timeMin = new Date(now.getTime() - 30*86400000).toISOString();
+   const timeMax = new Date(now.getTime() + 60*86400000).toISOString();
+   const calRes = await fetchLiveCalendarEvents(calendarId, accessToken, timeMin, timeMax);
+   if(calRes.ok && calRes.events){
+    snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events);
+   }
+  } catch (e) {
+   console.warn('Live calendar overlay skipped:', e);
+  }
+ }
+ return {...snap,preview:v.preview};
+}
 function slug(v:unknown){return String(v||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
 function cell(row:Item,names:string[],max=300){const wanted=names.map(slug);for(const [key,value] of Object.entries(row||{})){if(wanted.includes(slug(key))&&value!==undefined&&value!==null){const s=String(value).trim();if(s)return s.slice(0,max);}}return '';}
 function maybeNum(value:string,fallback:number,min=0,max=100000){if(!value)return fallback;const n=Number(value.replace(/[^0-9.-]/g,''));return Number.isFinite(n)&&n>=min&&n<=max?n:fallback;}
