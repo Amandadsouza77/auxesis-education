@@ -96,7 +96,7 @@ async function syncTrackerRows(cx:any,all:Item[],rows:Item[],source='Student Tra
 async function checkedFiles(cx:any,a:Actor,ids:unknown,kind:string,recordId:string){if(!Array.isArray(ids)||ids.length>3)fail('Attach up to three files.',400);const files:Item[]=[];for(const fid of ids){const f=await cx.selectFrom('portalFiles').selectAll().where('id','=',text(fid,80,true)).executeTakeFirst();if(!f||f.ownerId!==a.id||f.kind!==kind||f.recordId!==recordId)fail();const info=await getInfo({visibility:"private",filename:f.storageKey});if(!info.ok||!info.exists||info.sizeBytes!==f.bytes)fail('The attachment did not finish uploading. Please try again.',400);files.push({id:f.id,name:f.name,type:f.mime});}return files;}
 async function command(request:Request,v:Item){previewReadOnly(request);const a=await account(request);const action=text(v.action,60,true),operation=text(v.operationId,80,true);if(!/^[a-zA-Z0-9-]{12,80}$/.test(operation))fail('Please retry this change.',400);
  const result=await db.transaction().execute(async cx=>{await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);const prior=await cx.selectFrom('portalOperations').select('result').where('accountId','=',a.id).where('operationId','=',operation).executeTakeFirst();if(prior)return prior.result;
- const all=await records(cx);const find=(k:string,rid:string)=>{const r=all.find(r=>r._kind===k&&r.id===rid);if(!r)fail();return r;};const student=(sid:string)=>{const s=find('students',sid);if(!allowed(a,s))fail();return s;};let target:Item={},out:Item={ok:true};const save=async(k:string,r:Item)=>{await put(cx,k,r);const n=all.findIndex(x=>x.id===r.id);if(n<0)all.push({...r,_kind:k});else all[n]={...r,_kind:k};};
+ const all=await records(cx);const find=(k:string,rid:string)=>{const r=all.find(r=>r._kind===k&&r.id===rid);if(!r)fail();return r;};const student=(sid:string)=>{const s=find('students',sid);if(!allowed(a,s))fail();return s;};let target:Item={},out:Item={ok:true};const save=async(kind:string,r:Item)=>{await put(cx,kind,r);const n=all.findIndex(x=>x.id===r.id);if(n<0)all.push({...r,_kind:kind});else all[n]={...r,_kind:kind};};
  const notify=async(accountId:string,message:string,extra:Item={})=>save('notifications',{id:id(),accountId,text:message,at:new Date().toISOString(),...extra});const notifyAdmin=async(message:string,extra:Item={})=>{for(const ad of await cx.selectFrom('portalAccounts').select('id').where('role','=','admin').where('enabled','=',true).execute())await notify(ad.id,message,extra);};
  if(action==='invite'){admin(a);if(all.find(r=>r.id==='settings')?.reviewMode)fail('Family access is paused during private review. Imported records can be previewed without invitations.',403);const pe=email(v.parentEmail),se=email(v.studentEmail);if(pe===se)fail('Use separate parent and student email addresses.',400);const existing=await cx.selectFrom('portalAccounts').selectAll().where('email','=',pe).executeTakeFirst();if(existing&&existing.role!=='parent')fail('This email already has a different role.',409);if(await cx.selectFrom('portalAccounts').select('id').where('email','=',se).executeTakeFirst())fail('The student email is already assigned.',409);
  const pid=existing?.parentId||id(),sid=id(),pn=text(v.parentName,200,true),sn=text(v.studentName,200,true);const p=existing?find('parents',pid):{id:pid,name:pn,email:pe,mobile:'',country:'',zone:'America/Toronto',contact:'Email',billingName:pn};const s={id:sid,parentId:pid,name:sn,preferred:text(v.preferred||sn.split(' ')[0],200),pronouns:'',email:se,country:'',zone:'America/Toronto',year:'',programme:text(v.programme||'',100),subject:text(v.subject||'',200),level:'',board:'',exam:'',rate:num(v.rate,0,10000),currency:['USD','CAD','GBP','EUR','AUD'].includes(v.currency)?v.currency:'USD',discount:0,purchased:0,used:0,day:'',time:'',length:60,frequency:'Weekly',startDate:new Date().toISOString(),endDate:null,goals:'',challenge:''};await save('parents',p);await save('students',s);if(!existing)await cx.insertInto('portalAccounts').values({id:id(),email:pe,name:pn,role:'parent',parentId:pid}).execute();await cx.insertInto('portalAccounts').values({id:id(),email:se,name:sn,role:'student',studentId:sid}).execute();await save('threads',{id:sid+'-student',kind:'student',studentId:sid,name:sn,messages:[],unreadBy:[]});if(!existing)await save('threads',{id:pid+'-parent',kind:'parent',parentId:pid,name:pn,messages:[],unreadBy:[]});await save('onboardings',{id:'onboarding-'+sid,studentId:sid,parentId:pid,step:0,parent:{...p},student:{...s},learning:{help:'',challenge:'',goals:'',dates:'',other:''},agreements:[],complete:false,arrangementsConfirmed:false});out.studentId=sid;out.invitation=SITE+'/portal/';
@@ -109,41 +109,45 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
  if(action==='complete'){
    admin(a);
    if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);
-   target.status='Completed';
-   target.completedAt=new Date().toISOString();
-   s.used+=1;
-   await save('students',s);
 
    // Attempt Google Sheets and Calendar write-through sync if configured
    const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
    const accessToken=settings.googleAccessToken;
+   const refreshToken=settings.googleRefreshToken;
+   const clientId=settings.googleClientId;
+   const clientSecret=settings.googleClientSecret;
    const spreadsheetId=settings.spreadsheetId;
    const calendarId=settings.calendarId;
 
-   if (accessToken) {
-     try {
-       const syncRes = await syncLessonCompletionToGoogle({
-         spreadsheetId,
-         calendarId,
-         accessToken,
-         lessonRowIndex: target.sourceRow,
-         calendarEventId: target.calendarEventId,
-         lessonSubject: target.subject,
-         statusColumn: 'C' // Verified Student Tracker schema: Lessons Column C is Status
-       });
-       if (!syncRes.ok) {
-         target.googleSyncError = syncRes.error;
-         out.googleSyncError = syncRes.error;
-         console.warn('Google sync completed with warnings:', syncRes.error);
-       } else {
-         delete target.googleSyncError;
-         out.googleSync = 'success';
-       }
-     } catch (err: any) {
-       target.googleSyncError = err?.message || 'Google sync exception';
-       out.googleSyncError = err?.message || 'Google sync exception';
-       console.error('Google sync exception:', err);
-     }
+   // Require student identity for pre-flight verification
+   const syncRes = await syncLessonCompletionToGoogle({
+     spreadsheetId,
+     calendarId,
+     accessToken,
+     refreshToken,
+     clientId,
+     clientSecret,
+     lessonRowIndex: target.sourceRow,
+     expectedStudentId: s.id,
+     calendarEventId: target.calendarEventId,
+     lessonSubject: target.subject
+   });
+
+   if (!syncRes.ok) {
+     target.googleSyncStatus = syncRes.status;
+     target.googleSyncError = syncRes.error;
+     out.googleSyncStatus = syncRes.status;
+     out.googleSyncError = syncRes.error;
+     console.warn('Google sync failed:', syncRes.error);
+   } else {
+     // Apply local changes only when external write succeeds or is intentionally skipped
+     target.status='Completed';
+     target.completedAt=new Date().toISOString();
+     s.used+=1;
+     target.googleSyncStatus = 'synced';
+     delete target.googleSyncError;
+     out.googleSync = 'success';
+     await save('students',s);
    }
  }
  if(action==='cancel'){if(a.role!=='parent'||target.status!=='Scheduled'||Date.parse(target.start)<=Date.now())fail();const hours=(Date.parse(target.start)-Date.now())/3600000;target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=hours<12;target.rescheduleRequired=hours>=12&&hours<168;if(target.chargeable){s.used+=1;await save('students',s);}await notifyAdmin(s.name+' cancelled a lesson · '+(target.chargeable?'Chargeable':target.rescheduleRequired?'Rescheduling applies':'No charge'),{type:'cancellation',lessonId:target.id});}

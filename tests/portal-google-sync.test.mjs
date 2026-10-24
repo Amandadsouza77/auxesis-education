@@ -62,18 +62,18 @@ test('syncLessonCompletionToGoogle stops and fails on student ID identity mismat
   globalThis.fetch = originalFetch;
 });
 
-test('updateGoogleSheetCell blocks writes to unsafe columns (Lessons!E, Students!G, Students!O)', async () => {
+test('updateGoogleSheetCell blocks writes to non-Column C ranges (Lessons!E, Students!G, Students!O)', async () => {
   const lessonsE = await updateGoogleSheetCell('sheet123', 'Lessons!E37', 'Completed', 'token123');
   assert.equal(lessonsE.ok, false);
-  assert.match(lessonsE.error || '', /Blocked attempt/);
+  assert.match(lessonsE.error || '', /Blocked write to range/);
 
   const studentsG = await updateGoogleSheetCell('sheet123', 'Students!G9', 5, 'token123');
   assert.equal(studentsG.ok, false);
-  assert.match(studentsG.error || '', /Blocked attempt/);
+  assert.match(studentsG.error || '', /Blocked write to range/);
 
   const studentsO = await updateGoogleSheetCell('sheet123', 'Students!O9', 5, 'token123');
   assert.equal(studentsO.ok, false);
-  assert.match(studentsO.error || '', /Blocked attempt/);
+  assert.match(studentsO.error || '', /Blocked write to range/);
 });
 
 test('syncLessonCompletionToGoogle formats requests correctly when access token and verified identity are provided', async () => {
@@ -103,12 +103,11 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
       lessonRowIndex: 37,
       expectedStudentId: 'student-123',
       calendarEventId: 'event456',
-      lessonSubject: 'IB Biology',
-      statusColumn: 'C'
+      lessonSubject: 'IB Biology'
     });
 
     assert.equal(result.ok, true);
-    assert.equal(result.status, 'success');
+    assert.equal(result.status, 'synced');
     assert.equal(calls.length, 3); // Verify G37, Lessons Sheet status, Calendar Event
 
     // Verify identity read
