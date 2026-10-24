@@ -39,7 +39,7 @@ export async function fetchLiveCalendarEvents(
     }
   }
   if (!activeToken) {
-    return { ok: false, error: 'No Google access token available for read-only query.' };
+    return { ok: false, error: 'Missing Google access token for read-only query.' };
   }
 
   const MAX_PAGES = 10;
