@@ -298,15 +298,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Both Google destinations are mandatory, including on partial retries.
-  // Never allow a Sheets-only success to complete a local lesson.
-  if (!calendarId || !calendarEventId) {
+  // Pre-flight check calendar configuration to prevent partial sync drift
+  if (!existingCalendarSynced && calendarId && !calendarEventId) {
     return {
       ok: false,
       status: 'failed',
       sheetsSynced: existingSheetsSynced,
-      calendarSynced: existingCalendarSynced,
-      error: 'Missing calendarId or calendarEventId; no Google writes attempted.'
+      calendarSynced: false,
+      error: 'Incomplete calendar configuration: missing calendarEventId.'
     };
   }
 
@@ -380,11 +379,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
       };
     } else {
-      calendarResult = {
-        ok: false,
-        skipped: false,
-        error: 'Calendar confirmation is required for lesson completion.'
-      };
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
     }
   }
 

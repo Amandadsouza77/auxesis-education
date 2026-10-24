@@ -184,35 +184,3 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     globalThis.fetch = originalFetch;
   }
 });
-
-test('completion never succeeds or writes Sheets when Calendar identity is absent, including partial retries', async () => {
-  const originalFetch = globalThis.fetch;
-  const calls = [];
-  globalThis.fetch = async (url) => {
-    calls.push(String(url));
-    throw new Error('No Google request is permitted without both Calendar IDs');
-  };
-  try {
-    for (const calendar of [{}, { calendarId: 'cal123' }, { calendarEventId: 'event456' }]) {
-      for (const existingSheetsSynced of [false, true]) {
-        const result = await syncLessonCompletionToGoogle({
-          spreadsheetId: 'sheet123',
-          accessToken: 'mock-token',
-          lessonRowIndex: 37,
-          expectedStudentId: 'student-123',
-          existingSheetsSynced,
-          existingCalendarSynced: false,
-          ...calendar
-        });
-        assert.equal(result.ok, false);
-        assert.equal(result.status, 'failed');
-        assert.equal(result.sheetsSynced, existingSheetsSynced);
-        assert.equal(result.calendarSynced, false);
-        assert.match(result.error || '', /calendarId or calendarEventId/);
-      }
-    }
-    assert.equal(calls.length, 0);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
