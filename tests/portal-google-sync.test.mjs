@@ -127,3 +127,59 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('missing both Calendar identifiers fails before any Sheets writes', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('No Google request expected'); };
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sandbox-sheet', accessToken: 'mock-token',
+      lessonRowIndex: 2, expectedStudentId: 'QA-STUDENT-001'
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'failed');
+    assert.equal(result.sheetsSynced, false);
+    assert.equal(result.calendarSynced, false);
+    assert.match(result.error || '', /calendarId or calendarEventId/);
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('partial retry missing Calendar mapping preserves Sheets success without new writes', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('No Google request expected'); };
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sandbox-sheet', accessToken: 'mock-token',
+      lessonRowIndex: 2, expectedStudentId: 'QA-STUDENT-001',
+      existingSheetsSynced: true, existingCalendarSynced: false
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.calendarSynced, false);
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('one missing Calendar identifier also fails before any Sheets writes', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('No Google request expected'); };
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sandbox-sheet', calendarId: 'sandbox-calendar',
+      accessToken: 'mock-token', lessonRowIndex: 2, expectedStudentId: 'QA-STUDENT-001'
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.sheetsSynced, false);
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
