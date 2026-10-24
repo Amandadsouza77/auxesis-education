@@ -127,3 +127,42 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('syncLessonCompletionToGoogle handles durable per-destination partial retry recovery correctly', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
+    calls.push({ url: urlStr, method: init?.method || 'GET' });
+
+    if (urlStr.includes('/calendars/cal123/events/event456')) {
+      return new Response(JSON.stringify({ id: 'event456', summary: '[Completed] IB Chemistry' }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ error: 'Unexpected URL' }), { status: 400 });
+  });
+
+  try {
+    // Retry sync when Sheets was already synced previously
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      calendarEventId: 'event456',
+      lessonSubject: 'IB Chemistry',
+      existingSheetsSynced: true,
+      existingCalendarSynced: false
+    });
+
+    assert.equal(result.ok, true);
+    assert.equal(result.status, 'synced');
+    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.calendarSynced, true);
+    assert.equal(calls.length, 1); // Only Calendar PATCH is called; Sheets update is skipped
+    assert.match(calls[0].url, /calendars\/cal123\/events\/event456/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
