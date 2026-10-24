@@ -214,3 +214,11 @@ test('Calendar identifiers are mandatory before ANY Sheets write, including part
     globalThis.fetch = originalFetch;
   }
 });
+
+test('Lessons status writer blocks range injection and header/other-column writes', async () => {
+  for (const range of ['Lessons!C37:D37', 'Lessons!C37:Z999', 'Lessons!C1', 'Lessons!C0', 'Lessons!C37junk', 'Lessons!G37']) {
+    const result = await updateGoogleSheetCell('sheet123', range, 'Completed', 'mock-token');
+    assert.equal(result.ok, false, range);
+    assert.match(result.error || '', /Blocked write to range/);
+  }
+});
