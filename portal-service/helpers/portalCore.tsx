@@ -117,8 +117,8 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    // Attempt Google Sheets and Calendar write-through sync if configured
    const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
    const accessToken=settings.googleAccessToken;
-   const spreadsheetId=settings.spreadsheetId || '1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ';
-   const calendarId=settings.calendarId || 'classroom107924035776692772286@group.calendar.google.com';
+   const spreadsheetId=settings.spreadsheetId;
+   const calendarId=settings.calendarId;
 
    if (accessToken) {
      try {
@@ -180,4 +180,3 @@ async function realtime(request:Request){const a=await account(request);return c
 function response(value:unknown,status=200){return new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}
 async function handle(request:Request,fn:(r:Request,v:Item)=>Promise<unknown>){try{let v={};if(request.method==='POST'){if(request.headers.get('content-type')?.split(';')[0]!=='application/json')fail('Send JSON data.',415);const body=await request.text();if(body.length>150000)fail('This request is too large.',413);v=JSON.parse(body);}return response(await fn(request,v));}catch(e:any){return response({error:e.status?e.message:'This change could not be saved. Please retry.'},e.status||500);}}
 export const portalCore={account,state,command,files,file,start,callback,redeem,logout,realtime,handle,hash,snapshot,entitlement,weekly,viewer,previewReadOnly};
-

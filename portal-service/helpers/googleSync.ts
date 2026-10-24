@@ -1,15 +1,30 @@
 // Google Sheets & Calendar Direct Write Integration Helper
 // Supports updating Google Sheets (Student Tracker) and Google Calendar events
 
-export interface GoogleSyncOptions {
-  accessToken?: string;
+export interface GoogleSyncParams {
   spreadsheetId?: string;
   calendarId?: string;
+  accessToken?: string;
+  lessonRowIndex?: number;
+  studentRowIndex?: number;
+  newUsedCount?: number;
+  calendarEventId?: string;
+  lessonSubject?: string;
+  statusColumn?: string; // e.g. "E"
+  usedColumn?: string;   // e.g. "O"
+}
+
+export interface GoogleSyncResult {
+  ok: boolean;
+  status: 'success' | 'failed' | 'skipped';
+  error?: string;
+  sheetsStatusResult?: { ok: boolean; error?: string };
+  sheetsBalanceResult?: { ok: boolean; error?: string };
+  calendarResult?: { ok: boolean; error?: string };
 }
 
 /**
  * Updates a single range in Google Sheets via REST API v4.
- * Uses stable range coordinates (e.g. "Lessons!E37") or value search.
  */
 export async function updateGoogleSheetCell(
   spreadsheetId: string,
@@ -87,18 +102,9 @@ export async function patchGoogleCalendarEvent(
 
 /**
  * Synchronizes a lesson completion event to both Google Sheets and Google Calendar.
- * Handles errors gracefully without crashing local transactions.
+ * Validates row indices and identity, tracking distinct sub-operation outcomes.
  */
-export async function syncLessonCompletionToGoogle(params: {
-  spreadsheetId?: string;
-  calendarId?: string;
-  accessToken?: string;
-  lessonRowIndex?: number;
-  studentRowIndex?: number;
-  newUsedCount?: number;
-  calendarEventId?: string;
-  lessonSubject?: string;
-}): Promise<{ ok: boolean; sheetsResult?: any; calendarResult?: any; error?: string }> {
+export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Promise<GoogleSyncResult> {
   const {
     spreadsheetId,
     calendarId,
@@ -107,38 +113,60 @@ export async function syncLessonCompletionToGoogle(params: {
     studentRowIndex,
     newUsedCount,
     calendarEventId,
-    lessonSubject
+    lessonSubject,
+    statusColumn = 'E',
+    usedColumn = 'O'
   } = params;
 
   if (!accessToken) {
-    return { ok: false, error: 'No Google access token configured; external sync skipped.' };
+    return {
+      ok: false,
+      status: 'skipped',
+      error: 'No Google access token configured; external sync skipped.'
+    };
   }
 
-  let sheetsResult: any = { ok: true };
-  let calendarResult: any = { ok: true };
-
-  // 1. Update Lessons Sheet status if row index is known
-  if (spreadsheetId && lessonRowIndex && lessonRowIndex > 1) {
-    sheetsResult = await updateGoogleSheetCell(
-      spreadsheetId,
-      `Lessons!E${lessonRowIndex}`,
-      'Completed',
-      accessToken
-    );
+  if (!spreadsheetId) {
+    return {
+      ok: false,
+      status: 'failed',
+      error: 'Missing Google Spreadsheet ID for synchronization.'
+    };
   }
 
-  // 2. Update Students Sheet used balance count if student row index is known (Used column is Column O / 15 or target range)
-  // Used lessons column in Student Tracker is column O (e.g. Students!O)
-  if (spreadsheetId && studentRowIndex && studentRowIndex > 1 && typeof newUsedCount === 'number') {
-    const studentBalanceRes = await updateGoogleSheetCell(
+  if (!lessonRowIndex || lessonRowIndex <= 1) {
+    return {
+      ok: false,
+      status: 'failed',
+      error: 'Invalid or missing lesson source row index. Identity revalidation required.'
+    };
+  }
+
+  let sheetsStatusResult: { ok: boolean; error?: string } = { ok: true };
+  let sheetsBalanceResult: { ok: boolean; error?: string } = { ok: true };
+  let calendarResult: { ok: boolean; error?: string } = { ok: true };
+
+  // 1. Update Lessons Sheet status
+  sheetsStatusResult = await updateGoogleSheetCell(
+    spreadsheetId,
+    `Lessons!${statusColumn}${lessonRowIndex}`,
+    'Completed',
+    accessToken
+  );
+
+  // 2. Update Students Sheet used balance count if student row index is present and valid
+  if (studentRowIndex && studentRowIndex > 1 && typeof newUsedCount === 'number') {
+    sheetsBalanceResult = await updateGoogleSheetCell(
       spreadsheetId,
-      `Students!O${studentRowIndex}`,
+      `Students!${usedColumn}${studentRowIndex}`,
       newUsedCount,
       accessToken
     );
-    if (!studentBalanceRes.ok) {
-      sheetsResult = studentBalanceRes;
-    }
+  } else if (typeof newUsedCount === 'number') {
+    sheetsBalanceResult = {
+      ok: false,
+      error: 'Missing or invalid student source row index for prepaid balance update.'
+    };
   }
 
   // 3. Patch Google Calendar event if calendarId & eventId are available
@@ -151,11 +179,19 @@ export async function syncLessonCompletionToGoogle(params: {
     );
   }
 
-  const ok = sheetsResult.ok && calendarResult.ok;
+  const allOk = sheetsStatusResult.ok && sheetsBalanceResult.ok && calendarResult.ok;
+  const errors = [
+    !sheetsStatusResult.ok ? `Lessons sheet: ${sheetsStatusResult.error}` : '',
+    !sheetsBalanceResult.ok ? `Students sheet: ${sheetsBalanceResult.error}` : '',
+    !calendarResult.ok ? `Calendar: ${calendarResult.error}` : ''
+  ].filter(Boolean).join(' | ');
+
   return {
-    ok,
-    sheetsResult,
-    calendarResult,
-    error: !ok ? (sheetsResult.error || calendarResult.error) : undefined
+    ok: allOk,
+    status: allOk ? 'success' : 'failed',
+    error: errors || undefined,
+    sheetsStatusResult,
+    sheetsBalanceResult,
+    calendarResult
   };
 }
