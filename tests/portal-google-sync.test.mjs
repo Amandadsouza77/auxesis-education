@@ -184,3 +184,33 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     globalThis.fetch = originalFetch;
   }
 });
+
+test('Calendar identifiers are mandatory before ANY Sheets write, including partial retries', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    throw new Error('No network request should be made without both Calendar identifiers');
+  };
+  try {
+    for (const state of [
+      { calendarId: undefined, calendarEventId: undefined, existingSheetsSynced: false },
+      { calendarId: 'cal123', calendarEventId: undefined, existingSheetsSynced: false },
+      { calendarId: undefined, calendarEventId: 'event456', existingSheetsSynced: true },
+      { calendarId: undefined, calendarEventId: undefined, existingSheetsSynced: true }
+    ]) {
+      const result = await syncLessonCompletionToGoogle({
+        spreadsheetId: 'sheet123', accessToken: 'mock-token',
+        lessonRowIndex: 37, expectedStudentId: 'student-123',
+        ...state
+      });
+      assert.equal(result.ok, false);
+      assert.equal(result.status, 'failed');
+      assert.equal(result.sheetsSynced, state.existingSheetsSynced);
+      assert.match(result.error || '', /calendarId and calendarEventId/);
+    }
+    assert.equal(calls.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
