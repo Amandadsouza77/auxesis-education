@@ -271,6 +271,18 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
+  // Both destinations are mandatory even when resuming a partial write.
+  // Reject missing Calendar mapping before any Sheets update can occur.
+  if (!calendarId || !calendarEventId) {
+    return {
+      ok: false,
+      status: 'failed',
+      sheetsSynced: existingSheetsSynced,
+      calendarSynced: false,
+      error: 'Missing calendarId or calendarEventId; no new Google writes attempted.'
+    };
+  }
+
   // Helper for 401 retry wrapper
   const execWith401Retry = async <T extends { ok: boolean; status?: number }>(
     fn: (token: string) => Promise<T>
@@ -341,9 +353,11 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
       };
     } else {
-      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
-      calendarSynced = true;
-      calendarResult = { ok: true, skipped: true };
+      calendarResult = {
+        ok: false,
+        skipped: false,
+        error: 'Calendar configuration is required for dual-destination synchronization.'
+      };
     }
   }
 
