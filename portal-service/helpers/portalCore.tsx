@@ -62,7 +62,7 @@ async function state(request:Request){
  const clientSecret=settings.googleClientSecret;
 
  // Server-side read-only live Google Calendar overlay for authorized snapshot lessons with 401 refresh
- if(calendarId && (accessToken || (refreshToken && clientId && clientSecret)) && Array.isArray(snap.lessons) && snap.lessons.length>0){
+ if(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length>0){
   try {
    const now = new Date();
    const timeMin = new Date(now.getTime() - 30*86400000).toISOString();

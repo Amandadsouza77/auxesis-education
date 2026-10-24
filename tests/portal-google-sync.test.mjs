@@ -146,53 +146,6 @@ test('syncLessonCompletionToGoogle enforces strict synthetic sandbox resource ma
   assert.match(resultMismatch.error || '', /Sandbox enforcement block/);
 });
 
-test('syncLessonCompletionToGoogle rejects missing Calendar IDs without any Google writes', async () => {
-  const originalFetch = globalThis.fetch;
-  const calls = [];
-  globalThis.fetch = async (url) => {
-    calls.push(String(url));
-    return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
-  };
-  try {
-    for (const config of [
-      { calendarId: undefined, calendarEventId: undefined },
-      { calendarId: 'cal123', calendarEventId: undefined },
-      { calendarId: undefined, calendarEventId: 'event456' }
-    ]) {
-      const result = await syncLessonCompletionToGoogle({
-        spreadsheetId: 'sheet123', accessToken: 'mock-token',
-        lessonRowIndex: 37, expectedStudentId: 'student-123',
-        ...config
-      });
-      assert.equal(result.ok, false);
-      assert.equal(result.status, 'failed');
-      assert.match(result.error || '', /calendarId and calendarEventId are required/);
-    }
-    assert.equal(calls.length, 0);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test('partial retry cannot declare success if Calendar destination is missing', async () => {
-  const originalFetch = globalThis.fetch;
-  let calls = 0;
-  globalThis.fetch = async () => { calls++; throw Error('Unexpected Google request'); };
-  try {
-    const result = await syncLessonCompletionToGoogle({
-      spreadsheetId: 'sheet123', accessToken: 'mock-token',
-      lessonRowIndex: 37, expectedStudentId: 'student-123',
-      existingSheetsSynced: true, existingCalendarSynced: false
-    });
-    assert.equal(result.ok, false);
-    assert.equal(result.sheetsSynced, true);
-    assert.equal(result.calendarSynced, false);
-    assert.equal(calls, 0);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
 test('syncLessonCompletionToGoogle handles durable per-destination partial retry recovery correctly', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];

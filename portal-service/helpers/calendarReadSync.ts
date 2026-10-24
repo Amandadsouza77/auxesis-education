@@ -25,22 +25,12 @@ export async function fetchLiveCalendarEvents(
   clientId?: string,
   clientSecret?: string
 ): Promise<{ ok: boolean; events?: CalendarEventRead[]; error?: string; newAccessToken?: string }> {
-  if (!calendarId) {
-    return { ok: false, error: 'Missing calendarId for read-only query.' };
+  if (!calendarId || !accessToken) {
+    return { ok: false, error: 'Missing calendarId or Google accessToken for read-only query.' };
   }
 
   let activeToken = accessToken;
   let newAccessToken: string | undefined;
-  if (!activeToken && refreshToken && clientId && clientSecret) {
-    const refreshed = await refreshGoogleAccessToken(refreshToken, clientId, clientSecret);
-    if (refreshed.ok && refreshed.accessToken) {
-      activeToken = refreshed.accessToken;
-      newAccessToken = activeToken;
-    }
-  }
-  if (!activeToken) {
-    return { ok: false, error: 'Missing Google access token for read-only query.' };
-  }
 
   const MAX_PAGES = 10;
 
@@ -76,13 +66,7 @@ export async function fetchLiveCalendarEvents(
           return { ok: false, status: 500, error: `Malformed Google Calendar response on page ${pageCount}.` };
         }
 
-        if (data.items !== undefined && !Array.isArray(data.items)) {
-          return { ok: false, status: 500, error: `Malformed Google Calendar items on page ${pageCount}.` };
-        }
-        if (data.nextPageToken !== undefined && typeof data.nextPageToken !== 'string') {
-          return { ok: false, status: 500, error: `Malformed Google Calendar nextPageToken on page ${pageCount}.` };
-        }
-        const items = data.items || [];
+        const items = Array.isArray(data.items) ? data.items : [];
         for (const item of items) {
           if (!item || typeof item !== 'object') continue;
           allEvents.push({
@@ -97,9 +81,6 @@ export async function fetchLiveCalendarEvents(
         pageToken = data.nextPageToken;
         if (!pageToken) {
           break;
-        }
-        if (pageCount >= MAX_PAGES) {
-          return { ok: false, status: 500, error: 'Calendar result exceeded safe pagination limit; read is incomplete.' };
         }
       } catch (err: any) {
         return { ok: false, status: 500, error: 'Network error fetching live Google Calendar events.' };

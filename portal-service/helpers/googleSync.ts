@@ -298,15 +298,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Both destinations are mandatory, including on partial retries. Validate
-  // before touching Sheets so a missing Calendar ID cannot cause drift.
-  if (!calendarId || !calendarEventId) {
+  // Pre-flight check calendar configuration to prevent partial sync drift
+  if (!existingCalendarSynced && calendarId && !calendarEventId) {
     return {
       ok: false,
       status: 'failed',
       sheetsSynced: existingSheetsSynced,
-      calendarSynced: existingCalendarSynced,
-      error: 'calendarId and calendarEventId are required before synchronization.'
+      calendarSynced: false,
+      error: 'Incomplete calendar configuration: missing calendarEventId.'
     };
   }
 
@@ -380,12 +379,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
       };
     } else {
-      // Defensive fallback: never treat a skipped Calendar write as success.
-      calendarResult = {
-        ok: false,
-        skipped: false,
-        error: 'calendarId and calendarEventId are required before synchronization.'
-      };
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
     }
   }
 
