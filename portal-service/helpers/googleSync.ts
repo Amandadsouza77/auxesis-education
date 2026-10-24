@@ -129,7 +129,7 @@ export async function updateGoogleSheetCell(
   }
 
   // Enforce strict Column C target for Lessons status
-  if (!/^Lessons!C[2-9]\d*$/i.test(range)) {
+  if (!/^Lessons!C(?:[2-9]|[1-9]\d+)$/i.test(range)) {
     return { ok: false, error: `Blocked write to range "${range}". Only Lessons!C (Status column) is permitted.` };
   }
 
