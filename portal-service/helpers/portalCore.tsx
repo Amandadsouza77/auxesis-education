@@ -127,10 +127,9 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
          calendarId,
          accessToken,
          lessonRowIndex: target.sourceRow,
-         studentRowIndex: s.sourceRow,
-         newUsedCount: s.used,
          calendarEventId: target.calendarEventId,
-         lessonSubject: target.subject
+         lessonSubject: target.subject,
+         statusColumn: 'C' // Verified Student Tracker schema: Lessons Column C is Status
        });
        if (!syncRes.ok) {
          target.googleSyncError = syncRes.error;

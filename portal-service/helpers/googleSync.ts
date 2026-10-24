@@ -6,12 +6,9 @@ export interface GoogleSyncParams {
   calendarId?: string;
   accessToken?: string;
   lessonRowIndex?: number;
-  studentRowIndex?: number;
-  newUsedCount?: number;
   calendarEventId?: string;
   lessonSubject?: string;
-  statusColumn?: string; // e.g. "E"
-  usedColumn?: string;   // e.g. "O"
+  statusColumn?: string; // Correct column for Lessons status is 'C' (Row 1 Header: 'Status')
 }
 
 export interface GoogleSyncResult {
@@ -19,7 +16,6 @@ export interface GoogleSyncResult {
   status: 'success' | 'failed' | 'skipped';
   error?: string;
   sheetsStatusResult?: { ok: boolean; error?: string };
-  sheetsBalanceResult?: { ok: boolean; error?: string };
   calendarResult?: { ok: boolean; error?: string };
 }
 
@@ -34,6 +30,16 @@ export async function updateGoogleSheetCell(
 ): Promise<{ ok: boolean; updatedCells?: number; error?: string }> {
   if (!spreadsheetId || !accessToken) {
     return { ok: false, error: 'Missing spreadsheetId or Google accessToken' };
+  }
+
+  // Prevent writing to known incorrect columns based on Student Tracker live schema:
+  // Lessons!E is "Homework / Next Step" (Status is Lessons!C)
+  // Students!O is "Oct 25–31 Local Time" and Students!G is "Rate" (no prepaid balance column in Students tab)
+  if (/^Lessons!E\d+/i.test(range)) {
+    return { ok: false, error: 'Blocked attempt to write status to Lessons!E (Column E is Homework/Next Step; status is Column C).' };
+  }
+  if (/^Students!(O|G)\d+/i.test(range)) {
+    return { ok: false, error: 'Blocked attempt to write balance to Students tab (No prepaid balance column exists in Students tab).' };
   }
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
@@ -102,7 +108,7 @@ export async function patchGoogleCalendarEvent(
 
 /**
  * Synchronizes a lesson completion event to both Google Sheets and Google Calendar.
- * Validates row indices and identity, tracking distinct sub-operation outcomes.
+ * Validates row index and updates Lessons status (Column C) safely.
  */
 export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Promise<GoogleSyncResult> {
   const {
@@ -110,12 +116,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     calendarId,
     accessToken,
     lessonRowIndex,
-    studentRowIndex,
-    newUsedCount,
     calendarEventId,
     lessonSubject,
-    statusColumn = 'E',
-    usedColumn = 'O'
+    statusColumn = 'C'
   } = params;
 
   if (!accessToken) {
@@ -143,10 +146,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
   }
 
   let sheetsStatusResult: { ok: boolean; error?: string } = { ok: true };
-  let sheetsBalanceResult: { ok: boolean; error?: string } = { ok: true };
   let calendarResult: { ok: boolean; error?: string } = { ok: true };
 
-  // 1. Update Lessons Sheet status
+  // 1. Update Lessons Sheet status (Column C in Student Tracker schema)
   sheetsStatusResult = await updateGoogleSheetCell(
     spreadsheetId,
     `Lessons!${statusColumn}${lessonRowIndex}`,
@@ -154,22 +156,7 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     accessToken
   );
 
-  // 2. Update Students Sheet used balance count if student row index is present and valid
-  if (studentRowIndex && studentRowIndex > 1 && typeof newUsedCount === 'number') {
-    sheetsBalanceResult = await updateGoogleSheetCell(
-      spreadsheetId,
-      `Students!${usedColumn}${studentRowIndex}`,
-      newUsedCount,
-      accessToken
-    );
-  } else if (typeof newUsedCount === 'number') {
-    sheetsBalanceResult = {
-      ok: false,
-      error: 'Missing or invalid student source row index for prepaid balance update.'
-    };
-  }
-
-  // 3. Patch Google Calendar event if calendarId & eventId are available
+  // 2. Patch Google Calendar event if calendarId & eventId are available
   if (calendarId && calendarEventId) {
     calendarResult = await patchGoogleCalendarEvent(
       calendarId,
@@ -179,10 +166,9 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     );
   }
 
-  const allOk = sheetsStatusResult.ok && sheetsBalanceResult.ok && calendarResult.ok;
+  const allOk = sheetsStatusResult.ok && calendarResult.ok;
   const errors = [
     !sheetsStatusResult.ok ? `Lessons sheet: ${sheetsStatusResult.error}` : '',
-    !sheetsBalanceResult.ok ? `Students sheet: ${sheetsBalanceResult.error}` : '',
     !calendarResult.ok ? `Calendar: ${calendarResult.error}` : ''
   ].filter(Boolean).join(' | ');
 
@@ -191,7 +177,6 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     status: allOk ? 'success' : 'failed',
     error: errors || undefined,
     sheetsStatusResult,
-    sheetsBalanceResult,
     calendarResult
   };
 }
