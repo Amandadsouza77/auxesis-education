@@ -77,7 +77,7 @@ async function state(request:Request){
      clientSecret
    );
    if(calRes.ok && calRes.events){
-    snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events);
+    snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events, snap.students);
     if(calRes.newAccessToken){
      settings.googleAccessToken = calRes.newAccessToken;
      await put(db, 'settings', settings);
