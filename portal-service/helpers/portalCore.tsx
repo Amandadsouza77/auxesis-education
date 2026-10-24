@@ -4,6 +4,7 @@ import { randomBytes, randomUUID, createHash } from 'crypto';
 import { upload, getUrl, getInfo } from '@floot/storage';
 import { createToken, publish } from '@floot/realtime';
 import { FlootOAuthProvider } from './FlootOAuthProvider';
+import { syncLessonCompletionToGoogle } from './googleSync';
 
 const SITE='https://auxesis-education.pages.dev';
 const VERSION='2026-10-03';
@@ -105,7 +106,47 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
  if(action==='notes'){admin(a);target.notes=pick(v,['covered','outcome','next']);for(const k of ['covered','outcome','next'])target.notes[k]||='';}
  if(action==='privateNotes'){admin(a);target.privateNotes=text(v.text,20000);}
  if(action==='attachResource'){admin(a);find('resources',v.resourceId);if(!target.resources.includes(v.resourceId))target.resources.push(v.resourceId);}
- if(action==='complete'){admin(a);if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);target.status='Completed';target.completedAt=new Date().toISOString();s.used+=1;await save('students',s);}
+ if(action==='complete'){
+   admin(a);
+   if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);
+   target.status='Completed';
+   target.completedAt=new Date().toISOString();
+   s.used+=1;
+   await save('students',s);
+
+   // Attempt Google Sheets and Calendar write-through sync if configured
+   const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
+   const accessToken=settings.googleAccessToken;
+   const spreadsheetId=settings.spreadsheetId || '1UrdpPD4AWU1H1Ok7Txb-sL1hIXoIEVN8u--8fZqXwUQ';
+   const calendarId=settings.calendarId || 'classroom107924035776692772286@group.calendar.google.com';
+
+   if (accessToken) {
+     try {
+       const syncRes = await syncLessonCompletionToGoogle({
+         spreadsheetId,
+         calendarId,
+         accessToken,
+         lessonRowIndex: target.sourceRow,
+         studentRowIndex: s.sourceRow,
+         newUsedCount: s.used,
+         calendarEventId: target.calendarEventId,
+         lessonSubject: target.subject
+       });
+       if (!syncRes.ok) {
+         target.googleSyncError = syncRes.error;
+         out.googleSyncError = syncRes.error;
+         console.warn('Google sync completed with warnings:', syncRes.error);
+       } else {
+         delete target.googleSyncError;
+         out.googleSync = 'success';
+       }
+     } catch (err: any) {
+       target.googleSyncError = err?.message || 'Google sync exception';
+       out.googleSyncError = err?.message || 'Google sync exception';
+       console.error('Google sync exception:', err);
+     }
+   }
+ }
  if(action==='cancel'){if(a.role!=='parent'||target.status!=='Scheduled'||Date.parse(target.start)<=Date.now())fail();const hours=(Date.parse(target.start)-Date.now())/3600000;target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=hours<12;target.rescheduleRequired=hours>=12&&hours<168;if(target.chargeable){s.used+=1;await save('students',s);}await notifyAdmin(s.name+' cancelled a lesson · '+(target.chargeable?'Chargeable':target.rescheduleRequired?'Rescheduling applies':'No charge'),{type:'cancellation',lessonId:target.id});}
  if(action==='reschedule'){admin(a);if(target.status==='Completed')fail('Completed lessons retain their original dates.',409);target.start=date(v.start);target.hours=num(v.hours,.25,3);if(target.status==='Cancelled'){if(target.chargeable){s.used=Math.max(0,s.used-1);await save('students',s);}target.status='Scheduled';target.rescheduledAt=new Date().toISOString();target.chargeable=false;target.rescheduleRequired=false;}}
  if(action==='noShow'){admin(a);if(target.status!=='Scheduled'||Date.parse(target.start)>Date.now())fail();target.status='No-show';target.completedAt=new Date().toISOString();s.used+=1;await save('students',s);}
