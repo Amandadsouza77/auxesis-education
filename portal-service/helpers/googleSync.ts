@@ -1,9 +1,6 @@
 // Google Sheets & Calendar Direct Write Integration Helper
 // Supports updating Google Sheets (Student Tracker) and Google Calendar events
 
-export const SYNTHETIC_SANDBOX_SHEET_ID = '1iBKR0IAgdncGsmhcbrKSDrRglkw93gx8p_SSOLQ5SD8';
-export const SYNTHETIC_SANDBOX_CALENDAR_ID = 'f4ba076fd0f806830c10a75a946a56dddd51dbbd086348a12619f0a5cae3fce7@group.calendar.google.com';
-
 export interface GoogleSyncParams {
   spreadsheetId?: string;
   calendarId?: string;
@@ -19,6 +16,8 @@ export interface GoogleSyncParams {
   existingSheetsSynced?: boolean;
   existingCalendarSynced?: boolean;
   sandboxOnly?: boolean;
+  allowedSpreadsheetId?: string;
+  allowedCalendarId?: string;
 }
 
 export interface GoogleSyncResult {
@@ -213,27 +212,29 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     lessonSubject,
     existingSheetsSynced = false,
     existingCalendarSynced = false,
-    sandboxOnly = false
+    sandboxOnly = false,
+    allowedSpreadsheetId,
+    allowedCalendarId
   } = params;
 
-  // Strict sandbox guardrail: If sandboxOnly mode is enabled, enforce exact synthetic resource IDs
+  // Strict sandbox guardrail: If sandboxOnly mode is enabled, enforce match with allowed server sandbox IDs without echoing IDs in error strings
   if (sandboxOnly) {
-    if (spreadsheetId !== SYNTHETIC_SANDBOX_SHEET_ID) {
+    if (!allowedSpreadsheetId || spreadsheetId !== allowedSpreadsheetId) {
       return {
         ok: false,
         status: 'failed',
         sheetsSynced: false,
         calendarSynced: false,
-        error: `Sandbox enforcement block: spreadsheetId "${spreadsheetId}" does not match synthetic sandbox sheet ID "${SYNTHETIC_SANDBOX_SHEET_ID}".`
+        error: 'Sandbox enforcement block: spreadsheet ID does not match allowed sandbox sheet configuration.'
       };
     }
-    if (calendarId !== SYNTHETIC_SANDBOX_CALENDAR_ID) {
+    if (!allowedCalendarId || calendarId !== allowedCalendarId) {
       return {
         ok: false,
         status: 'failed',
         sheetsSynced: false,
         calendarSynced: false,
-        error: `Sandbox enforcement block: calendarId "${calendarId}" does not match synthetic sandbox calendar ID "${SYNTHETIC_SANDBOX_CALENDAR_ID}".`
+        error: 'Sandbox enforcement block: calendar ID does not match allowed sandbox calendar configuration.'
       };
     }
   }

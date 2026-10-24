@@ -179,7 +179,22 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    const spreadsheetId=settings.spreadsheetId;
    const calendarId=settings.calendarId;
 
-   // Pass existing destination sync state for partial retry reconciliation
+   // Read server-only environment test mode and sandbox configuration
+   const testMode = process.env.PORTAL_TEST_MODE === 'true';
+   const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
+   const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+
+   // Fail closed at server entry point if test mode is active but sandbox allowlist config is missing or mismatched
+   if (testMode) {
+     if (!allowedSpreadsheetId || !allowedCalendarId || spreadsheetId !== allowedSpreadsheetId || calendarId !== allowedCalendarId) {
+       out.googleSyncStatus = 'failed';
+       out.googleSyncError = 'Sandbox enforcement block: server test mode active but spreadsheet or calendar ID does not match server allowlist configuration.';
+       console.warn('Sandbox enforcement block:', out.googleSyncError);
+       return out;
+     }
+   }
+
+   // Pass existing destination sync state and server allowlist for partial retry reconciliation
    const syncRes = await syncLessonCompletionToGoogle({
      spreadsheetId,
      calendarId,
@@ -193,7 +208,10 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      lessonSubject: target.subject,
      existingSyncState: target.googleSyncStatus,
      existingSheetsSynced: target.googleSheetsSynced === true,
-     existingCalendarSynced: target.googleCalendarSynced === true
+     existingCalendarSynced: target.googleCalendarSynced === true,
+     sandboxOnly: testMode,
+     allowedSpreadsheetId,
+     allowedCalendarId
    });
 
    // Persist updated token if refreshed
