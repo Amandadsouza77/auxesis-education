@@ -1,6 +1,9 @@
 // Google Sheets & Calendar Direct Write Integration Helper
 // Supports updating Google Sheets (Student Tracker) and Google Calendar events
 
+export const SYNTHETIC_SANDBOX_SHEET_ID = '1iBKR0IAgdncGsmhcbrKSDrRglkw93gx8p_SSOLQ5SD8';
+export const SYNTHETIC_SANDBOX_CALENDAR_ID = 'f4ba076fd0f806830c10a75a946a56dddd51dbbd086348a12619f0a5cae3fce7@group.calendar.google.com';
+
 export interface GoogleSyncParams {
   spreadsheetId?: string;
   calendarId?: string;
@@ -15,6 +18,7 @@ export interface GoogleSyncParams {
   existingSyncState?: 'pending' | 'partial' | 'failed' | 'synced';
   existingSheetsSynced?: boolean;
   existingCalendarSynced?: boolean;
+  sandboxOnly?: boolean;
 }
 
 export interface GoogleSyncResult {
@@ -208,8 +212,31 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     calendarEventId,
     lessonSubject,
     existingSheetsSynced = false,
-    existingCalendarSynced = false
+    existingCalendarSynced = false,
+    sandboxOnly = false
   } = params;
+
+  // Strict sandbox guardrail: If sandboxOnly mode is enabled, enforce exact synthetic resource IDs
+  if (sandboxOnly) {
+    if (spreadsheetId !== SYNTHETIC_SANDBOX_SHEET_ID) {
+      return {
+        ok: false,
+        status: 'failed',
+        sheetsSynced: false,
+        calendarSynced: false,
+        error: `Sandbox enforcement block: spreadsheetId "${spreadsheetId}" does not match synthetic sandbox sheet ID "${SYNTHETIC_SANDBOX_SHEET_ID}".`
+      };
+    }
+    if (calendarId !== SYNTHETIC_SANDBOX_CALENDAR_ID) {
+      return {
+        ok: false,
+        status: 'failed',
+        sheetsSynced: false,
+        calendarSynced: false,
+        error: `Sandbox enforcement block: calendarId "${calendarId}" does not match synthetic sandbox calendar ID "${SYNTHETIC_SANDBOX_CALENDAR_ID}".`
+      };
+    }
+  }
 
   let newAccessToken: string | undefined;
 

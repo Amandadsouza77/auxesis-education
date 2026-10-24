@@ -5,7 +5,9 @@ import {
   patchGoogleCalendarEvent,
   refreshGoogleAccessToken,
   verifyLessonRowIdentity,
-  syncLessonCompletionToGoogle
+  syncLessonCompletionToGoogle,
+  SYNTHETIC_SANDBOX_SHEET_ID,
+  SYNTHETIC_SANDBOX_CALENDAR_ID
 } from '../portal-service/helpers/googleSync.ts';
 
 test('refreshGoogleAccessToken rejects missing credentials', async () => {
@@ -126,6 +128,22 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('syncLessonCompletionToGoogle enforces strict synthetic sandbox resource match when sandboxOnly is enabled', async () => {
+  const resultMismatch = await syncLessonCompletionToGoogle({
+    spreadsheetId: 'production-sheet-id',
+    calendarId: SYNTHETIC_SANDBOX_CALENDAR_ID,
+    accessToken: 'mock-token',
+    lessonRowIndex: 2,
+    expectedStudentId: 'QA-STUDENT-001',
+    calendarEventId: '337a0n0hecsrq55ps7bcrjnp18',
+    sandboxOnly: true
+  });
+
+  assert.equal(resultMismatch.ok, false);
+  assert.equal(resultMismatch.status, 'failed');
+  assert.match(resultMismatch.error || '', /Sandbox enforcement block/);
 });
 
 test('syncLessonCompletionToGoogle handles durable per-destination partial retry recovery correctly', async () => {
