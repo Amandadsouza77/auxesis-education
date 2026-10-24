@@ -184,3 +184,27 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     globalThis.fetch = originalFetch;
   }
 });
+
+test('completion fails closed when both Calendar IDs are missing, before any Google writes', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('Unexpected network request'); };
+  try {
+    for (const existingSheetsSynced of [false, true]) {
+      const result = await syncLessonCompletionToGoogle({
+        spreadsheetId: 'sheet123',
+        accessToken: 'mock-token',
+        lessonRowIndex: 37,
+        expectedStudentId: 'student-123',
+        existingSheetsSynced,
+        existingCalendarSynced: false
+      });
+      assert.equal(result.ok, false);
+      assert.equal(result.status, 'failed');
+      assert.match(result.error, /calendarId or calendarEventId/);
+    }
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
