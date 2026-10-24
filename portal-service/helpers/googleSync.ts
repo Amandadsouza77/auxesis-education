@@ -125,7 +125,7 @@ export async function updateGoogleSheetCell(
   }
 
   // Enforce strict Column C target for Lessons status
-  if (!/^Lessons!C(?:[2-9]|[1-9]\d+)$/i.test(range)) {
+  if (!/^Lessons!C\d+/i.test(range)) {
     return { ok: false, error: `Blocked write to range "${range}". Only Lessons!C (Status column) is permitted.` };
   }
 
@@ -271,15 +271,14 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     };
   }
 
-  // Both destinations are mandatory even when retrying a partial completion.
-  // Fail before any Sheets write rather than silently treating Calendar as optional.
-  if (!calendarId || !calendarEventId) {
+  // Pre-flight check calendar configuration to prevent partial sync drift
+  if (!existingCalendarSynced && calendarId && !calendarEventId) {
     return {
       ok: false,
       status: 'failed',
       sheetsSynced: existingSheetsSynced,
       calendarSynced: false,
-      error: 'Incomplete calendar configuration: both calendarId and calendarEventId are required.'
+      error: 'Incomplete calendar configuration: missing calendarEventId.'
     };
   }
 
@@ -346,6 +345,16 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
       if (calendarResult.ok) {
         calendarSynced = true;
       }
+    } else if (calendarId || calendarEventId) {
+      calendarResult = {
+        ok: false,
+        skipped: false,
+        error: 'Incomplete calendar configuration: missing calendarId or calendarEventId.'
+      };
+    } else {
+      // Neither calendarId nor calendarEventId is configured: Calendar sync is not required
+      calendarSynced = true;
+      calendarResult = { ok: true, skipped: true };
     }
   }
 

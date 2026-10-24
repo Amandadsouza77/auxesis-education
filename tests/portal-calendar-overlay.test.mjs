@@ -105,3 +105,70 @@ test('overlayLiveCalendarToLessons handles live Calendar event cancellations', (
   assert.equal(result[0].status, 'Cancelled');
   assert.equal(result[0].liveCalendarOverlay, true);
 });
+
+test('fetchLiveCalendarEvents handles multi-page pagination and page 2 failures correctly', async () => {
+  const originalFetch = globalThis.fetch;
+  let pageRequests = 0;
+
+  globalThis.fetch = (async (url, init) => {
+    pageRequests++;
+    const urlStr = url.toString();
+    if (pageRequests === 1) {
+      assert.doesNotMatch(urlStr, /pageToken=/);
+      return new Response(
+        JSON.stringify({
+          nextPageToken: 'token-page-2',
+          items: [{ id: 'p1-ev1', summary: 'Page 1 Event', start: { dateTime: '2026-10-30T10:00:00Z' } }]
+        }),
+        { status: 200 }
+      );
+    } else {
+      assert.match(urlStr, /pageToken=token-page-2/);
+      return new Response(
+        JSON.stringify({
+          items: [{ id: 'p2-ev1', summary: 'Page 2 Event', start: { dateTime: '2026-10-30T11:00:00Z' } }]
+        }),
+        { status: 200 }
+      );
+    }
+  });
+
+  try {
+    const res = await fetchLiveCalendarEvents('cal-id', 'access-token');
+    assert.equal(res.ok, true);
+    assert.equal(res.events?.length, 2);
+    assert.equal(res.events[0].id, 'p1-ev1');
+    assert.equal(res.events[1].id, 'p2-ev1');
+    assert.equal(pageRequests, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('fetchLiveCalendarEvents fails safely when page 2 returns API error', async () => {
+  const originalFetch = globalThis.fetch;
+  let pageRequests = 0;
+
+  globalThis.fetch = (async (url) => {
+    pageRequests++;
+    if (pageRequests === 1) {
+      return new Response(
+        JSON.stringify({
+          nextPageToken: 'token-page-2',
+          items: [{ id: 'p1-ev1', summary: 'Page 1 Event' }]
+        }),
+        { status: 200 }
+      );
+    } else {
+      return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    }
+  });
+
+  try {
+    const res = await fetchLiveCalendarEvents('cal-id', 'access-token');
+    assert.equal(res.ok, false);
+    assert.match(res.error || '', /page 2/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

@@ -32,51 +32,72 @@ export async function fetchLiveCalendarEvents(
   let activeToken = accessToken;
   let newAccessToken: string | undefined;
 
-  const queryEvents = async (token: string) => {
-    const params = new URLSearchParams({
-      singleEvents: 'true',
-      orderBy: 'startTime'
-    });
-    if (timeMin) params.set('timeMin', timeMin);
-    if (timeMax) params.set('timeMax', timeMax);
+  const MAX_PAGES = 10;
 
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params.toString()}`;
+  const queryAllPages = async (token: string) => {
+    const allEvents: CalendarEventRead[] = [];
+    let pageToken: string | undefined = undefined;
+    let pageCount = 0;
 
-    try {
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
+    while (pageCount < MAX_PAGES) {
+      pageCount++;
+      const params = new URLSearchParams({
+        singleEvents: 'true',
+        orderBy: 'startTime'
       });
+      if (timeMin) params.set('timeMin', timeMin);
+      if (timeMax) params.set('timeMax', timeMax);
+      if (pageToken) params.set('pageToken', pageToken);
 
-      if (!res.ok) {
-        return { ok: false, status: res.status, error: `Google Calendar API read error (${res.status})` };
+      const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params.toString()}`;
+
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          return { ok: false, status: res.status, error: `Google Calendar API read error on page ${pageCount} (${res.status})` };
+        }
+
+        const data = (await res.json()) as any;
+        if (!data || typeof data !== 'object') {
+          return { ok: false, status: 500, error: `Malformed Google Calendar response on page ${pageCount}.` };
+        }
+
+        const items = Array.isArray(data.items) ? data.items : [];
+        for (const item of items) {
+          if (!item || typeof item !== 'object') continue;
+          allEvents.push({
+            id: String(item.id || ''),
+            summary: String(item.summary || ''),
+            start: String(item.start?.dateTime || item.start?.date || ''),
+            end: String(item.end?.dateTime || item.end?.date || ''),
+            status: String(item.status || 'confirmed')
+          });
+        }
+
+        pageToken = data.nextPageToken;
+        if (!pageToken) {
+          break;
+        }
+      } catch (err: any) {
+        return { ok: false, status: 500, error: 'Network error fetching live Google Calendar events.' };
       }
-
-      const data = (await res.json()) as any;
-      const items = Array.isArray(data.items) ? data.items : [];
-
-      const events: CalendarEventRead[] = items.map((item: any) => ({
-        id: item.id,
-        summary: item.summary || '',
-        start: item.start?.dateTime || item.start?.date || '',
-        end: item.end?.dateTime || item.end?.date || '',
-        status: item.status || 'confirmed'
-      }));
-
-      return { ok: true, status: 200, events };
-    } catch (err: any) {
-      return { ok: false, status: 500, error: 'Network error fetching live Google Calendar events.' };
     }
+
+    return { ok: true, status: 200, events: allEvents };
   };
 
-  let res = await queryEvents(activeToken);
+  let res = await queryAllPages(activeToken);
 
   if (!res.ok && res.status === 401 && refreshToken && clientId && clientSecret) {
     const refresh = await refreshGoogleAccessToken(refreshToken, clientId, clientSecret);
     if (refresh.ok && refresh.accessToken) {
       activeToken = refresh.accessToken;
       newAccessToken = activeToken;
-      res = await queryEvents(activeToken);
+      res = await queryAllPages(activeToken);
     }
   }
 
