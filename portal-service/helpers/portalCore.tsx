@@ -179,20 +179,28 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    const spreadsheetId=settings.spreadsheetId;
    const calendarId=settings.calendarId;
 
-   // Read server-only environment configuration with fail-closed default when test sandbox IDs are configured
+   // Server-only environment configuration inspection
    const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
    const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
-   const testMode = process.env.PORTAL_TEST_MODE === 'true' || (Boolean(allowedSpreadsheetId) && Boolean(allowedCalendarId));
+   const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
+   const partialSandboxConfig = Boolean(allowedSpreadsheetId) !== Boolean(allowedCalendarId);
 
-   // Fail closed at server entry point if test sandbox mode is active but configured resource IDs do not match the allowed sandbox configuration
-   if (testMode) {
-     if (!allowedSpreadsheetId || !allowedCalendarId || spreadsheetId !== allowedSpreadsheetId || calendarId !== allowedCalendarId) {
+   // Reject partial or malformed sandbox configuration immediately before any Google call or local mutation
+   if (testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId)) {
+     if (!allowedSpreadsheetId || !allowedCalendarId || partialSandboxConfig) {
        out.googleSyncStatus = 'failed';
-       out.googleSyncError = 'Sandbox enforcement block: server test mode active but spreadsheet or calendar ID does not match server allowlist configuration.';
+       out.googleSyncError = 'Sandbox enforcement block: sandbox test configuration is incomplete or missing required allowlist IDs.';
+       console.warn('Sandbox enforcement block:', out.googleSyncError);
+       return out;
+     }
+     if (spreadsheetId !== allowedSpreadsheetId || calendarId !== allowedCalendarId) {
+       out.googleSyncStatus = 'failed';
+       out.googleSyncError = 'Sandbox enforcement block: target spreadsheet or calendar ID does not match allowed server sandbox configuration.';
        console.warn('Sandbox enforcement block:', out.googleSyncError);
        return out;
      }
    }
+   const testMode = testModeRequested || Boolean(allowedSpreadsheetId);
 
    // Pass existing destination sync state and server allowlist for partial retry reconciliation
    const syncRes = await syncLessonCompletionToGoogle({
