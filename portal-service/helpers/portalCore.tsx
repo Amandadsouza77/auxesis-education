@@ -5,7 +5,7 @@ import { upload, getUrl, getInfo } from '@floot/storage';
 import { createToken, publish } from '@floot/realtime';
 import { FlootOAuthProvider } from './FlootOAuthProvider';
 import { syncLessonCompletionToGoogle } from './googleSync';
-import { fetchLiveCalendarEvents, overlayLiveCalendarToLessons } from './calendarReadSync';
+import { fetchLiveCalendarEvents, overlayLiveCalendarToLessons, evalCalendarReadEligibility } from './calendarReadSync';
 
 const SITE='https://auxesis-education.pages.dev';
 const VERSION='2026-10-03';
@@ -65,21 +65,22 @@ async function state(request:Request){
  const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
  const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
  const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
- const testMode = testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId);
 
- // Fail closed on state endpoint live Calendar fetch if sandbox test mode is active but configuration is incomplete or mismatched
- let allowCalendarRead = Boolean(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length > 0);
- if (testMode && allowCalendarRead) {
-  if (!allowedSpreadsheetId || !allowedCalendarId || calendarId !== allowedCalendarId || settings.spreadsheetId !== allowedSpreadsheetId) {
-   allowCalendarRead = false;
-   snap.liveCalendarReadStatus = 'sandbox_blocked';
-   snap.liveCalendarReadNotice = 'Live calendar overlay disabled: target resource IDs do not match server sandbox allowlist.';
-   console.warn('Sandbox enforcement block on state live calendar read:', snap.liveCalendarReadNotice);
-  }
- }
+ const eligibility = evalCalendarReadEligibility({
+  calendarId,
+  spreadsheetId: settings.spreadsheetId,
+  accessToken,
+  hasLessons: Array.isArray(snap.lessons) && snap.lessons.length > 0,
+  testModeRequested,
+  allowedSpreadsheetId,
+  allowedCalendarId
+ });
+
+ snap.liveCalendarReadStatus = eligibility.status;
+ if (eligibility.notice) snap.liveCalendarReadNotice = eligibility.notice;
 
  // Server-side read-only live Google Calendar overlay for authorized snapshot lessons with 401 refresh
- if(allowCalendarRead){
+ if(eligibility.eligible){
   try {
    const now = new Date();
    const timeMin = new Date(now.getTime() - 30*86400000).toISOString();
@@ -95,12 +96,18 @@ async function state(request:Request){
    );
    if(calRes.ok && calRes.events){
     snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events, snap.students);
+    snap.liveCalendarReadStatus = 'refreshed';
     if(calRes.newAccessToken){
      settings.googleAccessToken = calRes.newAccessToken;
      await put(db, 'settings', settings);
     }
+   } else {
+    snap.liveCalendarReadStatus = 'stale_read_failed';
+    snap.liveCalendarReadNotice = calRes.error || 'Live calendar read failed; serving cached snapshot.';
    }
   } catch (e) {
+   snap.liveCalendarReadStatus = 'stale_read_failed';
+   snap.liveCalendarReadNotice = 'Live calendar overlay error; serving cached snapshot.';
    console.warn('Live calendar overlay skipped:', e);
   }
  }

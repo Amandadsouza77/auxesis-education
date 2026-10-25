@@ -11,6 +11,68 @@ export interface CalendarEventRead {
   status: string;
 }
 
+export interface CalendarReadEligibilityParams {
+  calendarId?: string;
+  spreadsheetId?: string;
+  accessToken?: string;
+  hasLessons?: boolean;
+  testModeRequested?: boolean;
+  allowedSpreadsheetId?: string;
+  allowedCalendarId?: string;
+}
+
+export interface CalendarReadEligibilityResult {
+  eligible: boolean;
+  status: 'eligible' | 'sandbox_blocked' | 'unconfigured' | 'no_lessons';
+  notice?: string;
+}
+
+/**
+ * Evaluates whether a server-side live Google Calendar fetch is eligible.
+ * Fail closed in sandbox test mode when configured resource IDs mismatch server allowlist.
+ */
+export function evalCalendarReadEligibility(params: CalendarReadEligibilityParams): CalendarReadEligibilityResult {
+  const {
+    calendarId,
+    spreadsheetId,
+    accessToken,
+    hasLessons,
+    testModeRequested = false,
+    allowedSpreadsheetId = '',
+    allowedCalendarId = ''
+  } = params;
+
+  const testMode = testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId);
+
+  if (testMode) {
+    if (!allowedSpreadsheetId || !allowedCalendarId || calendarId !== allowedCalendarId || spreadsheetId !== allowedSpreadsheetId) {
+      return {
+        eligible: false,
+        status: 'sandbox_blocked',
+        notice: 'Live calendar overlay disabled: target resource IDs do not match server sandbox allowlist.'
+      };
+    }
+  }
+
+  if (!calendarId || !accessToken) {
+    return {
+      eligible: false,
+      status: 'unconfigured',
+      notice: 'Live calendar overlay disabled: missing calendar ID or Google access token.'
+    };
+  }
+
+  if (!hasLessons) {
+    return {
+      eligible: false,
+      status: 'no_lessons',
+      notice: 'Live calendar overlay skipped: no authorized scheduled lessons to overlay.'
+    };
+  }
+
+  return { eligible: true, status: 'eligible' };
+}
+
 /**
  * Reads live Google Calendar events for a specific timeframe to overlay schedule changes
  * (e.g. Lara Oct 30 lesson moved to 5:30-6:30 AM Toronto).
