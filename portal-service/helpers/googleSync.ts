@@ -327,26 +327,26 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     return res;
   };
 
-  // 3. Mandatory Identity Verification Pre-flight (read Column G) if Sheets write is required
+  // 3. Mandatory Identity Verification Pre-flight (read Column G) on EVERY attempt, even when recovering partial sync
+  const verifyRes = await execWith401Retry((token) =>
+    verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, token)
+  );
+
+  if (!verifyRes.match) {
+    return {
+      ok: false,
+      status: 'identity_mismatch',
+      sheetsSynced: false,
+      calendarSynced: existingCalendarSynced,
+      error: verifyRes.error || 'Lesson row identity verification failed.',
+      newAccessToken
+    };
+  }
+
   let sheetsSynced = existingSheetsSynced;
   let sheetsStatusResult: { ok: boolean; error?: string } = { ok: sheetsSynced };
 
   if (!sheetsSynced) {
-    const verifyRes = await execWith401Retry((token) =>
-      verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, token)
-    );
-
-    if (!verifyRes.match) {
-      return {
-        ok: false,
-        status: 'identity_mismatch',
-        sheetsSynced: false,
-        calendarSynced: existingCalendarSynced,
-        error: verifyRes.error || 'Lesson row identity verification failed.',
-        newAccessToken
-      };
-    }
-
     // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
     sheetsStatusResult = await execWith401Retry((token) =>
       updateGoogleSheetCell(spreadsheetId, `Lessons!C${lessonRowIndex}`, 'Completed', token)

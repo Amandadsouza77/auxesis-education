@@ -170,6 +170,9 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     const urlStr = url.toString();
     calls.push({ url: urlStr, method: init?.method || 'GET' });
 
+    if (urlStr.includes('/values/Lessons!G37')) {
+      return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    }
     if (urlStr.includes('/calendars/cal123/events/event456')) {
       return new Response(JSON.stringify({ id: 'event456', summary: '[Completed] IB Chemistry' }), { status: 200 });
     }
@@ -194,8 +197,9 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     assert.equal(result.status, 'synced');
     assert.equal(result.sheetsSynced, true);
     assert.equal(result.calendarSynced, true);
-    assert.equal(calls.length, 1); // Only Calendar PATCH is called; Sheets update is skipped
-    assert.match(calls[0].url, /calendars\/cal123\/events\/event456/);
+    assert.equal(calls.length, 2); // Pre-flight G37 verify read + Calendar PATCH
+    assert.match(calls[0].url, /values\/Lessons!G37/);
+    assert.match(calls[1].url, /calendars\/cal123\/events\/event456/);
   } finally {
     globalThis.fetch = originalFetch;
   }
