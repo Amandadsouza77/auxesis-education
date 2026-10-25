@@ -179,12 +179,12 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    const spreadsheetId=settings.spreadsheetId;
    const calendarId=settings.calendarId;
 
-   // Read server-only environment test mode and sandbox configuration
-   const testMode = process.env.PORTAL_TEST_MODE === 'true';
+   // Read server-only environment configuration with fail-closed default when test sandbox IDs are configured
    const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
    const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+   const testMode = process.env.PORTAL_TEST_MODE === 'true' || (Boolean(allowedSpreadsheetId) && Boolean(allowedCalendarId));
 
-   // Fail closed at server entry point if test mode is active but sandbox allowlist config is missing or mismatched
+   // Fail closed at server entry point if test sandbox mode is active but configured resource IDs do not match the allowed sandbox configuration
    if (testMode) {
      if (!allowedSpreadsheetId || !allowedCalendarId || spreadsheetId !== allowedSpreadsheetId || calendarId !== allowedCalendarId) {
        out.googleSyncStatus = 'failed';
