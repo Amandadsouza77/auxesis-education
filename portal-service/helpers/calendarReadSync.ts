@@ -124,11 +124,11 @@ export async function fetchLiveCalendarEvents(
         }
 
         const data = (await res.json()) as any;
-        if (!data || typeof data !== 'object') {
-          return { ok: false, status: 500, error: `Malformed Google Calendar response on page ${pageCount}.` };
+        if (!data || typeof data !== 'object' || !Array.isArray(data.items)) {
+          return { ok: false, status: 500, error: `Malformed Google Calendar response payload on page ${pageCount}: items array is missing or invalid.` };
         }
 
-        const items = Array.isArray(data.items) ? data.items : [];
+        const items = data.items;
         for (const item of items) {
           if (!item || typeof item !== 'object') continue;
           allEvents.push({
@@ -214,7 +214,7 @@ export function overlayLiveCalendarToLessons(
       const matchedEvent = liveEvents.find((e) => e.id === lesson.calendarEventId);
       if (!matchedEvent) return lesson;
 
-      // Rule 2: Expose calendarEventStatus warning on cancellation without mutating Student Tracker lesson status or credits
+      // Rule 2: Expose calendarEventStatus warning without mutating in-place cached lesson object
       if (matchedEvent.status === 'cancelled') {
         return {
           ...lesson,
@@ -223,20 +223,19 @@ export function overlayLiveCalendarToLessons(
           liveCalendarOverlay: true
         };
       }
+
+      const updated = { ...lesson };
       if (matchedEvent.status) {
-        lesson.calendarEventStatus = matchedEvent.status;
+        updated.calendarEventStatus = matchedEvent.status;
       }
 
       // Rule 3: Overlay live start time if different from cached store
       if (matchedEvent.start && matchedEvent.start !== lesson.start) {
-        return {
-          ...lesson,
-          start: matchedEvent.start,
-          calendarSyncedAt: new Date().toISOString(),
-          liveCalendarOverlay: true
-        };
+        updated.start = matchedEvent.start;
+        updated.calendarSyncedAt = new Date().toISOString();
+        updated.liveCalendarOverlay = true;
       }
 
-      return lesson;
+      return updated;
     });
 }

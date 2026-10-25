@@ -91,21 +91,40 @@ test('overlayLiveCalendarToLessons filters inactive student future lessons while
   assert.equal(filtered.some((l) => l.id === 'l3'), true);
 });
 
-test('overlayLiveCalendarToLessons exposes calendarEventStatus warning on cancellation without mutating Tracker lesson status', () => {
-  const cachedLessons = [
-    { id: 'l1', studentId: 'active-id', start: '2026-10-30T15:00:00Z', status: 'Scheduled', calendarEventId: 'event-cancelled' }
-  ];
+test('overlayLiveCalendarToLessons exposes calendarEventStatus warning on cancellation without mutating in-place cached lesson object', () => {
+  const originalLesson = Object.freeze({ id: 'l1', studentId: 'active-id', start: '2026-10-30T15:00:00Z', status: 'Scheduled', calendarEventId: 'event-confirmed' });
+  const cachedLessons = [originalLesson];
 
   const liveEvents = [
-    { id: 'event-cancelled', summary: 'Cancelled Lesson', start: '2026-10-30T15:00:00Z', end: '2026-10-30T16:00:00Z', status: 'cancelled' }
+    { id: 'event-confirmed', summary: 'Confirmed Lesson', start: '2026-10-30T15:00:00Z', end: '2026-10-30T16:00:00Z', status: 'confirmed' }
   ];
 
   const result = overlayLiveCalendarToLessons(cachedLessons, liveEvents);
 
   // Lesson status from Student Tracker MUST remain Scheduled
   assert.equal(result[0].status, 'Scheduled');
-  assert.equal(result[0].calendarEventStatus, 'cancelled');
-  assert.equal(result[0].liveCalendarOverlay, true);
+  assert.equal(result[0].calendarEventStatus, 'confirmed');
+  // Original cached lesson object MUST NOT have been mutated in-place
+  assert.equal('calendarEventStatus' in originalLesson, false);
+});
+
+test('fetchLiveCalendarEvents fails closed on non-array items payload', async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = (async () => {
+    return new Response(
+      JSON.stringify({ items: 'invalid-non-array-items' }),
+      { status: 200 }
+    );
+  });
+
+  try {
+    const res = await fetchLiveCalendarEvents('cal-id', 'access-token');
+    assert.equal(res.ok, false);
+    assert.match(res.error || '', /Malformed Google Calendar response payload/i);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('fetchLiveCalendarEvents fails closed on truncated pagination exceeding page limit', async () => {
