@@ -149,6 +149,10 @@ export async function fetchLiveCalendarEvents(
       }
     }
 
+    if (pageToken) {
+      return { ok: false, status: 500, error: 'Google Calendar event list truncated: exceeded max pagination page limit.' };
+    }
+
     return { ok: true, status: 200, events: allEvents };
   };
 
@@ -210,15 +214,17 @@ export function overlayLiveCalendarToLessons(
       const matchedEvent = liveEvents.find((e) => e.id === lesson.calendarEventId);
       if (!matchedEvent) return lesson;
 
-      // Rule 2: Handle live Calendar event cancellation / status change
+      // Rule 2: Expose calendarEventStatus warning on cancellation without mutating Student Tracker lesson status or credits
       if (matchedEvent.status === 'cancelled') {
         return {
           ...lesson,
-          status: 'Cancelled',
-          cancelledAt: lesson.cancelledAt || new Date().toISOString(),
+          calendarEventStatus: 'cancelled',
           calendarSyncedAt: new Date().toISOString(),
           liveCalendarOverlay: true
         };
+      }
+      if (matchedEvent.status) {
+        lesson.calendarEventStatus = matchedEvent.status;
       }
 
       // Rule 3: Overlay live start time if different from cached store

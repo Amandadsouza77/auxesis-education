@@ -91,7 +91,7 @@ test('overlayLiveCalendarToLessons filters inactive student future lessons while
   assert.equal(filtered.some((l) => l.id === 'l3'), true);
 });
 
-test('overlayLiveCalendarToLessons handles live Calendar event cancellations', () => {
+test('overlayLiveCalendarToLessons exposes calendarEventStatus warning on cancellation without mutating Tracker lesson status', () => {
   const cachedLessons = [
     { id: 'l1', studentId: 'active-id', start: '2026-10-30T15:00:00Z', status: 'Scheduled', calendarEventId: 'event-cancelled' }
   ];
@@ -102,8 +102,35 @@ test('overlayLiveCalendarToLessons handles live Calendar event cancellations', (
 
   const result = overlayLiveCalendarToLessons(cachedLessons, liveEvents);
 
-  assert.equal(result[0].status, 'Cancelled');
+  // Lesson status from Student Tracker MUST remain Scheduled
+  assert.equal(result[0].status, 'Scheduled');
+  assert.equal(result[0].calendarEventStatus, 'cancelled');
   assert.equal(result[0].liveCalendarOverlay, true);
+});
+
+test('fetchLiveCalendarEvents fails closed on truncated pagination exceeding page limit', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+
+  globalThis.fetch = (async () => {
+    calls++;
+    return new Response(
+      JSON.stringify({
+        nextPageToken: `token-page-${calls + 1}`,
+        items: [{ id: `ev-${calls}`, summary: `Event ${calls}` }]
+      }),
+      { status: 200 }
+    );
+  });
+
+  try {
+    const res = await fetchLiveCalendarEvents('cal-id', 'access-token');
+    assert.equal(res.ok, false);
+    assert.match(res.error || '', /truncated/i);
+    assert.equal(calls, 10);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('fetchLiveCalendarEvents handles multi-page pagination and page 2 failures correctly', async () => {
