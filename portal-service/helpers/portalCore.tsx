@@ -61,8 +61,25 @@ async function state(request:Request){
  const clientId=settings.googleClientId;
  const clientSecret=settings.googleClientSecret;
 
+ // Read server-only environment test mode and sandbox configuration
+ const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
+ const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+ const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
+ const testMode = testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId);
+
+ // Fail closed on state endpoint live Calendar fetch if sandbox test mode is active but configuration is incomplete or mismatched
+ let allowCalendarRead = Boolean(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length > 0);
+ if (testMode && allowCalendarRead) {
+  if (!allowedSpreadsheetId || !allowedCalendarId || calendarId !== allowedCalendarId || settings.spreadsheetId !== allowedSpreadsheetId) {
+   allowCalendarRead = false;
+   snap.liveCalendarReadStatus = 'sandbox_blocked';
+   snap.liveCalendarReadNotice = 'Live calendar overlay disabled: target resource IDs do not match server sandbox allowlist.';
+   console.warn('Sandbox enforcement block on state live calendar read:', snap.liveCalendarReadNotice);
+  }
+ }
+
  // Server-side read-only live Google Calendar overlay for authorized snapshot lessons with 401 refresh
- if(calendarId && accessToken && Array.isArray(snap.lessons) && snap.lessons.length>0){
+ if(allowCalendarRead){
   try {
    const now = new Date();
    const timeMin = new Date(now.getTime() - 30*86400000).toISOString();
