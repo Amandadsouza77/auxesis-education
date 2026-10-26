@@ -212,7 +212,7 @@ export async function patchGoogleCalendarEvent(
 
     return { ok: true, status: 200 };
   } catch (err: any) {
-    return { ok: false, error: 'Network error patching Google Calendar event.' };
+    return { ok: false, isAmbiguousNetworkError: true, error: 'Network error patching Google Calendar event.' };
   }
 }
 
@@ -442,6 +442,18 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
           token
         )
       );
+      if (!calendarResult.ok && (calendarResult as any).isAmbiguousNetworkError) {
+        return {
+          ok: false,
+          status: 'unknown_attribution',
+          sheetsSynced,
+          calendarSynced: existingCalendarSynced,
+          error: `Ambiguous network error patching Google Calendar event: ${calendarResult.error}`,
+          sheetsStatusResult,
+          calendarResult,
+          newAccessToken
+        };
+      }
       if (calendarResult.ok) {
         if (params.onDestinationSynced) {
           try {

@@ -267,6 +267,47 @@ test('syncLessonCompletionToGoogle returns unknown_attribution if onDestinationS
   }
 });
 
+test('syncLessonCompletionToGoogle returns unknown_attribution on ambiguous Calendar PATCH network exception', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
+    calls.push({ url: urlStr, method: init?.method || 'GET' });
+
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Completed', '', '', '', 'student-123']] }), { status: 200 });
+    }
+    if (urlStr.includes('/calendars/cal123/events/event456')) {
+      throw new Error('Network timeout during Calendar PATCH');
+    }
+    return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
+  });
+
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      calendarEventId: 'event456',
+      lessonSubject: 'IB Biology',
+      existingSheetsSynced: true,
+      existingCalendarSynced: false
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'unknown_attribution');
+    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.calendarSynced, false);
+    assert.match(result.error || '', /Ambiguous network error/);
+    assert.equal(calls.length, 2); // C37:G37 verify + Calendar PATCH attempt
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('syncLessonCompletionToGoogle STOPS before write if beforeDestinationWrite claim fence fails', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
