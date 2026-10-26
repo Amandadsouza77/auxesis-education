@@ -189,7 +189,7 @@ export async function patchGoogleCalendarEvent(
   eventId: string,
   updates: { summary?: string; description?: string; colorId?: string },
   accessToken: string
-): Promise<{ ok: boolean; status?: number; error?: string }> {
+): Promise<{ ok: boolean; status?: number; isAmbiguousNetworkError?: boolean; isAmbiguousServerError?: boolean; error?: string }> {
   if (!calendarId || !eventId || !accessToken) {
     return { ok: false, error: 'Missing calendarId, eventId, or accessToken' };
   }
@@ -207,7 +207,13 @@ export async function patchGoogleCalendarEvent(
     });
 
     if (!res.ok) {
-      return { ok: false, status: res.status, error: `Google Calendar API error (${res.status})` };
+      const is5xx = res.status >= 500 && res.status < 600;
+      return {
+        ok: false,
+        status: res.status,
+        isAmbiguousServerError: is5xx,
+        error: `Google Calendar API error (${res.status})`
+      };
     }
 
     return { ok: true, status: 200 };
@@ -442,13 +448,13 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
           token
         )
       );
-      if (!calendarResult.ok && (calendarResult as any).isAmbiguousNetworkError) {
+      if (!calendarResult.ok && (calendarResult.isAmbiguousNetworkError || calendarResult.isAmbiguousServerError)) {
         return {
           ok: false,
           status: 'unknown_attribution',
           sheetsSynced,
           calendarSynced: existingCalendarSynced,
-          error: `Ambiguous network error patching Google Calendar event: ${calendarResult.error}`,
+          error: `Ambiguous write outcome patching Google Calendar event: ${calendarResult.error}`,
           sheetsStatusResult,
           calendarResult,
           newAccessToken
