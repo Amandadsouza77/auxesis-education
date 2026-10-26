@@ -196,9 +196,9 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
        }
      }
 
-     // Disallow taking over an active or unresolved sync claim from another worker.
-     // Blocks takeover when status is 'in_progress' or 'unknown_attribution'.
-     if (target.syncClaim && target.syncClaim !== operation && (target.googleSyncStatus === 'in_progress' || target.googleSyncStatus === 'unknown_attribution')) {
+     // Disallow taking over an active or unresolved sync claim from another worker, or repeating write if in_progress.
+     // Blocks takeover or duplicate in-flight entry when status is 'in_progress' or 'unknown_attribution'.
+     if (target.syncClaim && (target.googleSyncStatus === 'in_progress' || target.googleSyncStatus === 'unknown_attribution')) {
        fail('Another worker operation is syncing or in an unknown-attribution state for this lesson. Concurrent takeover is blocked.', 409);
      }
 
