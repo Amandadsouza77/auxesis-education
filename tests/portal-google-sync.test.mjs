@@ -212,7 +212,7 @@ test('syncLessonCompletionToGoogle STOPS before Calendar PATCH if onDestinationS
 
     assert.equal(result.ok, false);
     assert.equal(result.status, 'failed');
-    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.sheetsSynced, false); // Not promoted to synced because receipt persistence failed
     assert.equal(result.calendarSynced, false);
     assert.match(result.error || '', /Receipt persistence failed for Sheets/);
     assert.equal(calls.length, 2); // C37:G37 verify + Sheets PUT ONLY. Calendar PATCH is never called.

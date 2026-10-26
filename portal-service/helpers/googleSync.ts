@@ -391,21 +391,23 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     );
 
     if (sheetsStatusResult.ok) {
-      sheetsSynced = true;
       if (params.onDestinationSynced) {
         try {
           await params.onDestinationSynced('sheets', { sheetsSynced: true, calendarSynced: existingCalendarSynced });
+          sheetsSynced = true;
         } catch (e: any) {
           return {
             ok: false,
             status: 'failed',
-            sheetsSynced: true,
+            sheetsSynced: existingSheetsSynced,
             calendarSynced: existingCalendarSynced,
             error: `Receipt persistence failed for Sheets: ${e?.message || String(e)}`,
             sheetsStatusResult,
             newAccessToken
           };
         }
+      } else {
+        sheetsSynced = true;
       }
     }
   }
@@ -441,22 +443,24 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         )
       );
       if (calendarResult.ok) {
-        calendarSynced = true;
         if (params.onDestinationSynced) {
           try {
             await params.onDestinationSynced('calendar', { sheetsSynced: true, calendarSynced: true });
+            calendarSynced = true;
           } catch (e: any) {
             return {
               ok: false,
               status: 'partial',
-              sheetsSynced: true,
-              calendarSynced: false,
+              sheetsSynced,
+              calendarSynced: existingCalendarSynced,
               error: `Receipt persistence failed for Calendar: ${e?.message || String(e)}`,
               sheetsStatusResult,
               calendarResult,
               newAccessToken
             };
           }
+        } else {
+          calendarSynced = true;
         }
       }
     } else if (calendarId || calendarEventId) {
