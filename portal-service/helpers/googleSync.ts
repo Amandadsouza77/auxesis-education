@@ -18,6 +18,7 @@ export interface GoogleSyncParams {
   sandboxOnly?: boolean;
   allowedSpreadsheetId?: string;
   allowedCalendarId?: string;
+  beforeDestinationWrite?: (destination: 'sheets' | 'calendar') => Promise<void> | void;
   onDestinationSynced?: (destination: 'sheets' | 'calendar', details: { sheetsSynced: boolean; calendarSynced: boolean }) => Promise<void> | void;
 }
 
@@ -369,6 +370,21 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
   let sheetsStatusResult: { ok: boolean; error?: string } = { ok: sheetsSynced };
 
   if (!sheetsSynced) {
+    if (params.beforeDestinationWrite) {
+      try {
+        await params.beforeDestinationWrite('sheets');
+      } catch (e: any) {
+        return {
+          ok: false,
+          status: 'failed',
+          sheetsSynced: false,
+          calendarSynced: existingCalendarSynced,
+          error: `Claim fencing failed before Sheets write: ${e?.message || String(e)}`,
+          newAccessToken
+        };
+      }
+    }
+
     // 4. Update Lessons Sheet status (Column C in Student Tracker schema)
     sheetsStatusResult = await execWith401Retry((token) =>
       updateGoogleSheetCell(spreadsheetId, `Lessons!C${lessonRowIndex}`, 'Completed', token)
@@ -379,8 +395,16 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
       if (params.onDestinationSynced) {
         try {
           await params.onDestinationSynced('sheets', { sheetsSynced: true, calendarSynced: existingCalendarSynced });
-        } catch (e) {
-          console.warn('Incremental receipt callback failed for sheets:', e);
+        } catch (e: any) {
+          return {
+            ok: false,
+            status: 'failed',
+            sheetsSynced: true,
+            calendarSynced: existingCalendarSynced,
+            error: `Receipt persistence failed for Sheets: ${e?.message || String(e)}`,
+            sheetsStatusResult,
+            newAccessToken
+          };
         }
       }
     }
@@ -392,6 +416,22 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
 
   if (sheetsSynced && !calendarSynced) {
     if (calendarId && calendarEventId) {
+      if (params.beforeDestinationWrite) {
+        try {
+          await params.beforeDestinationWrite('calendar');
+        } catch (e: any) {
+          return {
+            ok: false,
+            status: 'partial',
+            sheetsSynced: true,
+            calendarSynced: false,
+            error: `Claim fencing failed before Calendar write: ${e?.message || String(e)}`,
+            sheetsStatusResult,
+            newAccessToken
+          };
+        }
+      }
+
       calendarResult = await execWith401Retry((token) =>
         patchGoogleCalendarEvent(
           calendarId,
@@ -405,8 +445,17 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         if (params.onDestinationSynced) {
           try {
             await params.onDestinationSynced('calendar', { sheetsSynced: true, calendarSynced: true });
-          } catch (e) {
-            console.warn('Incremental receipt callback failed for calendar:', e);
+          } catch (e: any) {
+            return {
+              ok: false,
+              status: 'partial',
+              sheetsSynced: true,
+              calendarSynced: false,
+              error: `Receipt persistence failed for Calendar: ${e?.message || String(e)}`,
+              sheetsStatusResult,
+              calendarResult,
+              newAccessToken
+            };
           }
         }
       }

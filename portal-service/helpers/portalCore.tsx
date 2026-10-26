@@ -196,8 +196,18 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
        }
      }
 
+     // Verify no existing active claim from another worker unless it matches our operationId or is stale (> 30s)
+     const now = Date.now();
+     if (target.syncClaim && target.syncClaim !== operation && target.syncClaimAt) {
+       const claimAge = now - Date.parse(target.syncClaimAt);
+       if (claimAge < 30000) {
+         fail('Another update operation is currently processing this lesson.', 409);
+       }
+     }
+
      // Mark sync intent claim in DB prior to external HTTP calls
      target.syncClaim = operation;
+     target.syncClaimAt = new Date().toISOString();
      target.googleSyncStatus = 'in_progress';
      await put(cx, 'lessons', target);
 
@@ -215,6 +225,16 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
    if (phase1.alreadyCompleted) return phase1.out;
 
    const { target, student: s, settings, testMode, allowedSpreadsheetId, allowedCalendarId } = phase1;
+
+   // Helper to verify fence/claim ownership in short DB transaction
+   const verifyClaimFence = async (lessonId: string, currentOp: string) => {
+     await db.transaction().execute(async cx => {
+       const latestLesson = (await records(cx)).find(r => r._kind === 'lessons' && r.id === lessonId);
+       if (!latestLesson || latestLesson.syncClaim !== currentOp) {
+         fail('Worker lease fencing failure: sync claim ownership was lost or superseded by another operation.', 409);
+       }
+     });
+   };
 
    // Phase 2: Out-of-transaction external HTTP sync to Google APIs
    const syncRes = await syncLessonCompletionToGoogle({
@@ -234,10 +254,16 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      sandboxOnly: testMode,
      allowedSpreadsheetId,
      allowedCalendarId,
+     beforeDestinationWrite: async (dest) => {
+       await verifyClaimFence(target.id, operation);
+     },
      onDestinationSynced: async (dest, details) => {
-       // Fast incremental per-destination receipt persistence in independent short DB transaction
+       // Fast incremental per-destination receipt persistence in independent short DB transaction with claim fence verification
        await db.transaction().execute(async cx => {
          const latestLesson = (await records(cx)).find(r => r._kind === 'lessons' && r.id === target.id) || target;
+         if (latestLesson.syncClaim !== operation) {
+           fail('Worker lease fencing failure on receipt persistence: sync claim ownership was lost.', 409);
+         }
          latestLesson.googleSheetsSynced = details.sheetsSynced;
          latestLesson.googleCalendarSynced = details.calendarSynced;
          latestLesson.googleSyncStatus = 'partial';
@@ -253,6 +279,11 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      const latestLesson = all.find(r => r._kind === 'lessons' && r.id === target.id) || target;
      const latestStudent = all.find(r => r._kind === 'students' && r.id === s.id) || s;
      const latestSettings = all.find(r => r._kind === 'settings' && r.id === 'settings') || settings;
+
+     // Enforce claim ownership fence before final commit
+     if (latestLesson.syncClaim !== operation) {
+       fail('Worker lease fencing failure at final commit: sync claim ownership was lost.', 409);
+     }
 
      if (syncRes.newAccessToken) {
        latestSettings.googleAccessToken = syncRes.newAccessToken;

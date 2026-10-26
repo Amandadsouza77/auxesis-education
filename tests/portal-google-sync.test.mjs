@@ -180,6 +180,88 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
   }
 });
 
+test('syncLessonCompletionToGoogle STOPS before Calendar PATCH if onDestinationSynced for Sheets fails', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
+    calls.push({ url: urlStr, method: init?.method || 'GET' });
+
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'student-123']] }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
+  });
+
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      calendarEventId: 'event456',
+      lessonSubject: 'IB Biology',
+      onDestinationSynced: async (dest) => {
+        if (dest === 'sheets') {
+          throw new Error('Database disk error saving Sheets receipt');
+        }
+      }
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'failed');
+    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.calendarSynced, false);
+    assert.match(result.error || '', /Receipt persistence failed for Sheets/);
+    assert.equal(calls.length, 2); // C37:G37 verify + Sheets PUT ONLY. Calendar PATCH is never called.
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('syncLessonCompletionToGoogle STOPS before write if beforeDestinationWrite claim fence fails', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
+    calls.push({ url: urlStr, method: init?.method || 'GET' });
+
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'student-123']] }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
+  });
+
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      calendarEventId: 'event456',
+      lessonSubject: 'IB Biology',
+      beforeDestinationWrite: async (dest) => {
+        if (dest === 'sheets') {
+          throw new Error('Worker claim fence superseded by concurrent operation');
+        }
+      }
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'failed');
+    assert.equal(result.sheetsSynced, false);
+    assert.equal(result.calendarSynced, false);
+    assert.match(result.error || '', /Claim fencing failed before Sheets write/);
+    assert.equal(calls.length, 1); // C37:G37 verify ONLY. Sheets PUT is never called.
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('syncLessonCompletionToGoogle enforces strict synthetic sandbox resource match when sandboxOnly is enabled', async () => {
   const resultMismatch = await syncLessonCompletionToGoogle({
     spreadsheetId: 'production-sheet-id',
