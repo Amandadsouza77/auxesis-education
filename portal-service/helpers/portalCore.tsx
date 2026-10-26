@@ -263,7 +263,8 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
          }
          latestLesson.googleSheetsSynced = details.sheetsSynced;
          latestLesson.googleCalendarSynced = details.calendarSynced;
-         latestLesson.googleSyncStatus = 'partial';
+         // Keep claim in 'in_progress' while Calendar sync or final commit is in flight
+         latestLesson.googleSyncStatus = details.calendarSynced ? 'in_progress' : 'in_progress';
          await put(cx, 'lessons', latestLesson);
        });
      }
