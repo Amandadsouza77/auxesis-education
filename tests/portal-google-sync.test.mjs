@@ -211,11 +211,57 @@ test('syncLessonCompletionToGoogle STOPS before Calendar PATCH if onDestinationS
     });
 
     assert.equal(result.ok, false);
-    assert.equal(result.status, 'failed');
+    assert.equal(result.status, 'unknown_attribution');
     assert.equal(result.sheetsSynced, false); // Not promoted to synced because receipt persistence failed
     assert.equal(result.calendarSynced, false);
     assert.match(result.error || '', /Receipt persistence failed for Sheets/);
     assert.equal(calls.length, 2); // C37:G37 verify + Sheets PUT ONLY. Calendar PATCH is never called.
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('syncLessonCompletionToGoogle returns unknown_attribution if onDestinationSynced for Calendar fails', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = (async (url, init) => {
+    const urlStr = url.toString();
+    calls.push({ url: urlStr, method: init?.method || 'GET' });
+
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Completed', '', '', '', 'student-123']] }), { status: 200 });
+    }
+    if (urlStr.includes('/calendars/cal123/events/event456')) {
+      return new Response(JSON.stringify({ id: 'event456', summary: '[Completed] IB Biology' }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
+  });
+
+  try {
+    const result = await syncLessonCompletionToGoogle({
+      spreadsheetId: 'sheet123',
+      calendarId: 'cal123',
+      accessToken: 'mock-token',
+      lessonRowIndex: 37,
+      expectedStudentId: 'student-123',
+      calendarEventId: 'event456',
+      lessonSubject: 'IB Biology',
+      existingSheetsSynced: true,
+      existingCalendarSynced: false,
+      onDestinationSynced: async (dest) => {
+        if (dest === 'calendar') {
+          throw new Error('Database disk error saving Calendar receipt');
+        }
+      }
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 'unknown_attribution');
+    assert.equal(result.sheetsSynced, true);
+    assert.equal(result.calendarSynced, false); // Not promoted to calendarSynced because receipt persistence failed
+    assert.match(result.error || '', /Receipt persistence failed for Calendar/);
+    assert.equal(calls.length, 2); // C37:G37 verify + Calendar PATCH
   } finally {
     globalThis.fetch = originalFetch;
   }

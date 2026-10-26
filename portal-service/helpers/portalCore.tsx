@@ -197,9 +197,9 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
      }
 
      // Disallow taking over an active or unresolved sync claim from another worker.
-     // Stale claims are only cleared by manual admin reconciliation or retry by the same operationId.
-     if (target.syncClaim && target.syncClaim !== operation && target.googleSyncStatus === 'in_progress') {
-       fail('Another worker operation is currently syncing this lesson. Concurrent takeover is blocked.', 409);
+     // Blocks takeover when status is 'in_progress' or 'unknown_attribution'.
+     if (target.syncClaim && target.syncClaim !== operation && (target.googleSyncStatus === 'in_progress' || target.googleSyncStatus === 'unknown_attribution')) {
+       fail('Another worker operation is syncing or in an unknown-attribution state for this lesson. Concurrent takeover is blocked.', 409);
      }
 
      // Mark sync intent claim in DB prior to external HTTP calls

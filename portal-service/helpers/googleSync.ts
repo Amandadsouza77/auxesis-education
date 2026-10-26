@@ -24,7 +24,7 @@ export interface GoogleSyncParams {
 
 export interface GoogleSyncResult {
   ok: boolean;
-  status: 'synced' | 'partial' | 'failed' | 'skipped' | 'identity_mismatch';
+  status: 'synced' | 'partial' | 'failed' | 'skipped' | 'identity_mismatch' | 'unknown_attribution';
   sheetsSynced: boolean;
   calendarSynced: boolean;
   error?: string;
@@ -398,7 +398,7 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
         } catch (e: any) {
           return {
             ok: false,
-            status: 'failed',
+            status: 'unknown_attribution',
             sheetsSynced: existingSheetsSynced,
             calendarSynced: existingCalendarSynced,
             error: `Receipt persistence failed for Sheets: ${e?.message || String(e)}`,
@@ -450,7 +450,7 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
           } catch (e: any) {
             return {
               ok: false,
-              status: 'partial',
+            status: 'unknown_attribution',
               sheetsSynced,
               calendarSynced: existingCalendarSynced,
               error: `Receipt persistence failed for Calendar: ${e?.message || String(e)}`,
