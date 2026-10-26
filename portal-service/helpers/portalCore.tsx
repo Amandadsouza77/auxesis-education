@@ -159,6 +159,143 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
   // Fail closed until the authoritative Calendar update is independently confirmed.
   // Parent/student request-only actions remain available.
   if(a.role==='admin'&&['schedule','cancel','requestCancellation','reschedule','tutorCancel','approveRequest','noShow'].includes(action))fail('Admin calendar changes are paused until verified Google Calendar approval is implemented. Use Google Calendar for scheduling; portal status and credits were not changed.',409);
+
+ if(action==='complete'){
+   admin(a);
+   // Check operation idempotency prior to transaction
+   const prior = await db.selectFrom('portalOperations').select('result').where('accountId','=',a.id).where('operationId','=',operation).executeTakeFirst();
+   if (prior) return prior.result as Item;
+
+   // Phase 1: Pre-flight & Pre-write Claim in short DB transaction
+   const phase1 = await db.transaction().execute(async cx => {
+     await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);
+     const all = await records(cx);
+     const find = (k:string,rid:string) => { const r = all.find(r => r._kind === k && r.id === rid); if(!r) fail(); return r; };
+     const student = (sid:string) => { const s = find('students',sid); if(!allowed(a,s)) fail(); return s; };
+
+     const target = find('lessons', v.id);
+     const s = student(target.studentId);
+
+     if (target.status === 'Completed') {
+       return { alreadyCompleted: true, out: { ok: true, googleSync: 'already_completed' } };
+     }
+     if (target.status !== 'Scheduled') fail('This lesson has already been completed or cancelled.', 409);
+
+     const settings = all.find(r => r._kind === 'settings' && r.id === 'settings') || {};
+     const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
+     const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+     const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
+     const partialSandboxConfig = Boolean(allowedSpreadsheetId) !== Boolean(allowedCalendarId);
+
+     if (testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId)) {
+       if (!allowedSpreadsheetId || !allowedCalendarId || partialSandboxConfig) {
+         fail('Sandbox enforcement block: sandbox test configuration is incomplete or missing required allowlist IDs.', 400);
+       }
+       if (settings.spreadsheetId !== allowedSpreadsheetId || settings.calendarId !== allowedCalendarId) {
+         fail('Sandbox enforcement block: target spreadsheet or calendar ID does not match allowed server sandbox configuration.', 400);
+       }
+     }
+
+     // Mark sync intent claim in DB prior to external HTTP calls
+     target.syncClaim = operation;
+     target.googleSyncStatus = 'in_progress';
+     await put(cx, 'lessons', target);
+
+     return {
+       alreadyCompleted: false,
+       target,
+       student: s,
+       settings,
+       testMode: testModeRequested || Boolean(allowedSpreadsheetId),
+       allowedSpreadsheetId,
+       allowedCalendarId
+     };
+   });
+
+   if (phase1.alreadyCompleted) return phase1.out;
+
+   const { target, student: s, settings, testMode, allowedSpreadsheetId, allowedCalendarId } = phase1;
+
+   // Phase 2: Out-of-transaction external HTTP sync to Google APIs
+   const syncRes = await syncLessonCompletionToGoogle({
+     spreadsheetId: settings.spreadsheetId,
+     calendarId: settings.calendarId,
+     accessToken: settings.googleAccessToken,
+     refreshToken: settings.googleRefreshToken,
+     clientId: settings.googleClientId,
+     clientSecret: settings.googleClientSecret,
+     lessonRowIndex: target.sourceRow,
+     expectedStudentId: s.id,
+     calendarEventId: target.calendarEventId,
+     lessonSubject: target.subject,
+     existingSyncState: target.googleSyncStatus,
+     existingSheetsSynced: target.googleSheetsSynced === true,
+     existingCalendarSynced: target.googleCalendarSynced === true,
+     sandboxOnly: testMode,
+     allowedSpreadsheetId,
+     allowedCalendarId,
+     onDestinationSynced: async (dest, details) => {
+       // Fast incremental per-destination receipt persistence in independent short DB transaction
+       await db.transaction().execute(async cx => {
+         const latestLesson = (await records(cx)).find(r => r._kind === 'lessons' && r.id === target.id) || target;
+         latestLesson.googleSheetsSynced = details.sheetsSynced;
+         latestLesson.googleCalendarSynced = details.calendarSynced;
+         latestLesson.googleSyncStatus = 'partial';
+         await put(cx, 'lessons', latestLesson);
+       });
+     }
+   });
+
+   // Phase 3: Final State Commit in short DB transaction
+   const finalResult = await db.transaction().execute(async cx => {
+     await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);
+     const all = await records(cx);
+     const latestLesson = all.find(r => r._kind === 'lessons' && r.id === target.id) || target;
+     const latestStudent = all.find(r => r._kind === 'students' && r.id === s.id) || s;
+     const latestSettings = all.find(r => r._kind === 'settings' && r.id === 'settings') || settings;
+
+     if (syncRes.newAccessToken) {
+       latestSettings.googleAccessToken = syncRes.newAccessToken;
+       await put(cx, 'settings', latestSettings);
+     }
+
+     latestLesson.googleSyncStatus = syncRes.status;
+     latestLesson.googleSheetsSynced = syncRes.sheetsSynced;
+     latestLesson.googleCalendarSynced = syncRes.calendarSynced;
+
+     const out: Item = { ok: true };
+
+     if (!syncRes.ok) {
+       latestLesson.googleSyncError = syncRes.error;
+       out.googleSyncStatus = syncRes.status;
+       out.googleSyncError = syncRes.error;
+     } else {
+       latestLesson.status = 'Completed';
+       latestLesson.completedAt = new Date().toISOString();
+       if (!latestLesson.usedIncremented) {
+         latestStudent.used += 1;
+         latestLesson.usedIncremented = true;
+         await put(cx, 'students', latestStudent);
+       }
+       delete latestLesson.googleSyncError;
+       out.googleSync = 'synced';
+     }
+
+     await put(cx, 'lessons', latestLesson);
+     await cx.insertInto('portalAudit').values({ id: id(), accountId: a.id, action: 'complete', recordId: latestLesson.id }).execute();
+     await cx.insertInto('portalOperations').values({ accountId: a.id, operationId: operation, result: out }).execute();
+
+     return out;
+   });
+
+   const accounts = await db.selectFrom('portalAccounts').select('id').where('enabled','=',true).execute();
+   for (const actor of accounts) {
+     try { await publish('account:' + actor.id, { type: 'refresh' }); } catch {}
+   }
+
+   return finalResult;
+ }
+
  const result=await db.transaction().execute(async cx=>{await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);const prior=await cx.selectFrom('portalOperations').select('result').where('accountId','=',a.id).where('operationId','=',operation).executeTakeFirst();if(prior)return prior.result;
  const all=await records(cx);const find=(k:string,rid:string)=>{const r=all.find(r=>r._kind===k&&r.id===rid);if(!r)fail();return r;};const student=(sid:string)=>{const s=find('students',sid);if(!allowed(a,s))fail();return s;};let target:Item={},out:Item={ok:true};const save=async(kind:string,r:Item)=>{await put(cx,kind,r);const n=all.findIndex(x=>x.id===r.id);if(n<0)all.push({...r,_kind:kind});else all[n]={...r,_kind:kind};};
  const notify=async(accountId:string,message:string,extra:Item={})=>save('notifications',{id:id(),accountId,text:message,at:new Date().toISOString(),...extra});const notifyAdmin=async(message:string,extra:Item={})=>{for(const ad of await cx.selectFrom('portalAccounts').select('id').where('role','=','admin').where('enabled','=',true).execute())await notify(ad.id,message,extra);};
@@ -181,99 +318,11 @@ async function command(request:Request,v:Item){previewReadOnly(request);const a=
  }else if(action==='approveExtraLesson'){
    admin(a);target=find('extraLessonRequests',text(v.id,80,true));student(target.studentId);
    fail('Extra-lesson approval requires a verified matching Google Calendar event and is not yet enabled.',409);
- }else if(['planning','notes','privateNotes','attachResource','complete','cancel','requestCancellation','requestReschedule','approveRequest','rejectRequest','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
+ }else if(['planning','notes','privateNotes','attachResource','cancel','requestCancellation','requestReschedule','approveRequest','rejectRequest','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
  if(action==='planning'){if(a.role==='parent'||target.status!=='Scheduled')fail();target.planning.push({id:id(),author:a.name,authorId:a.id,at:new Date().toISOString(),text:text(v.text,10000,true),files:await checkedFiles(cx,a,v.files||[],'lesson',target.id)});await notifyAdmin(s.name+' added lesson planning.',{lessonId:target.id,type:'planning'});}
  if(action==='notes'){admin(a);target.notes=pick(v,['covered','outcome','next']);for(const k of ['covered','outcome','next'])target.notes[k]||='';}
  if(action==='privateNotes'){admin(a);target.privateNotes=text(v.text,20000);}
  if(action==='attachResource'){admin(a);find('resources',v.resourceId);if(!target.resources.includes(v.resourceId))target.resources.push(v.resourceId);}
- if(action==='complete'){
-   admin(a);
-   // Prevent duplicate completion or double-deduction on retry
-   if(target.status==='Completed') {
-     out.googleSync = 'already_completed';
-     return out;
-   }
-   if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);
-
-   const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
-   const accessToken=settings.googleAccessToken;
-   const refreshToken=settings.googleRefreshToken;
-   const clientId=settings.googleClientId;
-   const clientSecret=settings.googleClientSecret;
-   const spreadsheetId=settings.spreadsheetId;
-   const calendarId=settings.calendarId;
-
-   // Server-only environment configuration inspection
-   const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
-   const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
-   const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
-   const partialSandboxConfig = Boolean(allowedSpreadsheetId) !== Boolean(allowedCalendarId);
-
-   // Reject partial or malformed sandbox configuration immediately before any Google call or local mutation
-   if (testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId)) {
-     if (!allowedSpreadsheetId || !allowedCalendarId || partialSandboxConfig) {
-       out.googleSyncStatus = 'failed';
-       out.googleSyncError = 'Sandbox enforcement block: sandbox test configuration is incomplete or missing required allowlist IDs.';
-       console.warn('Sandbox enforcement block:', out.googleSyncError);
-       return out;
-     }
-     if (spreadsheetId !== allowedSpreadsheetId || calendarId !== allowedCalendarId) {
-       out.googleSyncStatus = 'failed';
-       out.googleSyncError = 'Sandbox enforcement block: target spreadsheet or calendar ID does not match allowed server sandbox configuration.';
-       console.warn('Sandbox enforcement block:', out.googleSyncError);
-       return out;
-     }
-   }
-   const testMode = testModeRequested || Boolean(allowedSpreadsheetId);
-
-   // Pass existing destination sync state and server allowlist for partial retry reconciliation
-   const syncRes = await syncLessonCompletionToGoogle({
-     spreadsheetId,
-     calendarId,
-     accessToken,
-     refreshToken,
-     clientId,
-     clientSecret,
-     lessonRowIndex: target.sourceRow,
-     expectedStudentId: s.id,
-     calendarEventId: target.calendarEventId,
-     lessonSubject: target.subject,
-     existingSyncState: target.googleSyncStatus,
-     existingSheetsSynced: target.googleSheetsSynced === true,
-     existingCalendarSynced: target.googleCalendarSynced === true,
-     sandboxOnly: testMode,
-     allowedSpreadsheetId,
-     allowedCalendarId
-   });
-
-   // Persist updated token if refreshed
-   if (syncRes.newAccessToken) {
-     settings.googleAccessToken = syncRes.newAccessToken;
-     await save('settings', settings);
-   }
-
-   target.googleSyncStatus = syncRes.status;
-   target.googleSheetsSynced = syncRes.sheetsSynced;
-   target.googleCalendarSynced = syncRes.calendarSynced;
-
-   if (!syncRes.ok) {
-     target.googleSyncError = syncRes.error;
-     out.googleSyncStatus = syncRes.status;
-     out.googleSyncError = syncRes.error;
-     console.warn('Google sync incomplete:', syncRes.error);
-   } else {
-     // Apply local changes ONLY when full sync succeeds (or is cleanly skipped when unconfigured)
-     target.status='Completed';
-     target.completedAt=new Date().toISOString();
-     if (!target.usedIncremented) {
-       s.used += 1;
-       target.usedIncremented = true;
-       await save('students', s);
-     }
-     delete target.googleSyncError;
-     out.googleSync = 'synced';
-   }
- }
  if(action==='cancel'||action==='requestCancellation'){
    if(a.role!=='admin'){
      if(target.status!=='Scheduled')fail('Only scheduled lessons can be requested for cancellation.',400);

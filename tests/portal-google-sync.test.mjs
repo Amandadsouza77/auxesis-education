@@ -19,7 +19,7 @@ test('verifyLessonRowIdentity detects student ID matches and mismatches', async 
 
   // Case 1: Match
   globalThis.fetch = (async () => {
-    return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'student-123']] }), { status: 200 });
   });
 
   const matchRes = await verifyLessonRowIdentity('sheet123', 37, 'student-123', 'token123');
@@ -28,7 +28,7 @@ test('verifyLessonRowIdentity detects student ID matches and mismatches', async 
 
   // Case 2: Mismatch
   globalThis.fetch = (async () => {
-    return new Response(JSON.stringify({ values: [['other-student']] }), { status: 200 });
+    return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'other-student']] }), { status: 200 });
   });
 
   const mismatchRes = await verifyLessonRowIdentity('sheet123', 37, 'student-123', 'token123');
@@ -42,7 +42,7 @@ test('syncLessonCompletionToGoogle stops and fails on student ID identity mismat
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = (async () => {
-    return new Response(JSON.stringify({ values: [['wrong-student-id']] }), { status: 200 });
+    return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'wrong-student-id']] }), { status: 200 });
   });
 
   const result = await syncLessonCompletionToGoogle({
@@ -58,6 +58,31 @@ test('syncLessonCompletionToGoogle stops and fails on student ID identity mismat
   assert.equal(result.ok, false);
   assert.equal(result.status, 'identity_mismatch');
   assert.match(result.error || '', /identity/i);
+
+  globalThis.fetch = originalFetch;
+});
+
+test('verifyLessonRowIdentity flags unknown attribution if Sheet Column C is Completed but local receipt is false', async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ values: [['Completed', '', '', '', 'student-123']] }), { status: 200 });
+  });
+
+  const result = await syncLessonCompletionToGoogle({
+    spreadsheetId: 'sheet123',
+    calendarId: 'cal123',
+    accessToken: 'mock-token',
+    lessonRowIndex: 37,
+    expectedStudentId: 'student-123',
+    calendarEventId: 'event456',
+    lessonSubject: 'IB Biology',
+    existingSheetsSynced: false
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 'failed');
+  assert.match(result.error || '', /Unknown attribution/i);
 
   globalThis.fetch = originalFetch;
 });
@@ -95,6 +120,7 @@ test('Lessons status writer rejects suffixes, multi-cell ranges and header rows 
 test('syncLessonCompletionToGoogle formats requests correctly when access token and verified identity are provided', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
+  const destinationReceipts = [];
 
   globalThis.fetch = (async (url, init) => {
     const urlStr = url.toString();
@@ -104,8 +130,8 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
       body: init?.body ? JSON.parse(init.body) : null
     });
 
-    if (urlStr.includes('/values/Lessons!G37')) {
-      return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Scheduled', '', '', '', 'student-123']] }), { status: 200 });
     }
 
     return new Response(JSON.stringify({ updatedCells: 1 }), { status: 200 });
@@ -119,19 +145,22 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
       lessonRowIndex: 37,
       expectedStudentId: 'student-123',
       calendarEventId: 'event456',
-      lessonSubject: 'IB Biology'
+      lessonSubject: 'IB Biology',
+      onDestinationSynced: async (dest, details) => {
+        destinationReceipts.push({ dest, details });
+      }
     });
 
     assert.equal(result.ok, true);
     assert.equal(result.status, 'synced');
-    assert.equal(calls.length, 3); // Verify G37, Lessons Sheet status, Calendar Event
+    assert.equal(calls.length, 3); // Verify C37:G37, Lessons Sheet status, Calendar Event
 
     // Verify identity read
-    assert.match(calls[0].url, /values\/Lessons!G37/);
+    assert.match(decodeURIComponent(calls[0].url), /values\/Lessons!C37:G37/);
     assert.equal(calls[0].method, 'GET');
 
     // Verify Lessons Sheet status update (Column C)
-    assert.match(calls[1].url, /values\/Lessons!C37/);
+    assert.match(decodeURIComponent(calls[1].url), /values\/Lessons!C37/);
     assert.equal(calls[1].method, 'PUT');
     assert.deepEqual(calls[1].body.values, [['Completed']]);
 
@@ -139,6 +168,13 @@ test('syncLessonCompletionToGoogle formats requests correctly when access token 
     assert.match(calls[2].url, /calendars\/cal123\/events\/event456/);
     assert.equal(calls[2].method, 'PATCH');
     assert.equal(calls[2].body.summary, '[Completed] IB Biology');
+
+    // Verify incremental receipts were called twice (sheets, then calendar)
+    assert.equal(destinationReceipts.length, 2);
+    assert.equal(destinationReceipts[0].dest, 'sheets');
+    assert.equal(destinationReceipts[0].details.sheetsSynced, true);
+    assert.equal(destinationReceipts[1].dest, 'calendar');
+    assert.equal(destinationReceipts[1].details.calendarSynced, true);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -170,8 +206,8 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     const urlStr = url.toString();
     calls.push({ url: urlStr, method: init?.method || 'GET' });
 
-    if (urlStr.includes('/values/Lessons!G37')) {
-      return new Response(JSON.stringify({ values: [['student-123']] }), { status: 200 });
+    if (decodeURIComponent(urlStr).includes('/values/Lessons!C37:G37')) {
+      return new Response(JSON.stringify({ values: [['Completed', '', '', '', 'student-123']] }), { status: 200 });
     }
     if (urlStr.includes('/calendars/cal123/events/event456')) {
       return new Response(JSON.stringify({ id: 'event456', summary: '[Completed] IB Chemistry' }), { status: 200 });
@@ -197,8 +233,8 @@ test('syncLessonCompletionToGoogle handles durable per-destination partial retry
     assert.equal(result.status, 'synced');
     assert.equal(result.sheetsSynced, true);
     assert.equal(result.calendarSynced, true);
-    assert.equal(calls.length, 2); // Pre-flight G37 verify read + Calendar PATCH
-    assert.match(calls[0].url, /values\/Lessons!G37/);
+    assert.equal(calls.length, 2); // Pre-flight C37:G37 verify read + Calendar PATCH
+    assert.match(decodeURIComponent(calls[0].url), /values\/Lessons!C37:G37/);
     assert.match(calls[1].url, /calendars\/cal123\/events\/event456/);
   } finally {
     globalThis.fetch = originalFetch;

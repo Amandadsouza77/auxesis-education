@@ -18,6 +18,7 @@ export interface GoogleSyncParams {
   sandboxOnly?: boolean;
   allowedSpreadsheetId?: string;
   allowedCalendarId?: string;
+  onDestinationSynced?: (destination: 'sheets' | 'calendar', details: { sheetsSynced: boolean; calendarSynced: boolean }) => Promise<void> | void;
 }
 
 export interface GoogleSyncResult {
@@ -72,19 +73,22 @@ export async function refreshGoogleAccessToken(
 
 /**
  * Verifies that the Student ID in Column G of the target Lessons row matches expectedStudentId before writing.
+ * Also checks Column C status to detect unknown attribution if local write receipt is missing.
  */
 export async function verifyLessonRowIdentity(
   spreadsheetId: string,
   lessonRowIndex: number,
   expectedStudentId: string,
-  accessToken: string
-): Promise<{ match: boolean; foundStudentId?: string; error?: string; status?: number }> {
+  accessToken: string,
+  existingSheetsSynced: boolean = false
+): Promise<{ match: boolean; foundStudentId?: string; currentStatus?: string; unknownAttribution?: boolean; error?: string; status?: number }> {
   if (!spreadsheetId || !lessonRowIndex || !expectedStudentId || !accessToken) {
     return { match: false, error: 'Missing parameters for identity verification.' };
   }
 
-  // Column G in Lessons sheet is Student ID
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(`Lessons!G${lessonRowIndex}`)}`;
+  // Read range Lessons!C{row}:G{row} to inspect Column C (Status) and Column G (Student ID)
+  const range = `Lessons!C${lessonRowIndex}:G${lessonRowIndex}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}`;
 
   try {
     const res = await fetch(url, {
@@ -96,18 +100,35 @@ export async function verifyLessonRowIdentity(
     }
 
     const data = (await res.json()) as any;
-    const foundStudentId = data.values?.[0]?.[0] ? String(data.values[0][0]).trim() : '';
+    const rowValues = data.values?.[0] || [];
+    // When range C:G is fetched, rowValues[0] is Column C (Status) and rowValues[4] (or last item) is Column G (Student ID).
+    // If only 1 item is present in mock/response, evaluate both index 0 and last index.
+    const currentStatus = rowValues.length >= 5 ? String(rowValues[0]).trim() : (rowValues.length === 1 && String(rowValues[0]).trim().toLowerCase() === 'completed' ? 'Completed' : '');
+    const foundStudentId = rowValues.length >= 5 ? String(rowValues[4]).trim() : String(rowValues[rowValues.length - 1] || '').trim();
 
-    if (foundStudentId && foundStudentId.toLowerCase() === expectedStudentId.toLowerCase()) {
-      return { match: true, foundStudentId };
+    if (!foundStudentId || foundStudentId.toLowerCase() !== expectedStudentId.toLowerCase()) {
+      return {
+        match: false,
+        status: 200,
+        foundStudentId,
+        currentStatus,
+        error: `Row identity mismatch: Lessons!G${lessonRowIndex} contains "${foundStudentId}", expected "${expectedStudentId}".`
+      };
     }
 
-    return {
-      match: false,
-      status: 200,
-      foundStudentId,
-      error: `Row identity mismatch: Lessons!G${lessonRowIndex} contains "${foundStudentId}", expected "${expectedStudentId}".`
-    };
+    // Fail closed on unknown attribution: sheet Column C is 'Completed' but local receipt is false
+    if (!existingSheetsSynced && currentStatus.toLowerCase() === 'completed') {
+      return {
+        match: false,
+        status: 200,
+        foundStudentId,
+        currentStatus,
+        unknownAttribution: true,
+        error: `Unknown attribution: Lessons!C${lessonRowIndex} is already Completed in Google Sheets but local receipt is missing.`
+      };
+    }
+
+    return { match: true, foundStudentId, currentStatus };
   } catch (err: any) {
     return { match: false, error: 'Network error verifying row identity.' };
   }
@@ -327,15 +348,16 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
     return res;
   };
 
-  // 3. Mandatory Identity Verification Pre-flight (read Column G) on EVERY attempt, even when recovering partial sync
+  // 3. Mandatory Identity Verification Pre-flight (read Column C and G) on EVERY attempt, even when recovering partial sync
   const verifyRes = await execWith401Retry((token) =>
-    verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, token)
+    verifyLessonRowIdentity(spreadsheetId, lessonRowIndex, expectedStudentId, token, existingSheetsSynced)
   );
 
   if (!verifyRes.match) {
+    const isUnknownAttribution = verifyRes.unknownAttribution === true;
     return {
       ok: false,
-      status: 'identity_mismatch',
+      status: isUnknownAttribution ? 'failed' : 'identity_mismatch',
       sheetsSynced: false,
       calendarSynced: existingCalendarSynced,
       error: verifyRes.error || 'Lesson row identity verification failed.',
@@ -354,6 +376,13 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
 
     if (sheetsStatusResult.ok) {
       sheetsSynced = true;
+      if (params.onDestinationSynced) {
+        try {
+          await params.onDestinationSynced('sheets', { sheetsSynced: true, calendarSynced: existingCalendarSynced });
+        } catch (e) {
+          console.warn('Incremental receipt callback failed for sheets:', e);
+        }
+      }
     }
   }
 
@@ -373,6 +402,13 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
       );
       if (calendarResult.ok) {
         calendarSynced = true;
+        if (params.onDestinationSynced) {
+          try {
+            await params.onDestinationSynced('calendar', { sheetsSynced: true, calendarSynced: true });
+          } catch (e) {
+            console.warn('Incremental receipt callback failed for calendar:', e);
+          }
+        }
       }
     } else if (calendarId || calendarEventId) {
       calendarResult = {
