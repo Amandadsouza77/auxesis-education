@@ -1,0 +1,35 @@
+name: Validate prelaunch fixes against private runtime (no deployment)
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths:
+      - .github/workflows/prelaunch-runtime-check.yml
+      - scripts/prelaunch-runtime-recover.mjs
+      - scripts/prelaunch-public-copy.py
+      - docs/PRELAUNCH_PORTAL_COPY_CHANGES.json
+permissions:
+  contents: read
+jobs:
+  private-runtime-check:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Recover checksum-verified runtime using existing authorised access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Check retained review behaviour
+        working-directory: work/staging-deployment/runtime
+        run: node tests/website-reviews.test.mjs
+      - name: Validate public copy changes against the actual package
+        run: python3 scripts/prelaunch-public-copy.py work/staging-deployment/runtime/dist
+      - name: Report bounded result
+        run: echo 'Private package recovered and public copy patch validated. No deployment, database writes or public artifact uploads.'

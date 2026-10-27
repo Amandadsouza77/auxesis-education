@@ -18,12 +18,12 @@
     {
       "key": "privacy-consent-003",
       "label": "P: Auxesis Education collects only the information needed to respond to an enqu",
-      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resource links, messages, progress reports, invoices and payment records held in the private Auxesis Portal."
+      "text": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resource links, messages, progress reports, invoices and payment records."
     },
     {
       "key": "privacy-consent-004",
       "label": "P: Student phone numbers are not normally collected or used. Students communicate w",
-      "text": "Student phone numbers are not normally collected or used. Students communicate with me through their private message thread in the Auxesis Portal. Parents may choose to create a WhatsApp group after enrolment, and I am happy to participate, but WhatsApp is not a required student communication channel."
+      "text": "Student phone numbers are not normally collected or used. Students can contact me by email. Parents may choose to create a WhatsApp group after enrolment, and I am happy to participate, but WhatsApp is not a required student communication channel."
     },
     {
       "key": "privacy-consent-005",
@@ -38,12 +38,12 @@
     {
       "key": "privacy-consent-007",
       "label": "P: Website submissions and delivery",
-      "text": "The Auxesis Education website and live private Portal run on Cloudflare Pages and Workers. Cloudflare D1 stores Portal accounts, lesson records, messages, progress reports, invoices and payment records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring. The live Portal no longer runs on Floot."
+      "text": "The Auxesis Education website runs on Cloudflare Pages and Workers. The student and parent portal is still in development and is not currently available to families. Cloudflare D1 stores existing private Portal accounts and tutoring records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring."
     },
     {
       "key": "privacy-consent-008",
       "label": "P: Google provides Portal sign-in and processes the account information u",
-      "text": "Google provides Portal sign-in and processes the account information used to identify authorised users. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database."
+      "text": "Google processes account information used for authorised sign-in. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database."
     },
     {
       "key": "privacy-consent-009",
@@ -58,7 +58,7 @@
     {
       "key": "privacy-consent-011",
       "label": "P: The Portal uses necessary sign-in and session cookies. Cloudflare proc",
-      "text": "The Portal uses necessary sign-in and session cookies. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking."
+      "text": "Necessary sign-in and session cookies are used for authorised access. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking."
     },
     {
       "key": "privacy-consent-012",
