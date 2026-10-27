@@ -1,7 +1,7 @@
 name: Validate prelaunch fixes against private runtime (no deployment)
 on:
   push:
-    branches: [codex/prelaunch-portal-copy-2026-10-27]
+    branches: [codex/cloudflare-backend-migration]
     paths:
       - .github/workflows/prelaunch-runtime-check.yml
       - scripts/prelaunch-runtime-recover.mjs

@@ -13,7 +13,7 @@ async function cf(path,sql){
  require(r.ok,'Runtime recovery provider HTTP '+r.status);const j=await r.json();require(j.success,'Runtime recovery request rejected.');return j.result;
 }
 async function prepare(){
- require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/prelaunch-portal-copy-2026-10-27','Unexpected staging deployment branch.');
+ require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected staging deployment branch.');
  const live=await cf('/pages/projects/auxesis-education'),stage=await cf('/pages/projects/'+project),vars=stage.deployment_configs.preview.env_vars;
  require(!stage.source&&!stage.canonical_deployment&&stage.deployment_configs.preview.d1_databases.PORTAL_DB.id===db&&vars.PRODUCTION_SYNC_ENABLED.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED.value==='false','Unsafe staging deployment target.');
  require(!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===db)),'Staging database is bound to production.');
