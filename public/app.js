@@ -85,23 +85,35 @@ function loadTurnstile(){
 }
 for(const [id,statusId,kind,success] of forms){
   const form=document.getElementById(id);if(!form)continue;
-  const status=document.getElementById(statusId);let widget,token='',formCheck;const portalDelivery=window.AUXESIS?.formDelivery==='portal';
+  const status=document.getElementById(statusId);let widget,token='',formCheck;const portalDelivery=kind!=='enquiry'&&window.AUXESIS?.formDelivery==='portal';
+  function setupSpamCheck(siteKey){
+    const container=document.createElement('div');container.className='spam-check';form.insertBefore(container,form.querySelector('button[type="submit"]'));
+    return loadTurnstile().then(api=>{widget=api.render(container,{sitekey:siteKey,action:kind,callback:value=>token=value,'expired-callback':()=>token='','error-callback':()=>{token='';status.textContent='Spam protection could not load. Please refresh and try again.'}})});
+  }
   async function refreshFormCheck(){const r=await fetch('/api/enquiry?delivery=portal&kind='+kind,{headers:{accept:'application/json'}});const config=await r.json();if(!r.ok||!config.ready||!config.token)throw new Error(config.error||'Availability check failed');return {...config,receivedAt:Date.now()};}
   form.noValidate=true;
   for(const event of ['input','change'])form.addEventListener(event,()=>{if(form.dataset.validationAttempted)markFormErrors(form,status)});
-  if(portalDelivery){const button=form.querySelector('button[type="submit"]');button.disabled=true;refreshFormCheck().then(config=>{formCheck=config;button.disabled=false;}).catch(()=>formUnavailable(form,kind,true));}
+  if(kind==='enquiry'){
+    const button=form.querySelector('button[type="submit"]');button.disabled=true;
+    fetch('/api/enquiry',{headers:{accept:'application/json'}}).then(async response=>{
+      if(!response.ok)throw new Error('Availability check failed');const config=await response.json();
+      if(!config.ready||!config.siteKey)throw new Error('Email is not configured');
+      await setupSpamCheck(config.siteKey);button.disabled=false;
+    }).catch(()=>{formUnavailable(form,kind,true);status.textContent='Online enquiries are temporarily unavailable. Please email adsouza35@gmail.com.';});
+  }
+  else if(portalDelivery){const button=form.querySelector('button[type="submit"]');button.disabled=true;refreshFormCheck().then(config=>{formCheck=config;button.disabled=false;}).catch(()=>formUnavailable(form,kind,true));}
   else if(!window.AUXESIS?.turnstileSiteKey)formUnavailable(form,kind);
-  else fetch('/api/enquiry',{headers:{accept:'application/json'}}).then(response=>{
+  else fetch('/api/enquiry?kind=review',{headers:{accept:'application/json'}}).then(response=>{
     if(!response.ok)throw new Error('Availability check failed');return response.json();
   }).then(config=>{if(!config?.ready)formUnavailable(form,kind);}).catch(()=>formUnavailable(form,kind,true));
-  if(!portalDelivery&&window.AUXESIS?.turnstileSiteKey){
-    const container=document.createElement('div');container.className='spam-check';form.insertBefore(container,form.querySelector('button[type="submit"]'));
-    loadTurnstile().then(api=>{widget=api.render(container,{sitekey:window.AUXESIS.turnstileSiteKey,action:kind,callback:value=>token=value,'expired-callback':()=>token='','error-callback':()=>{token='';status.textContent='Spam protection could not load. Please refresh and try again.'}})}).catch(()=>status.textContent='Spam protection could not load. Please refresh and try again.');
+  if(kind!=='enquiry'&&!portalDelivery&&window.AUXESIS?.turnstileSiteKey){
+    setupSpamCheck(window.AUXESIS.turnstileSiteKey).catch(()=>status.textContent='Spam protection could not load. Please refresh and try again.');
   }
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(form.dataset.sending||form.dataset.deliveryUnavailable)return;
     form.dataset.validationAttempted='true';
     if(!markFormErrors(form,status,true))return;
+    if(kind==='enquiry'&&!token){status.textContent='Please complete the spam-protection check before sending your enquiry.';return;}
     delete form.dataset.validationAttempted;
     const data=Object.fromEntries(new FormData(form));data.consent=!!form.elements.consent.checked;data.turnstile_token=token;
     const submit=form.querySelector('button[type="submit"]');form.dataset.sending='true';submit.disabled=true;status.textContent='Sending…';

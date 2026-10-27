@@ -3,13 +3,32 @@ import assert from 'node:assert/strict';
 import {submit} from '../lib/server.js';
 import {onRequestGet as auth} from '../functions/api/auth.js';
 import {onRequestGet as callback} from '../functions/api/callback.js';
-import {onRequestGet as enquiryConfig} from '../functions/api/enquiry.js';
-const env={SITE_URL:'https://example.com',RESEND_API_KEY:'test-only',EMAIL_FROM:'Auxesis <forms@example.com>',ENQUIRY_TO:'owner@example.com',TURNSTILE_SECRET_KEY:'test-only',GITHUB_CLIENT_ID:'client',GITHUB_CLIENT_SECRET:'test-only',GITHUB_REPOSITORY:'owner/site'};
+import {onRequestGet as enquiryConfig,onRequestPost as enquiryPost} from '../functions/api/enquiry.js';
+const env={SITE_URL:'https://example.com',RESEND_API_KEY:'test-only',EMAIL_FROM:'Auxesis <forms@example.com>',ENQUIRY_TO:'owner@example.com',TURNSTILE_SECRET_KEY:'test-only',TURNSTILE_SITE_KEY:'public-widget-key',GITHUB_CLIENT_ID:'client',GITHUB_CLIENT_SECRET:'test-only',GITHUB_REPOSITORY:'owner/site'};
 const valid={name:'Parent',email:'parent@example.net',country:'Canada',timezone:'GMT -4',year:'Grade 11',programme:'IB Diploma',subject:'Biology',support:'Help with data analysis.',contact:'Email',consent:true,turnstile_token:'test-token'};
 function request(data,origin='https://example.com'){return new Request('https://example.com/api/enquiry',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(data)});}
 test('reports delivery availability without exposing credentials',async()=>{
   assert.deepEqual(await enquiryConfig({env:{}}).json(),{ready:false});
-  assert.deepEqual(await enquiryConfig({env}).json(),{ready:true});
+  assert.deepEqual(await enquiryConfig({env}).json(),{ready:true,siteKey:'public-widget-key'});
+  for(const key of ['SITE_URL','RESEND_API_KEY','EMAIL_FROM','TURNSTILE_SECRET_KEY','TURNSTILE_SITE_KEY'])assert.equal((await enquiryConfig({env:{...env,[key]:''}}).json()).ready,false);
+});
+test('Cloudflare inquiry route sends to the fixed Gmail recipient even with a legacy portal query',async t=>{
+  const sent=[];
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.includes('siteverify'))return Response.json({success:true,hostname:'example.com',action:'enquiry'});
+    assert.equal(url,'https://api.resend.com/emails');sent.push(JSON.parse(options.body));return Response.json({id:'mock'});
+  });
+  const data={...valid,timezone:'UTC±00:00',to:'attacker@example.org',ENQUIRY_TO:'attacker@example.org'};
+  const req=new Request('https://example.com/api/enquiry?delivery=portal',{method:'POST',headers:{origin:env.SITE_URL,'content-type':'application/json'},body:JSON.stringify(data)});
+  assert.deepEqual(await (await enquiryPost({request:req,env})).json(),{ok:true});
+  assert.deepEqual(sent[0].to,['adsouza35@gmail.com']);assert.equal(sent[0].reply_to,valid.email);
+  for(const key of ['name','email','country','timezone','year','programme','subject','support','contact'])assert.ok(sent[0].text.includes(data[key]));
+});
+test('spam checks must match both the website hostname and inquiry action before sending mail',async t=>{
+  for(const result of [{success:true,hostname:'attacker.example',action:'enquiry'},{success:true,hostname:'example.com',action:'review'}]){
+    let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json(result);});
+    assert.equal((await enquiryPost({request:request(valid),env})).status,400);assert.equal(calls,1);t.mock.restoreAll();
+  }
 });
 test('requires details for each Other choice and validates GMT offsets and calling codes',async()=>{
   for(const key of ['year','programme','subject'])assert.equal((await submit(request({...valid,[key]:'Other'}),env,'enquiry')).status,400);
