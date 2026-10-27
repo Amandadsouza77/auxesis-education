@@ -125,3 +125,9 @@ Original: The Portal uses necessary sign-in and session cookies. Cloudflare proc
 
 Replacement: Necessary sign-in and session cookies are used for authorised access. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking.
 
+
+## Recovery work started
+
+GitHub Actions run 38049880574 (10 October 2026) successfully retrieved the checksum-verified runtime and completed release verification. The runtime is therefore retrievable through that established access path, subject to current credentials and environment permission. Connected Drive search and the development folder did not expose the archive.
+
+Added a dedicated branch-only workflow, `prelaunch-runtime-check.yml`, using the existing protected environment and credential bindings. `prelaunch-runtime-recover.mjs` restricts Cloudflare requests to project reads and three exact metadata/authorization SELECT queries, downloads and verifies the private package with the existing privacy/size/extraction checks, then runs the private review tests and validates the public copy overlay. It performs no provider configuration/database writes or deployment and uploads no private artifacts. Existing environment protection remains in force; if this branch is disallowed, the run must fail rather than bypassing it.
