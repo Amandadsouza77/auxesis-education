@@ -1,7 +1,7 @@
 """Build the approved site from shared templates and editable JSON. Python 3.10+, no packages."""
 from pathlib import Path
 from html import escape
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, urlencode, quote
 import json, re, shutil, argparse
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +18,17 @@ def validate_url(value):
     if url.scheme != 'https' or not url.netloc or url.username or url.password or url.query or url.fragment or url.path not in ('', '/'):
         raise ValueError('site_url must be an HTTPS origin, such as https://auxedu.com.')
     return value.rstrip('/')
+
+def email_inquiries(html, address):
+    # Keep existing inquiry labels and programme context, using the public mailbox.
+    def replace(match):
+        query = parse_qs((match[1] or '').replace('&amp;', '&'))
+        context = [query[key][0] for key in ['programme', 'subject'] if query.get(key)]
+        subject = 'Auxesis Education — tutoring inquiry'
+        if context:
+            subject += ': ' + ' / '.join(context)
+        return 'href="' + e('mailto:' + address + '?' + urlencode({'subject': subject}, quote_via=quote)) + '"'
+    return re.sub(r'href="/enquire/(?:\?([^"#]*))?(?:#[^"]*)?"', replace, html)
 def recommendation_cards(items, short=False):
     cards=[]
     for item in items:
@@ -95,6 +106,7 @@ def build():
             address=settings['public_email']
             if not re.fullmatch(r'[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+',address): raise ValueError('Enter a valid public email.')
             doc=doc.replace('[PLACEHOLDER: Public Auxesis Education business email address.]',f'<a href="mailto:{e(address)}">{e(address)}</a>')
+            doc=email_inquiries(doc,address)
         else:
             doc=doc.replace('[PLACEHOLDER: Public Auxesis Education business email address.]',f'<a href="{e(rec["verification_url"])}">Contact Amanda on LinkedIn</a>')
         if production:

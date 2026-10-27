@@ -48,12 +48,12 @@
     {
       "key": "enquire-009",
       "label": "P: Enquiry form",
-      "text": "Enquiry form"
+      "text": "Email Amanda"
     },
     {
       "key": "enquire-010",
       "label": "LEGEND: Preferred contact method",
-      "text": "Preferred contact method"
+      "text": "The inquiry button opens your email app. You can also copy the email address above into your preferred email service."
     },
     {
       "key": "enquire-011",
@@ -78,9 +78,9 @@
     {
       "key": "enquire-015",
       "label": "A: Go to the enquiry form",
-      "text": "Go to the enquiry form"
+      "text": "Email About Tutoring"
     }
   ],
   "title": "Enquire About Tutoring | Auxesis Education",
-  "description": "Tell Amanda what the student is studying and where support would help. Start with a free parent conversation and student-and-parent Meet & Greet."
+  "description": "Email Amanda about what the student is studying and where support would help. Start with a conversation about tutoring."
 }
