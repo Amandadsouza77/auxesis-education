@@ -29,7 +29,7 @@ export interface GoogleSyncResult {
   calendarSynced: boolean;
   error?: string;
   sheetsStatusResult?: { ok: boolean; error?: string };
-  calendarResult?: { ok: boolean; skipped?: boolean; error?: string };
+  calendarResult?: { ok: boolean; skipped?: boolean; isAmbiguousNetworkError?: boolean; isAmbiguousServerError?: boolean; error?: string };
   newAccessToken?: string;
 }
 
@@ -420,7 +420,7 @@ export async function syncLessonCompletionToGoogle(params: GoogleSyncParams): Pr
 
   // 5. Update Google Calendar event if Sheets succeeded and Calendar update is needed
   let calendarSynced = existingCalendarSynced;
-  let calendarResult: { ok: boolean; skipped?: boolean; error?: string } = { ok: calendarSynced, skipped: calendarSynced };
+  let calendarResult: { ok: boolean; skipped?: boolean; isAmbiguousNetworkError?: boolean; isAmbiguousServerError?: boolean; error?: string } = { ok: calendarSynced, skipped: calendarSynced };
 
   if (sheetsSynced && !calendarSynced) {
     if (calendarId && calendarEventId) {
