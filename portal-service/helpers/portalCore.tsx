@@ -4,6 +4,8 @@ import { randomBytes, randomUUID, createHash } from 'crypto';
 import { upload, getUrl, getInfo } from '@floot/storage';
 import { createToken, publish } from '@floot/realtime';
 import { FlootOAuthProvider } from './FlootOAuthProvider';
+import { syncLessonCompletionToGoogle } from './googleSync';
+import { fetchLiveCalendarEvents, overlayLiveCalendarToLessons, evalCalendarReadEligibility } from './calendarReadSync';
 
 const SITE='https://auxesis-education.pages.dev';
 const VERSION='2026-10-03';
@@ -27,8 +29,8 @@ const admin=(a:Actor)=>{if(a.role!=='admin')fail();};
 async function account(request:Request):Promise<Actor>{const token=request.headers.get('x-auxesis-session')||'';if(!/^[\w-]{43}$/.test(token))fail('Please sign in to continue.',401);const a=await db.selectFrom('portalSessions').innerJoin('portalAccounts','portalAccounts.id','portalSessions.accountId').select(['portalAccounts.id','email','name','role','parentId','studentId']).where('tokenHash','=',hash(token)).where('expiresAt','>',new Date()).where('enabled','=',true).executeTakeFirst();if(!a)fail('Please sign in to continue.',401);if(a.role!=='admin'){const settings=await db.selectFrom('portalRecords').select('data').where('id','=','settings').executeTakeFirst();if((settings?.data as Item)?.reviewMode)fail('Family access is paused while Amanda reviews the portal.',403);}return a;}
 async function records(cx:any=db):Promise<Item[]>{const rows=await cx.selectFrom('portalRecords').selectAll().execute();return rows.map((r:any)=>({...r.data,id:r.id,_kind:r.kind}));}
 async function put(cx:any,kind:string,d:Item){const clean={...d};delete clean._kind;await cx.insertInto('portalRecords').values({id:d.id,kind,studentId:kind==='students'?d.id:d.studentId||null,parentId:kind==='parents'?d.id:d.parentId||null,data:clean}).onConflict((oc:any)=>oc.column('id').doUpdateSet({data:clean,studentId:kind==='students'?d.id:d.studentId||null,parentId:kind==='parents'?d.id:d.parentId||null,revision:sql`portal_records.revision+1`,updatedAt:new Date()})).execute();}
-function snapshot(a:Actor,all:Item[]){const state:Item={me:a,students:[],parents:[],lessons:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],notifications:[],onboardings:[],billingHistory:[],billingArchive:[],importReviews:[],settings:{transfer:'',paypal:''}};const ss=all.filter(r=>r._kind==='students'&&allowed(a,r));const child=(sid:string)=>ss.some(s=>s.id===sid),access=a.role==='admin'||ss.some(entitlement);
- for(const raw of all){const r={...raw};delete r._kind;const k=raw._kind;let ok=a.role==='admin';if(!ok){if(k==='students')ok=child(r.id);if(k==='parents')ok=a.role==='parent'&&a.parentId===r.id;if(k==='lessons')ok=child(r.studentId);if(k==='threads')ok=r.kind==='student'?child(r.studentId):a.role==='parent'&&r.parentId===a.parentId;if(k==='reports')ok=a.role==='parent'&&child(r.studentId)&&r.status==='Published';if(k==='invoices')ok=a.role==='parent'&&child(r.studentId)&&r.issued;if(k==='payments')ok=a.role==='parent'&&child(r.studentId);if(k==='onboardings')ok=child(r.studentId);if(k==='categories'||k==='resources')ok=access;if(k==='notifications')ok=r.accountId===a.id;if(k==='settings')ok=a.role==='parent';}
+function snapshot(a:Actor,all:Item[]){const state:Item={me:a,students:[],parents:[],lessons:[],extraLessonRequests:[],threads:[],reports:[],invoices:[],payments:[],categories:[],resources:[],notifications:[],onboardings:[],billingHistory:[],billingArchive:[],importReviews:[],settings:{transfer:'',paypal:''}};const ss=all.filter(r=>r._kind==='students'&&allowed(a,r));const child=(sid:string)=>ss.some(s=>s.id===sid),access=a.role==='admin'||ss.some(entitlement);
+ for(const raw of all){const r={...raw};delete r._kind;const k=raw._kind;let ok=a.role==='admin';if(!ok){if(k==='students')ok=child(r.id);if(k==='parents')ok=a.role==='parent'&&a.parentId===r.id;if(k==='lessons'||k==='extraLessonRequests')ok=child(r.studentId);if(k==='threads')ok=r.kind==='student'?child(r.studentId):a.role==='parent'&&r.parentId===a.parentId;if(k==='reports')ok=a.role==='parent'&&child(r.studentId)&&r.status==='Published';if(k==='invoices')ok=a.role==='parent'&&child(r.studentId)&&r.issued;if(k==='payments')ok=a.role==='parent'&&child(r.studentId);if(k==='onboardings')ok=child(r.studentId);if(k==='categories'||k==='resources')ok=access;if(k==='notifications')ok=r.accountId===a.id;if(k==='settings')ok=a.role==='parent';}
  if(!ok)continue;
  if(k==='settings'){state.settings={transfer:r.transfer||'',paypal:r.paypal||'',contactEmail:r.contactEmail,...(a.role==='admin'?{reviewMode:r.reviewMode===true,importSummary:r.importSummary}: {})};continue;}
  if(a.role!=='admin'){for(const key of ['sourceMeta','sourceData','reviewFlags','migration','privateNotes','parentSource'])delete r[key];}
@@ -50,7 +52,67 @@ async function viewer(request:Request,all:Item[]){
  return {actor,preview:{role,studentId:s.id,studentName:s.name,ownerName:owner.name,readOnly:true}};
 }
 function previewReadOnly(request:Request){if(request.headers.has('x-auxesis-preview-role')||request.headers.has('x-auxesis-preview-student'))fail('This is a read-only preview. Return to Amanda’s workspace to make changes.',403);}
-async function state(request:Request){const all=await records(),v=await viewer(request,all);return {...snapshot(v.actor,all),preview:v.preview};}
+async function state(request:Request){
+ const all=await records(),v=await viewer(request,all),snap=snapshot(v.actor,all);
+ const settings=all.find(r=>r._kind==='settings'&&r.id==='settings')||{};
+ const calendarId=settings.calendarId;
+ const accessToken=settings.googleAccessToken;
+ const refreshToken=settings.googleRefreshToken;
+ const clientId=settings.googleClientId;
+ const clientSecret=settings.googleClientSecret;
+
+ // Read server-only environment test mode and sandbox configuration
+ const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
+ const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+ const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
+
+ const eligibility = evalCalendarReadEligibility({
+  calendarId,
+  spreadsheetId: settings.spreadsheetId,
+  accessToken,
+  hasLessons: Array.isArray(snap.lessons) && snap.lessons.length > 0,
+  testModeRequested,
+  allowedSpreadsheetId,
+  allowedCalendarId
+ });
+
+ snap.liveCalendarReadStatus = eligibility.status;
+ if (eligibility.notice) snap.liveCalendarReadNotice = eligibility.notice;
+
+ // Server-side read-only live Google Calendar overlay for authorized snapshot lessons with 401 refresh
+ if(eligibility.eligible){
+  try {
+   const now = new Date();
+   const timeMin = new Date(now.getTime() - 30*86400000).toISOString();
+   const timeMax = new Date(now.getTime() + 60*86400000).toISOString();
+   const calRes = await fetchLiveCalendarEvents(
+     calendarId,
+     accessToken,
+     timeMin,
+     timeMax,
+     refreshToken,
+     clientId,
+     clientSecret
+   );
+   if(calRes.ok && calRes.events){
+    snap.lessons = overlayLiveCalendarToLessons(snap.lessons, calRes.events, snap.students);
+    snap.liveCalendarReadStatus = 'refreshed';
+    if(calRes.newAccessToken){
+     settings.googleAccessToken = calRes.newAccessToken;
+     await put(db, 'settings', settings);
+    }
+   } else {
+    snap.liveCalendarReadStatus = 'stale_read_failed';
+    snap.liveCalendarReadNotice = calRes.error || 'Live calendar read failed; serving cached snapshot.';
+   }
+  } catch (e) {
+   snap.liveCalendarReadStatus = 'stale_read_failed';
+   snap.liveCalendarReadNotice = 'Live calendar overlay error; serving cached snapshot.';
+   console.warn('Live calendar overlay skipped:', e);
+  }
+ }
+ return {...snap,preview:v.preview};
+}
 function slug(v:unknown){return String(v||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
 function cell(row:Item,names:string[],max=300){const wanted=names.map(slug);for(const [key,value] of Object.entries(row||{})){if(wanted.includes(slug(key))&&value!==undefined&&value!==null){const s=String(value).trim();if(s)return s.slice(0,max);}}return '';}
 function maybeNum(value:string,fallback:number,min=0,max=100000){if(!value)return fallback;const n=Number(value.replace(/[^0-9.-]/g,''));return Number.isFinite(n)&&n>=min&&n<=max?n:fallback;}
@@ -94,21 +156,256 @@ async function syncTrackerRows(cx:any,all:Item[],rows:Item[],source='Student Tra
 }
 async function checkedFiles(cx:any,a:Actor,ids:unknown,kind:string,recordId:string){if(!Array.isArray(ids)||ids.length>3)fail('Attach up to three files.',400);const files:Item[]=[];for(const fid of ids){const f=await cx.selectFrom('portalFiles').selectAll().where('id','=',text(fid,80,true)).executeTakeFirst();if(!f||f.ownerId!==a.id||f.kind!==kind||f.recordId!==recordId)fail();const info=await getInfo({visibility:"private",filename:f.storageKey});if(!info.ok||!info.exists||info.sizeBytes!==f.bytes)fail('The attachment did not finish uploading. Please try again.',400);files.push({id:f.id,name:f.name,type:f.mime});}return files;}
 async function command(request:Request,v:Item){previewReadOnly(request);const a=await account(request);const action=text(v.action,60,true),operation=text(v.operationId,80,true);if(!/^[a-zA-Z0-9-]{12,80}$/.test(operation))fail('Please retry this change.',400);
+  // Fail closed until the authoritative Calendar update is independently confirmed.
+  // Parent/student request-only actions remain available.
+  if(a.role==='admin'&&['schedule','cancel','requestCancellation','reschedule','tutorCancel','approveRequest','noShow'].includes(action))fail('Admin calendar changes are paused until verified Google Calendar approval is implemented. Use Google Calendar for scheduling; portal status and credits were not changed.',409);
+
+ if(action==='complete'){
+   admin(a);
+   // Check operation idempotency prior to transaction
+   const prior = await db.selectFrom('portalOperations').select('result').where('accountId','=',a.id).where('operationId','=',operation).executeTakeFirst();
+   if (prior) return prior.result as Item;
+
+   // Phase 1: Pre-flight & Pre-write Claim in short DB transaction
+   const phase1 = await db.transaction().execute(async cx => {
+     await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);
+     const all = await records(cx);
+     const find = (k:string,rid:string) => { const r = all.find(r => r._kind === k && r.id === rid); if(!r) fail(); return r; };
+     const student = (sid:string) => { const s = find('students',sid); if(!allowed(a,s)) fail(); return s; };
+
+     const target = find('lessons', v.id);
+     const s = student(target.studentId);
+
+     if (target.status === 'Completed') {
+       return { alreadyCompleted: true, out: { ok: true, googleSync: 'already_completed' } };
+     }
+     if (target.status !== 'Scheduled') fail('This lesson has already been completed or cancelled.', 409);
+
+     const settings = all.find(r => r._kind === 'settings' && r.id === 'settings') || {};
+     const allowedSpreadsheetId = process.env.SANDBOX_SPREADSHEET_ID || '';
+     const allowedCalendarId = process.env.SANDBOX_CALENDAR_ID || '';
+     const testModeRequested = process.env.PORTAL_TEST_MODE === 'true';
+     const partialSandboxConfig = Boolean(allowedSpreadsheetId) !== Boolean(allowedCalendarId);
+
+     if (testModeRequested || Boolean(allowedSpreadsheetId) || Boolean(allowedCalendarId)) {
+       if (!allowedSpreadsheetId || !allowedCalendarId || partialSandboxConfig) {
+         fail('Sandbox enforcement block: sandbox test configuration is incomplete or missing required allowlist IDs.', 400);
+       }
+       if (settings.spreadsheetId !== allowedSpreadsheetId || settings.calendarId !== allowedCalendarId) {
+         fail('Sandbox enforcement block: target spreadsheet or calendar ID does not match allowed server sandbox configuration.', 400);
+       }
+     }
+
+     // Disallow taking over an active or unresolved sync claim from another worker, or repeating write if in_progress.
+     // Blocks takeover or duplicate in-flight entry when status is 'in_progress' or 'unknown_attribution'.
+     if (target.syncClaim && (target.googleSyncStatus === 'in_progress' || target.googleSyncStatus === 'unknown_attribution')) {
+       fail('Another worker operation is syncing or in an unknown-attribution state for this lesson. Concurrent takeover is blocked.', 409);
+     }
+
+     // Mark sync intent claim in DB prior to external HTTP calls
+     target.syncClaim = operation;
+     target.syncClaimAt = new Date().toISOString();
+     target.googleSyncStatus = 'in_progress';
+     await put(cx, 'lessons', target);
+
+     return {
+       alreadyCompleted: false,
+       target,
+       student: s,
+       settings,
+       testMode: testModeRequested || Boolean(allowedSpreadsheetId),
+       allowedSpreadsheetId,
+       allowedCalendarId
+     };
+   });
+
+   if (phase1.alreadyCompleted) return phase1.out;
+
+   const { target, student: s, settings, testMode, allowedSpreadsheetId, allowedCalendarId } = phase1;
+
+   // Helper to verify fence/claim ownership in short DB transaction
+   const verifyClaimFence = async (lessonId: string, currentOp: string) => {
+     await db.transaction().execute(async cx => {
+       const latestLesson = (await records(cx)).find(r => r._kind === 'lessons' && r.id === lessonId);
+       if (!latestLesson || latestLesson.syncClaim !== currentOp) {
+         fail('Worker lease fencing failure: sync claim ownership was lost or superseded by another operation.', 409);
+       }
+     });
+   };
+
+   // Phase 2: Out-of-transaction external HTTP sync to Google APIs
+   const syncRes = await syncLessonCompletionToGoogle({
+     spreadsheetId: settings.spreadsheetId,
+     calendarId: settings.calendarId,
+     accessToken: settings.googleAccessToken,
+     refreshToken: settings.googleRefreshToken,
+     clientId: settings.googleClientId,
+     clientSecret: settings.googleClientSecret,
+     lessonRowIndex: target.sourceRow,
+     expectedStudentId: s.id,
+     calendarEventId: target.calendarEventId,
+     lessonSubject: target.subject,
+     existingSyncState: target.googleSyncStatus,
+     existingSheetsSynced: target.googleSheetsSynced === true,
+     existingCalendarSynced: target.googleCalendarSynced === true,
+     sandboxOnly: testMode,
+     allowedSpreadsheetId,
+     allowedCalendarId,
+     beforeDestinationWrite: async (dest) => {
+       await verifyClaimFence(target.id, operation);
+     },
+     onDestinationSynced: async (dest, details) => {
+       // Fast incremental per-destination receipt persistence in independent short DB transaction with claim fence verification
+       await db.transaction().execute(async cx => {
+         const latestLesson = (await records(cx)).find(r => r._kind === 'lessons' && r.id === target.id) || target;
+         if (latestLesson.syncClaim !== operation) {
+           fail('Worker lease fencing failure on receipt persistence: sync claim ownership was lost.', 409);
+         }
+         latestLesson.googleSheetsSynced = details.sheetsSynced;
+         latestLesson.googleCalendarSynced = details.calendarSynced;
+         // Keep claim in 'in_progress' while Calendar sync or final commit is in flight
+         latestLesson.googleSyncStatus = 'in_progress';
+         await put(cx, 'lessons', latestLesson);
+       });
+     }
+   });
+
+   // Phase 3: Final State Commit in short DB transaction
+   const finalResult = await db.transaction().execute(async cx => {
+     await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);
+     const all = await records(cx);
+     const latestLesson = all.find(r => r._kind === 'lessons' && r.id === target.id) || target;
+     const latestStudent = all.find(r => r._kind === 'students' && r.id === s.id) || s;
+     const latestSettings = all.find(r => r._kind === 'settings' && r.id === 'settings') || settings;
+
+     // Enforce claim ownership fence before final commit
+     if (latestLesson.syncClaim !== operation) {
+       fail('Worker lease fencing failure at final commit: sync claim ownership was lost.', 409);
+     }
+
+     if (syncRes.newAccessToken) {
+       latestSettings.googleAccessToken = syncRes.newAccessToken;
+       await put(cx, 'settings', latestSettings);
+     }
+
+     latestLesson.googleSyncStatus = syncRes.status;
+     latestLesson.googleSheetsSynced = syncRes.sheetsSynced;
+     latestLesson.googleCalendarSynced = syncRes.calendarSynced;
+
+     const out: Item = { ok: true };
+
+     if (!syncRes.ok) {
+       latestLesson.googleSyncError = syncRes.error;
+       out.googleSyncStatus = syncRes.status;
+       out.googleSyncError = syncRes.error;
+     } else {
+       latestLesson.status = 'Completed';
+       latestLesson.completedAt = new Date().toISOString();
+       if (!latestLesson.usedIncremented) {
+         latestStudent.used += 1;
+         latestLesson.usedIncremented = true;
+         await put(cx, 'students', latestStudent);
+       }
+       delete latestLesson.googleSyncError;
+       out.googleSync = 'synced';
+     }
+
+     await put(cx, 'lessons', latestLesson);
+     await cx.insertInto('portalAudit').values({ id: id(), accountId: a.id, action: 'complete', recordId: latestLesson.id }).execute();
+     await cx.insertInto('portalOperations').values({ accountId: a.id, operationId: operation, result: out }).execute();
+
+     return out;
+   });
+
+   const accounts = await db.selectFrom('portalAccounts').select('id').where('enabled','=',true).execute();
+   for (const actor of accounts) {
+     try { await publish('account:' + actor.id, { type: 'refresh' }); } catch {}
+   }
+
+   return finalResult;
+ }
+
  const result=await db.transaction().execute(async cx=>{await sql`select pg_advisory_xact_lock(769463201)`.execute(cx);const prior=await cx.selectFrom('portalOperations').select('result').where('accountId','=',a.id).where('operationId','=',operation).executeTakeFirst();if(prior)return prior.result;
- const all=await records(cx);const find=(k:string,rid:string)=>{const r=all.find(r=>r._kind===k&&r.id===rid);if(!r)fail();return r;};const student=(sid:string)=>{const s=find('students',sid);if(!allowed(a,s))fail();return s;};let target:Item={},out:Item={ok:true};const save=async(k:string,r:Item)=>{await put(cx,k,r);const n=all.findIndex(x=>x.id===r.id);if(n<0)all.push({...r,_kind:k});else all[n]={...r,_kind:k};};
+ const all=await records(cx);const find=(k:string,rid:string)=>{const r=all.find(r=>r._kind===k&&r.id===rid);if(!r)fail();return r;};const student=(sid:string)=>{const s=find('students',sid);if(!allowed(a,s))fail();return s;};let target:Item={},out:Item={ok:true};const save=async(kind:string,r:Item)=>{await put(cx,kind,r);const n=all.findIndex(x=>x.id===r.id);if(n<0)all.push({...r,_kind:kind});else all[n]={...r,_kind:kind};};
  const notify=async(accountId:string,message:string,extra:Item={})=>save('notifications',{id:id(),accountId,text:message,at:new Date().toISOString(),...extra});const notifyAdmin=async(message:string,extra:Item={})=>{for(const ad of await cx.selectFrom('portalAccounts').select('id').where('role','=','admin').where('enabled','=',true).execute())await notify(ad.id,message,extra);};
  if(action==='invite'){admin(a);if(all.find(r=>r.id==='settings')?.reviewMode)fail('Family access is paused during private review. Imported records can be previewed without invitations.',403);const pe=email(v.parentEmail),se=email(v.studentEmail);if(pe===se)fail('Use separate parent and student email addresses.',400);const existing=await cx.selectFrom('portalAccounts').selectAll().where('email','=',pe).executeTakeFirst();if(existing&&existing.role!=='parent')fail('This email already has a different role.',409);if(await cx.selectFrom('portalAccounts').select('id').where('email','=',se).executeTakeFirst())fail('The student email is already assigned.',409);
  const pid=existing?.parentId||id(),sid=id(),pn=text(v.parentName,200,true),sn=text(v.studentName,200,true);const p=existing?find('parents',pid):{id:pid,name:pn,email:pe,mobile:'',country:'',zone:'America/Toronto',contact:'Email',billingName:pn};const s={id:sid,parentId:pid,name:sn,preferred:text(v.preferred||sn.split(' ')[0],200),pronouns:'',email:se,country:'',zone:'America/Toronto',year:'',programme:text(v.programme||'',100),subject:text(v.subject||'',200),level:'',board:'',exam:'',rate:num(v.rate,0,10000),currency:['USD','CAD','GBP','EUR','AUD'].includes(v.currency)?v.currency:'USD',discount:0,purchased:0,used:0,day:'',time:'',length:60,frequency:'Weekly',startDate:new Date().toISOString(),endDate:null,goals:'',challenge:''};await save('parents',p);await save('students',s);if(!existing)await cx.insertInto('portalAccounts').values({id:id(),email:pe,name:pn,role:'parent',parentId:pid}).execute();await cx.insertInto('portalAccounts').values({id:id(),email:se,name:sn,role:'student',studentId:sid}).execute();await save('threads',{id:sid+'-student',kind:'student',studentId:sid,name:sn,messages:[],unreadBy:[]});if(!existing)await save('threads',{id:pid+'-parent',kind:'parent',parentId:pid,name:pn,messages:[],unreadBy:[]});await save('onboardings',{id:'onboarding-'+sid,studentId:sid,parentId:pid,step:0,parent:{...p},student:{...s},learning:{help:'',challenge:'',goals:'',dates:'',other:''},agreements:[],complete:false,arrangementsConfirmed:false});out.studentId=sid;out.invitation=SITE+'/portal/';
  }else if(action==='schedule'){admin(a);const s=student(v.studentId),start=date(v.start),count=num(v.count,1,24),hours=num(v.hours,.25,3);if(!Number.isInteger(count))fail('Enter a whole number of lessons.',400);for(let n=0;n<count;n++){const startAt=weekly(start,zone(v.zone||'America/Toronto'),n);if(all.some(r=>r._kind==='lessons'&&r.status==='Scheduled'&&r.studentId===s.id&&r.start===startAt))continue;await save('lessons',{id:id(),studentId:s.id,start:startAt,subject:text(v.subject||s.programme+' '+s.subject,200,true),hours,status:'Scheduled',planning:[],notes:{covered:'',outcome:'',next:''},resources:[],privateNotes:''});}
- }else if(['planning','notes','privateNotes','attachResource','complete','cancel','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
+ }else if(action==='requestExtraLesson'){
+   const s=student(v.studentId);
+   if(a.role==='admin')fail('Create and verify the event in Google Calendar before adding a lesson.',409);
+   const requestedStart=date(v.requestedStart),notes=text(v.notes||'',1000);
+   const pending={id:id(),studentId:s.id,status:'Pending',requestedBy:a.name,requestedById:a.id,requestedAt:new Date().toISOString(),requestedStart,notes};
+   await save('extraLessonRequests',pending);
+   await notifyAdmin(`${a.name} requested an extra lesson for ${s.name}`,{type:'extraLessonRequest',studentId:s.id,requestId:pending.id,requestedStart,notes});
+   out.requested=true;out.requestId=pending.id;
+ }else if(action==='rejectExtraLesson'){
+   admin(a);target=find('extraLessonRequests',text(v.id,80,true));student(target.studentId);
+   if(target.status!=='Pending')fail('This extra-lesson request has already been reviewed.',409);
+   target.status='Rejected';target.reviewedAt=new Date().toISOString();target.reviewedBy=a.id;
+   await save('extraLessonRequests',target);
+ }else if(action==='approveExtraLesson'){
+   admin(a);target=find('extraLessonRequests',text(v.id,80,true));student(target.studentId);
+   fail('Extra-lesson approval requires a verified matching Google Calendar event and is not yet enabled.',409);
+ }else if(['planning','notes','privateNotes','attachResource','cancel','requestCancellation','requestReschedule','approveRequest','rejectRequest','reschedule','tutorCancel','noShow'].includes(action)){target=find('lessons',v.id);const s=student(target.studentId);
  if(action==='planning'){if(a.role==='parent'||target.status!=='Scheduled')fail();target.planning.push({id:id(),author:a.name,authorId:a.id,at:new Date().toISOString(),text:text(v.text,10000,true),files:await checkedFiles(cx,a,v.files||[],'lesson',target.id)});await notifyAdmin(s.name+' added lesson planning.',{lessonId:target.id,type:'planning'});}
  if(action==='notes'){admin(a);target.notes=pick(v,['covered','outcome','next']);for(const k of ['covered','outcome','next'])target.notes[k]||='';}
  if(action==='privateNotes'){admin(a);target.privateNotes=text(v.text,20000);}
  if(action==='attachResource'){admin(a);find('resources',v.resourceId);if(!target.resources.includes(v.resourceId))target.resources.push(v.resourceId);}
- if(action==='complete'){admin(a);if(target.status!=='Scheduled')fail('This lesson has already been completed or cancelled.',409);target.status='Completed';target.completedAt=new Date().toISOString();s.used+=1;await save('students',s);}
- if(action==='cancel'){if(a.role!=='parent'||target.status!=='Scheduled'||Date.parse(target.start)<=Date.now())fail();const hours=(Date.parse(target.start)-Date.now())/3600000;target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=hours<12;target.rescheduleRequired=hours>=12&&hours<168;if(target.chargeable){s.used+=1;await save('students',s);}await notifyAdmin(s.name+' cancelled a lesson · '+(target.chargeable?'Chargeable':target.rescheduleRequired?'Rescheduling applies':'No charge'),{type:'cancellation',lessonId:target.id});}
- if(action==='reschedule'){admin(a);if(target.status==='Completed')fail('Completed lessons retain their original dates.',409);target.start=date(v.start);target.hours=num(v.hours,.25,3);if(target.status==='Cancelled'){if(target.chargeable){s.used=Math.max(0,s.used-1);await save('students',s);}target.status='Scheduled';target.rescheduledAt=new Date().toISOString();target.chargeable=false;target.rescheduleRequired=false;}}
- if(action==='noShow'){admin(a);if(target.status!=='Scheduled'||Date.parse(target.start)>Date.now())fail();target.status='No-show';target.completedAt=new Date().toISOString();s.used+=1;await save('students',s);}
+ if(action==='cancel'||action==='requestCancellation'){
+   if(a.role!=='admin'){
+     if(target.status!=='Scheduled')fail('Only scheduled lessons can be requested for cancellation.',400);
+     target.pendingRequest={type:'cancellation',requestedBy:a.name,requestedById:a.id,requestedAt:new Date().toISOString(),reason:text(v.reason||'',1000)};
+     await notifyAdmin(`${a.name} requested cancellation for ${s.name}'s lesson`,{type:'cancellationRequest',lessonId:target.id});
+   }else{
+     target.status='Cancelled';
+     target.cancelledAt=new Date().toISOString();
+     target.cancelledBy=a.name;
+     const hours=(Date.parse(target.start)-Date.now())/3600000;
+     target.chargeable=v.chargeable!==undefined?!!v.chargeable:(hours<12);
+     if(target.chargeable&&!target.usedIncremented){
+       s.used+=1;
+       target.usedIncremented=true;
+       await save('students',s);
+     }
+   }
+ }
+ if(action==='requestReschedule'){
+   if(target.status!=='Scheduled'&&target.status!=='Cancelled')fail('Cannot request reschedule for this lesson.',400);
+   const requestedStart=date(v.requestedStart);
+   target.pendingRequest={type:'reschedule',requestedBy:a.name,requestedById:a.id,requestedAt:new Date().toISOString(),requestedStart,reason:text(v.reason||'',1000)};
+   await notifyAdmin(`${a.name} requested reschedule for ${s.name}'s lesson`,{type:'rescheduleRequest',lessonId:target.id});
+ }
+ if(action==='approveRequest'){
+   admin(a);
+   if(!target.pendingRequest)fail('No pending request found for this lesson.',404);
+   const req=target.pendingRequest;
+   if(req.type==='cancellation'){
+     const hours=(Date.parse(target.start)-Date.parse(req.requestedAt))/3600000;
+     const chargeable=v.chargeable!==undefined?!!v.chargeable:(hours<12);
+     target.status='Cancelled';
+     target.cancelledAt=req.requestedAt;
+     target.cancelledBy=req.requestedBy;
+     target.chargeable=chargeable;
+     if(chargeable&&!target.usedIncremented){
+       s.used+=1;
+       target.usedIncremented=true;
+       await save('students',s);
+     }
+   }else if(req.type==='reschedule'){
+     if(req.requestedStart)target.start=req.requestedStart;
+     target.status='Scheduled';
+     target.rescheduledAt=new Date().toISOString();
+   }
+   delete target.pendingRequest;
+ }
+ if(action==='rejectRequest'){
+   admin(a);
+   if(!target.pendingRequest)fail('No pending request found for this lesson.',404);
+   delete target.pendingRequest;
+ }
+ if(action==='reschedule'){admin(a);if(target.status==='Completed')fail('Completed lessons retain their original dates.',409);target.start=date(v.start);target.hours=num(v.hours,.25,3);if(target.status==='Cancelled'){if(target.chargeable&&target.usedIncremented){s.used=Math.max(0,s.used-1);delete target.usedIncremented;await save('students',s);}target.status='Scheduled';target.rescheduledAt=new Date().toISOString();target.chargeable=false;target.rescheduleRequired=false;}}
+ if(action==='noShow'){admin(a);if(target.status!=='Scheduled'||Date.parse(target.start)>Date.now())fail();target.status='No-show';target.completedAt=new Date().toISOString();if(!target.usedIncremented){s.used+=1;target.usedIncremented=true;await save('students',s);}}
  if(action==='tutorCancel'){admin(a);if(target.status!=='Scheduled')fail();target.status='Cancelled';target.cancelledAt=new Date().toISOString();target.cancelledBy=a.name;target.chargeable=false;}
  await save('lessons',target);
  }else if(action==='message'||action==='markRead'){target=find('threads',v.id);if(target.kind==='student')student(target.studentId);else if(a.role!=='admin'&&!(a.role==='parent'&&target.parentId===a.parentId))fail();if(action==='message'){if(a.role==='parent'&&target.kind==='student'||a.role==='student'&&target.kind!=='student')fail();target.messages.push({id:id(),author:a.name,authorId:a.id,at:new Date().toISOString(),text:text(v.text,10000,true),files:await checkedFiles(cx,a,v.files||[],'thread',target.id)});const recipients=await cx.selectFrom('portalAccounts').selectAll().where('enabled','=',true).execute();target.unreadBy=recipients.filter(r=>r.id!==a.id&&(r.role==='admin'||target.kind==='parent'&&r.role==='parent'&&r.parentId===target.parentId||target.kind==='student'&&r.role==='student'&&r.studentId===target.studentId)).map(r=>r.id);for(const recipient of target.unreadBy)await notify(recipient,'New message from '+a.name,{type:'message',threadId:target.id});}else target.unreadBy=(target.unreadBy||[]).filter((rid:string)=>rid!==a.id);await save('threads',target);
@@ -139,4 +436,3 @@ async function realtime(request:Request){const a=await account(request);return c
 function response(value:unknown,status=200){return new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}
 async function handle(request:Request,fn:(r:Request,v:Item)=>Promise<unknown>){try{let v={};if(request.method==='POST'){if(request.headers.get('content-type')?.split(';')[0]!=='application/json')fail('Send JSON data.',415);const body=await request.text();if(body.length>150000)fail('This request is too large.',413);v=JSON.parse(body);}return response(await fn(request,v));}catch(e:any){return response({error:e.status?e.message:'This change could not be saved. Please retry.'},e.status||500);}}
 export const portalCore={account,state,command,files,file,start,callback,redeem,logout,realtime,handle,hash,snapshot,entitlement,weekly,viewer,previewReadOnly};
-
