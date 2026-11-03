@@ -12,7 +12,7 @@ function screen(data){
  const move=url=>{const p=new URL(url,location.origin);location.pathname=p.pathname;location.search=p.search;};
  const document={getElementById:id=>id==='portal-app'?root:null,querySelector:q=>q==='h1'?{textContent:'Portal'}:null,querySelectorAll:()=>[]};
  const ctx=vm.createContext({document,location,history:{replaceState:(_a,_b,u)=>move(u),pushState:(_a,_b,u)=>move(u)},window:{scrollTo(){},addEventListener(){},print(){}},crypto:webcrypto,URL,URLSearchParams,Intl,Date,Math,JSON,setInterval(){},setTimeout(){},console,Blob,fetch:async()=>new Response('{}',{status:401}),fixture:data});
- vm.runInContext(source.replace('initialise();\n})();',"db={...empty(),...fixture};me=db.me;activeChild=db.students[0]?.id||'';selectOnboarding();globalThis.show=go;render();\n})();"),ctx);
+ vm.runInContext(source.replace('initialise();\n})();',"db={...empty(),...fixture};me=db.me;activeChild=db.students[0]?.id||'';selectOnboarding();globalThis.show=go;globalThis.refreshTest=refresh;globalThis.actionTest=onAction;render();\n})();"),ctx);
  return {root,ctx};
 }
 test('first-party boundary forwards preview scope alongside its HttpOnly session',async()=>{
@@ -38,3 +38,23 @@ test('imported source rows, missing dates and restricted preview screens render'
  const studentState={me:{id:'preview',role:'student',name:s.name,studentId:s.id},preview,students:[s],parents:[],lessons:data.lessons.filter(l=>l.studentId===s.id),onboardings:[],entitled:true};
  const p=screen(studentState);p.ctx.show('/portal/dashboard/?view=student&previewStudent='+s.id);assert.ok(p.root.innerHTML.includes('Student preview'));assert.ok(p.root.innerHTML.includes('Return to Amanda’s workspace'));assert.ok(!p.root.innerHTML.includes('View as parent'));
 });
+
+ test('preview switch rejects an administrator response and restores the original record',async()=>{
+ const data={me:{id:'owner',name:'Amanda',role:'admin'},settings:{reviewMode:true}};
+ const {root,ctx}=screen(data);ctx.show('/portal/student/?id=mireya');
+ ctx.fetch=async()=>Response.json({...data,students:[]});
+ await ctx.actionTest({preventDefault(){},target:{closest(){return {dataset:{action:'start-preview',role:'student',student:'mireya'}};}}});
+ assert.equal(ctx.location.pathname,'/portal/student/');assert.equal(ctx.location.search,'?id=mireya');
+ assert.ok(!root.innerHTML.includes('Student preview'));
+ });
+ test('preview response must match the requested role and student',async()=>{
+ const {ctx}=screen({me:{id:'owner',role:'admin'}});
+ ctx.location.search='?view=student&previewStudent=mireya';
+ for(const data of [
+ {me:{role:'admin'},preview:null},
+ {me:{role:'student',studentId:'other'},preview:{role:'student',studentId:'other'}},
+ {me:{role:'admin'},preview:{role:'student',studentId:'mireya'}}
+ ]){ctx.fetch=async()=>Response.json(data);await assert.rejects(ctx.refreshTest(false),/different workspace/);}
+ ctx.fetch=async()=>Response.json({me:{id:'preview',role:'student',studentId:'mireya'},preview:{role:'student',studentId:'mireya'},students:[],onboardings:[]});
+ await assert.doesNotReject(ctx.refreshTest(false));
+ });
