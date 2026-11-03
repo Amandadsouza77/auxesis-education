@@ -1,0 +1,41 @@
+{
+  "mode": "preview",
+  "source": "verified read-only snapshot after the two source ID repairs on 2026-10-14",
+  "previewOnly": true,
+  "canApply": false,
+  "issues": [],
+  "sourceRepairs": [],
+  "changes": [
+    {
+      "id": "300e998c-60fb-5fd7-b57b-ef631e5a3022",
+      "status": "Cancelled",
+      "start": "2026-10-13T09:15:00.000Z",
+      "eventId": "60r3iohi6oq68b9o6srj6b9k61h62b9p70oj4b9m6lijicb4ckqmae9mco_20261013T091500Z",
+      "chargeable": false,
+      "notes": {
+        "next": "Does not consume a prepaid lesson. Resume regular lessons Oct 20/21; carry two unused credits forward.",
+        "covered": "Holiday cancellation; no charge.",
+        "outcome": ""
+      }
+    },
+    {
+      "id": "50f5e66f-ae05-51a3-b97a-42d03129c2e5",
+      "status": "Completed",
+      "start": "2026-10-14T10:30:00.000Z",
+      "eventId": "6osm2e1mc4oj0b9n6ksjgb9kckp36b9p6pgm4b9p6phjgc9p6cp3gpj6cg",
+      "chargeable": null,
+      "notes": {
+        "next": "Initially described as cancelled, but Andie called the next day to take the 6:30 AM slot. Treat as one rescheduled lesson, not a cancelled or additional lesson; no extra credit owed for this move.",
+        "covered": "Membranes and membrane transport practice questions.",
+        "outcome": ""
+      }
+    }
+  ],
+  "unchangedBalances": [
+    {
+      "id": "5febba2d-82ee-5585-805f-a3fc5e89f803",
+      "purchased": 8,
+      "used": 0
+    }
+  ]
+}
