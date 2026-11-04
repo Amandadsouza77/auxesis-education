@@ -33,6 +33,11 @@ booking, Google connection or database configuration changes are needed.
 The current workspace has working repository access but no Cloudflare or email
 provider credential. The most recent private-runtime recovery job, GitHub
 Actions run `40458712475`, failed with `Runtime recovery provider HTTP 401`.
+On 4 November, an additional read-only diagnostic run `41759704924` confirmed
+that the secret is present but Cloudflare rejects it with HTTP 401, API error
+`10000` (authentication failure). The diagnostic emits no credential values.
+The current environment and connected account resources contain no alternative
+Cloudflare credential, and repository integration access cannot manage its secrets.
 Renew `CLOUDFLARE_API_TOKEN` in the repository's existing protected
 `auxesis-migration-preview` environment. Preserve its branch restrictions.
 The established recovery also requires the existing `GOOGLE_CLIENT_SECRET`
