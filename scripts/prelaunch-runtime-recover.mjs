@@ -10,16 +10,21 @@ async function cf(path,sql){
  const allowed = ["SELECT file_id FROM migration_artifacts WHERE id='staging-runtime'", "SELECT email,client_id,refresh_token_ciphertext FROM migration_google_authorization WHERE id='owner'", "SELECT secret FROM portal_release_keys WHERE id='migration-transport'"];
  require(!sql && ['/pages/projects/auxesis-education','/pages/projects/'+project].includes(path) || allowed.includes(sql) && path==='/d1/database/'+db+'/query','Read-only recovery request rejected.');
  const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+path,{method:sql?'POST':'GET',redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(sql?{body:JSON.stringify({sql})}:{})});
- require(r.ok,'Runtime recovery provider HTTP '+r.status);const j=await r.json();require(j.success,'Runtime recovery request rejected.');return j.result;
+ const j=await r.json().catch(()=>({}));
+ // Report only numeric provider codes; never log headers, credentials or response data.
+ const codes=(Array.isArray(j.errors)?j.errors:[]).map(e=>e.code).filter(Number.isInteger).join(',');
+ require(r.ok,'Runtime recovery provider HTTP '+r.status+(codes?' (API codes '+codes+')':''));require(j.success,'Runtime recovery request rejected.');return j.result;
 }
 async function prepare(){
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected staging deployment branch.');
+ require(!!process.env.CLOUDFLARE_API_TOKEN?.trim(),'GitHub environment CLOUDFLARE_API_TOKEN is missing; configure it in auxesis-migration-preview.');
  const live=await cf('/pages/projects/auxesis-education'),stage=await cf('/pages/projects/'+project),vars=stage.deployment_configs.preview.env_vars;
  require(!stage.source&&!stage.canonical_deployment&&stage.deployment_configs.preview.d1_databases.PORTAL_DB.id===db&&vars.PRODUCTION_SYNC_ENABLED.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED.value==='false','Unsafe staging deployment target.');
  require(!Object.values(live.deployment_configs||{}).some(c=>Object.values(c.d1_databases||{}).some(b=>b.id===db)),'Staging database is bound to production.');
  const query=async(sql,p)=>(await cf('/d1/database/'+db+'/query',sql,p)).flatMap(x=>x.results||[]);
  const artifact=(await query("SELECT file_id FROM migration_artifacts WHERE id='staging-runtime'"))[0],grant=(await query("SELECT email,client_id,refresh_token_ciphertext FROM migration_google_authorization WHERE id='owner'"))[0],key=(await query("SELECT secret FROM portal_release_keys WHERE id='migration-transport'"))[0]?.secret;
  require(artifact&&grant&&key&&grant.email===vars.ADMIN_EMAIL.value&&grant.client_id===vars.GOOGLE_CLIENT_ID.value,'Private artifact or owner consent unavailable.');
+ require(!!process.env.GOOGLE_CLIENT_SECRET?.trim(),'GitHub environment GOOGLE_CLIENT_SECRET is missing; configure it in auxesis-migration-preview.');
  const refresh=await fetch('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',client_id:grant.client_id,client_secret:process.env.GOOGLE_CLIENT_SECRET,refresh_token:await open(key,grant.refresh_token_ciphertext)})});require(refresh.ok,'Staging artifact authorization refresh failed.');const access=(await refresh.json()).access_token;
  const url='https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(artifact.file_id),headers={Authorization:'Bearer '+access};const metadata=await fetch(url+'?fields=ownedByMe,shared,permissions,size',{headers,redirect:'error'});require(metadata.ok,'Private runtime package metadata unavailable.');const m=await metadata.json();require(m.ownedByMe===true&&m.shared!==true&&(m.permissions||[]).every(p=>p.type==='user'&&p.role==='owner')&&Number(m.size)>0&&Number(m.size)<8*1024*1024,'Private runtime package privacy or bounded size failed.');
  const raw=await fetch(url+'?alt=media',{headers,redirect:'error'});require(raw.ok,'Private runtime package read failed.');const bytes=Buffer.from(await raw.arrayBuffer());require(createHash('sha256').update(bytes).digest('hex')===expected,'Private runtime package checksum mismatch.');
