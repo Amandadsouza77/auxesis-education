@@ -1,0 +1,49 @@
+name: Repair native inquiry delivery with preserved website
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/inquiry-native-release.yml, scripts/inquiry-release.mjs]
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  inquiry-release:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify inquiry validation, native boundary and frontend behavior
+        run: node --test tests/api.test.mjs tests/native-inquiry.test.mjs tests/public-forms.test.mjs tests/public-proxy.test.mjs
+      - name: Recover the checksum-verified private package without provider writes
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Verify the retained private review implementation
+        working-directory: work/staging-deployment/runtime
+        run: node tests/website-reviews.test.mjs
+      - name: Match live assets and prepare the inquiry-only native wrapper
+        run: node scripts/inquiry-release.mjs prepare
+      - name: Install the existing bundler
+        run: npm install --no-save --ignore-scripts esbuild@0.25
+      - name: Bundle the retained native runtime with the inquiry route
+        run: npx esbuild work/staging-deployment/runtime/inquiry-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Verify production has not changed since preparation
+        run: node scripts/inquiry-release.mjs check
+      - name: Deploy the inquiry repair to the existing native production project
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify both domains and preserved pages, records and settings
+        run: node scripts/inquiry-release.mjs verify
+      - name: Restore the prior production deployment on release failure
+        if: failure()
+        run: node scripts/inquiry-release.mjs rollback
