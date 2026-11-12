@@ -9,6 +9,7 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 const routes=JSON.parse(readFileSync('templates/routes.json','utf8'));
 const publicFiles=new Set(['404.html','index.html','about-amanda/index.html','about-auxesis/index.html','enquire/index.html','faq/index.html','how-tutoring-works/index.html','privacy-consent/index.html','recommendations/index.html','subjects-programmes/index.html','tutoring-policies/index.html']);
 const anchors=/<a\b[^>]*\bhref\s*=\s*(["'])(?:(?:https:\/\/(?:auxedu\.com|auxesis-education\.pages\.dev))?\/portal(?:[/?#][^"']*)?)\1[^>]*>[\s\S]*?<\/a\s*>/gi;
+const hasPortalLink=html=>new RegExp(anchors.source,'i').test(html);
 const require=(v,m)=>{if(!v)throw Error(m);};
 async function body(host,path){let url=host+path,r;for(let i=0;i<4;i++){r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(30000)});if(![301,302,303,307,308].includes(r.status))break;const next=new URL(r.headers.get('Location'),url);require(next.origin===host,'Unexpected public-page redirect');url=next.href;}require(r.ok||path==='/404.html'&&r.status===404,'Public-page verification HTTP '+r.status);return Buffer.from(await r.arrayBuffer());}
 try{
@@ -19,7 +20,7 @@ try{
   for(const route of routes){
    const path=resolve(root,route.path),before=readFileSync(path,'utf8');let count=0;
    const after=before.replace(anchors,()=>{count++;return '';});
-   require(!anchors.test(after),'A public portal link remains');
+   require(!hasPortalLink(after),'A public portal link remains');
    if(count){changes.push({path:route.path,url:route.route,before:sha(before),after:sha(after),count,content:after});removed+=count;}
   }
   require(removed>0,'No portal navigation links found; stop rather than redeploy unnecessarily');
@@ -43,7 +44,7 @@ try{
      current=await body(host,route.route);
      // The custom domain can apply zone-level HTML transformations; byte-exact
      // source checks belong on the deployment hostname. Both must omit the links.
-     valid=!anchors.test(current.toString())&&current.toString().includes('<main')&&
+     valid=!hasPortalLink(current.toString())&&current.toString().includes('<main')&&
        (host!=='https://auxesis-education.pages.dev'||!change||sha(current)===change.after);
      if(valid)break;
      await new Promise(resolve=>setTimeout(resolve,3000));
