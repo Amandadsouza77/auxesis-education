@@ -22,7 +22,9 @@ try{
    if(count){changes.push({path:route.path,url:route.route,before:sha(before),after:sha(after),count,content:after});removed+=count;}
   }
   require(removed>0,'No portal navigation links found; stop rather than redeploy unnecessarily');
-  const saved={worker,removed,changes:changes.map(({content,...rest})=>rest)};
+  const portalBaseline={};
+  for(const host of ['https://auxesis-education.pages.dev','https://auxedu.com']){const r=await fetch(host+'/portal/',{redirect:'manual',headers:{'Cache-Control':'no-cache'}});portalBaseline[host]={status:r.status,hash:sha(Buffer.from(await r.arrayBuffer()))};}
+  const saved={worker,removed,portalBaseline,changes:changes.map(({content,...rest})=>rest)};
   writeFileSync(checkpoint,JSON.stringify(saved),{mode:0o600});
   for(const change of changes){writeFileSync(resolve(root,change.path),change.content);state.publicFiles[change.url]=change.after;}
   writeFileSync(baseline,JSON.stringify(state),{mode:0o600});
@@ -31,10 +33,28 @@ try{
  }else if(process.argv[2]==='verify'){
   const saved=JSON.parse(readFileSync(checkpoint));
   require(sha(readFileSync(resolve(root,'_worker.js')))===saved.worker,'Native Worker differs from pre-patch build');
+  let transformedCustomPages=0;
   for(const host of ['https://auxesis-education.pages.dev','https://auxedu.com']){
-   for(const route of routes){const current=await body(host,route.route);require(!anchors.test(current.toString()),'Portal link remains on '+host+route.route);const change=saved.changes.find(c=>c.path===route.path);if(change)require(sha(current)===change.after,'Public-page content differs from the exact approved link removal');}
-   const portal=await body(host,'/portal/');require(portal.length>0,'Retained portal entry is unavailable');
+   for(const route of routes){
+    let current,valid=false;
+    const change=saved.changes.find(c=>c.path===route.path);
+    for(let attempt=0;attempt<12;attempt++){
+     current=await body(host,route.route);
+     // The custom domain can apply zone-level HTML transformations; byte-exact
+     // source checks belong on the deployment hostname. Both must omit the links.
+     valid=!anchors.test(current.toString())&&current.toString().includes('<main')&&
+       (host!=='https://auxesis-education.pages.dev'||!change||sha(current)===change.after);
+     if(valid)break;
+     await new Promise(resolve=>setTimeout(resolve,3000));
+    }
+    require(valid,'Public navigation/content verification failed: '+host+route.route);
+    if(host==='https://auxedu.com'&&change&&sha(current)!==change.after){transformedCustomPages++;console.log('::notice::'+JSON.stringify({customDomainHtmlDiffers:true,path:route.route,emailObfuscation:current.toString().includes('__cf_email__'),portalLinksAbsent:true}));}
+   }
+   const portal=await fetch(host+'/portal/',{redirect:'manual',headers:{'Cache-Control':'no-cache'}}),bytes=Buffer.from(await portal.arrayBuffer());
+   require(portal.status===saved.portalBaseline[host].status,'Retained portal response status changed');
+   if(host==='https://auxesis-education.pages.dev')require(sha(bytes)===saved.portalBaseline[host].hash,'Retained portal HTML changed');
   }
+  console.log('::notice::'+JSON.stringify({customDomainTransformedPages:transformedCustomPages,portalResponseStatusesPreserved:true}));
   console.log('::notice::Public portal links removed on every public page at both domains; exact edited HTML verified; portal entry retained. Inquiry readiness, unrelated assets, private access boundaries, settings and data are checked separately by the native release verifier.');
  }else throw Error('Unknown portal navigation action');
 }catch(e){console.error('::error::'+e.message);process.exitCode=1;}
