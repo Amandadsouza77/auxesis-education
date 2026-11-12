@@ -5,22 +5,7 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu?.class
 const enquiry=document.querySelector('#enquiry-form');
 if(enquiry){
   const timezone=enquiry.elements.namedItem('timezone');
-  if(timezone?.dataset.examples){
-    try{
-      const examples=new Map();
-      const now=new Date();
-      for(const [place,zone] of JSON.parse(timezone.dataset.examples)){
-        const offset=new Intl.DateTimeFormat('en-GB',{timeZone:zone,timeZoneName:'longOffset'}).formatToParts(now).find(part=>part.type==='timeZoneName').value;
-        const value=/^GMT(?:[+−-]00:00)?$/.test(offset)?'UTC±00:00':offset.replace('GMT','UTC').replace('-','−');
-        if(!examples.has(value))examples.set(value,[]);
-        examples.get(value).push(place);
-      }
-      for(const option of timezone.options)if(option.value){
-        const places=examples.get(option.value);
-        option.textContent=option.value+(places?' — '+places.join(' / '):'');
-      }
-    }catch{ /* UTC offsets remain usable when regional formatting is unavailable. */ }
-  }
+  if(timezone&&globalThis.AuxesisTimeZones)globalThis.AuxesisTimeZones.populateTimeZones(timezone);
   const update=()=>{
     enquiry.querySelectorAll('[data-other-for]').forEach(field=>{
       const show=enquiry.elements.namedItem(field.dataset.otherFor).value==='Other';
@@ -55,7 +40,7 @@ function formUnavailable(form,kind,temporary=false){
   const button=form.querySelector('button[type="submit"]');button.disabled=true;
   button.textContent=temporary?'Form temporarily unavailable':kind==='enquiry'?'Online enquiries coming soon':'Online reviews coming soon';
 }
-const forms=[['enquiry-form','enquiry-status','enquiry','Thank you. Your enquiry has been received. Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.'],['review-form','review-status','review','Thank you. Your review has been received and will be checked before anything is published.']];
+const forms=[['enquiry-form','enquiry-status','enquiry','Thank you. Your enquiry has been received. Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'],['review-form','review-status','review','Thank you. Your review has been received and will be checked before anything is published.']];
 let turnstileLoad;
 function markFormErrors(form,status,focus=false){
   form.querySelectorAll('.field-error').forEach(error=>error.remove());

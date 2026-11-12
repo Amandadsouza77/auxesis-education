@@ -15,7 +15,7 @@ export default {async fetch(){
  };
  try{
   const env={SITE_URL:'https://auxesis-education.pages.dev',EMAIL_FROM:'Auxesis <inquiries@auxedu.com>',RESEND_API_KEY:'test-only',TURNSTILE_SECRET_KEY:'test-only',TURNSTILE_SITE_KEY:'test-only'};
-  const data={name:'Synthetic runtime QA',email:'qa@example.invalid',country:'Canada',timezone:'UTC−05:00',year:'Grade 11',programme:'IB Diploma',subject:'Biology',support:'Mock runtime test only',contact:'Email',consent:true,turnstile_token:'mock-token'};
+  const data={name:'Synthetic runtime QA',email:'qa@example.invalid',country:'Canada',timezone:'America/Vancouver',year:'Grade 11',programme:'IB Diploma',subject:'Biology',support:'Mock runtime test only',contact:'Email',consent:true,turnstile_token:'mock-token'};
   const response=await withInquiry({fetch(){throw Error('Unexpected native fallback')}}).fetch(new Request('https://auxedu.com/api/enquiry',{method:'POST',headers:{Origin:'https://auxedu.com','Content-Type':'application/json'},body:JSON.stringify(data)}),env);
   const body=await response.json();return Response.json({status:response.status,ok:body.ok===true,providerRequests,redirect});
  }finally{globalThis.fetch=prior;}

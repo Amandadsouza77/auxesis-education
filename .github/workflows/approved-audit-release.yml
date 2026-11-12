@@ -1,0 +1,57 @@
+name: Implement approved public website corrections with preserved native runtime
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/approved-audit-release.yml, scripts/approved-audit-release.mjs]
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-production-preparation
+  cancel-in-progress: false
+jobs:
+  approved-audit-release:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: 2ac862d7c1f865935d185df59e7bd719
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify inquiry validation, native boundary and frontend behavior
+        run: node --test tests/api.test.mjs tests/native-inquiry.test.mjs tests/public-forms.test.mjs tests/public-proxy.test.mjs tests/time-zones.test.mjs
+      - name: Recover the checksum-verified private package without provider writes
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Verify the retained private review implementation
+        working-directory: work/staging-deployment/runtime
+        run: node tests/website-reviews.test.mjs
+      - name: Install the existing bundler
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
+      - name: Verify inquiry delivery in the actual Cloudflare runtime with mocked providers
+        run: node tests/inquiry-runtime.mjs
+      - name: Compile the verified native source required by the preparation guard
+        run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Match current deployed source and prepare approved corrections
+        run: node scripts/approved-audit-release.mjs prepare
+      - name: Bundle the retained native runtime with the inquiry route
+        run: npx esbuild work/staging-deployment/runtime/inquiry-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Verify production has not changed since preparation
+        run: node scripts/approved-audit-release.mjs check
+      - name: Deploy the public navigation edit with the existing native runtime
+        run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify deployed copy, canonical routes, enquiry readiness and preserved private data
+        run: node scripts/approved-audit-release.mjs verify
+      - name: Browser regression checks without sending production email
+        run: |
+          npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0 playwright@1.56.0
+          node scripts/approved-audit-browser-qa.mjs
+      - name: Restore the prior production deployment on release failure
+        if: failure()
+        run: node scripts/approved-audit-release.mjs rollback

@@ -1,0 +1,216 @@
+{
+  "faq.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than just listening. I adjust the explanation and level of support as needed. Lesson information and resources are kept together in the private Auxesis Portal.",
+      "after": "Sessions are live and one-to-one. The student will be answering questions, explaining their thinking and working through problems rather than just listening. I adjust the explanation and level of support as needed. Lesson documents and resources are shared through Google Drive or our agreed communication method."
+    },
+    {
+      "before": "Whenever possible, tell me at least 48 hours before the session what you want to focus on. Add your questions and any school materials you want to use to the lesson’s planning record in the private Auxesis Portal in advance. If you have nothing specific to send, I can prepare suitable resources.",
+      "after": "Whenever possible, tell me at least 48 hours before the session what you want to focus on. Send questions and any school materials through our agreed contact method or shared Google Drive folder in advance. If you have nothing specific to send, I can prepare suitable resources."
+    },
+    {
+      "before": "Lesson notes and next steps are available in the private Auxesis Portal. I can also publish monthly progress reports for parents and guardians there. Updates are adapted to the family rather than following a fixed schedule. Parents are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays.",
+      "after": "I discuss lesson priorities, progress and next steps with students and, where appropriate, parents or guardians through our agreed communication method. Updates are adapted to the student and family rather than following a fixed reporting schedule. You are welcome to contact me with questions, and I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
+    },
+    {
+      "before": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first session, and new students pay their first block before tutoring begins. Payment can be made by PayPal or bank transfer. A session can be cancelled without charge with at least 7 days’ notice. With at least 12 hours’ notice but less than 7 days, it can be rescheduled within four weeks, subject to availability. Cancellations with less than 12 hours’ notice and no-shows are charged and cannot be made up.",
+      "after": "Regular tutoring is prepaid in agreed blocks. Payment for a new block is due before the first lesson requiring that block, unless a different date is explicitly agreed. Your rate, currency and any separately charged marking or feedback will be confirmed in advance. Payment can be made by PayPal or bank transfer. Existing client agreements remain in effect. With at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, it can be rescheduled; the replacement must take place within four weeks of the original date, subject to mutually convenient availability. An unused replacement expires after those four weeks. Cancellations with less than 12 hours’ notice and no-shows normally incur the full session fee. Existing client agreements and any exceptions expressly agreed with Amanda remain in effect."
+    }
+  ],
+  "enquire.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Tell me a little about the student.",
+      "after": "Tell me about the learning support you need."
+    },
+    {
+      "before": "Tell me a little about the student, what they are studying and where support would help. I will get in touch to talk through the situation, answer your questions and see whether I am the right person to help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents can enquire for a student, and adult students can enquire and arrange their own tuition. I will get in touch to answer your questions and discuss the next step."
+    },
+    {
+      "before": "After receiving your enquiry, I'll arrange a conversation with the parent to learn more about the student's needs and goals. If Auxesis seems suitable, we'll arrange a free, approximately 20-minute Meet & Greet with the student and parent.",
+      "after": "We start with a free Meet & Greet of about 20 minutes, usually my first conversation with the student. We discuss the course, needs and goals and get a feel for working together. Parents are welcome to take part; a separate parent phone call is not a required step."
+    },
+    {
+      "before": "There's no pressure to commit. If you decide to proceed, I'll arrange the first lesson and provide access to the private Auxesis Portal.",
+      "after": "There’s no pressure to commit. If you decide to proceed, I’ll confirm the tutoring arrangements, first lesson and how we will share lesson materials."
+    },
+    {
+      "before": "Share a little about the student’s learning goals and where support would help. There’s no need to include their school name or detailed medical information.",
+      "after": "Share a little about the learning goals and where support would help. You can enquire for yourself or for a student. There’s no need to include a school name or detailed medical information."
+    }
+  ],
+  "home.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "I’m Amanda D’Souza, a science teacher and tutor with more than 25 years of experience in Canada and international schools. I am an Ontario Certified Teacher, hold Qualified Teacher Status in England, and have worked as an IB Biology Assistant Examiner since 2013, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. I bring that experience to tutoring, but the relationship is still personal: I want to know the learner, not just the course they are taking.",
+      "after": "I’m Amanda D’Souza, a science teacher and tutor with more than 25 years of experience in Canada and international schools. I am an Ontario Certified Teacher, hold Qualified Teacher Status in England, and have worked as an IB Biology Assistant Examiner since 2013. I continue to examine IB Biology papers and moderate Biology Internal Assessments, with experience assessing HL Paper 2 against IB criteria. I bring that experience to tutoring, but the relationship is still personal: I want to know the learner, not just the course they are taking."
+    },
+    {
+      "before": "Getting started begins with a conversation. I'll discuss the student's course, current challenges and goals with the parent before arranging a free Meet & Greet with the student and parent together. If everyone feels Auxesis is a good fit, we'll agree on the first steps and begin.",
+      "after": "We start with a free Meet & Greet to discuss the student’s course, current challenges and goals and get a feel for working together. This is usually my first conversation with the student; parents are welcome to take part. Adult students can enquire and arrange their own tutoring. If Auxesis feels like a good fit, we agree on the first steps and begin."
+    }
+  ],
+  "about-amanda.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Since 2013, I have worked as an IB Biology Assistant Examiner, with experience assessing HL Paper 2 and Internal Assessments against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and, importantly, of the difference between knowing the science and communicating that knowledge effectively under assessment conditions.",
+      "after": "Since 2013, I have worked as an IB Biology Assistant Examiner. I continue to examine IB Biology papers and moderate Biology Internal Assessments, and have experience assessing HL Paper 2 against IB criteria. That work has given me a close understanding of how IB assessment criteria are applied and of the difference between knowing the science and communicating that knowledge effectively under assessment conditions."
+    }
+  ],
+  "about-auxesis.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "I facilitate learning and provide guidance; parents support routines and preparation; students take an active part in sessions and practise between them.",
+      "after": "I facilitate learning and provide guidance; students take an active part in sessions and practise between them. Parents can support routines and preparation, while adult students arrange their own learning and communication."
+    }
+  ],
+  "tutoring-policies.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Regular tutoring is billed in monthly blocks. Payment for the next block is due two days before its first session, and new students pay for their first block before tutoring begins. If a session is rescheduled, the dates of future invoices do not move with it. Your rate, currency and any separately charged marking or feedback will always be confirmed in advance. Payment can be made by PayPal or bank transfer.",
+      "after": "Regular tutoring is prepaid in agreed blocks. Payment for a new block is due before the first lesson requiring that block, unless a different date is explicitly agreed. Your rate, currency and any separately charged marking or feedback will be confirmed in advance. Payment can be made by PayPal or bank transfer. Existing client agreements remain in effect."
+    },
+    {
+      "before": "If you give at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, the session can be rescheduled instead. The replacement session must take place within four weeks of the original date, at a mutually convenient available time. If it is not used within those four weeks, it expires. Cancellations with less than 12 hours’ notice are charged and cannot be made up. The same applies to no-shows.",
+      "after": "With at least 7 days’ notice, a session can be cancelled without charge. With at least 12 hours’ notice but less than 7 days, it can be rescheduled; the replacement must take place within four weeks of the original date, subject to mutually convenient availability. An unused replacement expires after those four weeks. Cancellations with less than 12 hours’ notice and no-shows normally incur the full session fee. Existing client agreements and any exceptions expressly agreed with Amanda remain in effect."
+    }
+  ],
+  "how-tutoring-works.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Tutoring begins with an enquiry, a parent conversation and a Meet & Greet before you decide whether to proceed.",
+      "after": "Tutoring begins with an enquiry and a free Meet & Greet before you decide whether to proceed. Parents can enquire on a student’s behalf, and adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they need help with now, what they would like to achieve, and your country, time zone and preferred times.",
+      "after": "Tell me about the course, what support would help now, learning goals, and your country, time zone and preferred times. Parents and adult students can use the enquiry form or email me directly."
+    },
+    {
+      "before": "If it sounds as though I may be able to help, I arrange a Meet & Greet with the student and parent together. It usually takes about 20 minutes and gives everyone a chance to ask questions and get a feel for how I work.",
+      "after": "We start with a free Meet & Greet, usually my first conversation with the student. It takes about 20 minutes and gives us a chance to discuss the course, needs and goals, ask questions and get a feel for how I work. Parents are welcome to take part. An initial enquiry does not require a separate parent phone call."
+    },
+    {
+      "before": "The Auxesis Portal is the central place for planning, lesson records and resources. A shared Google Drive folder may also be used for documents we work on together. Students should download or copy any resources they want to keep before access ends.",
+      "after": "Lesson documents and resources can be shared through a Google Drive folder and the communication method we agree on. Students should download or copy any resources they want to keep before access ends."
+    },
+    {
+      "before": "Students contact me through the private Auxesis Portal between sessions. After enrolment, parents may also choose to communicate through WhatsApp; I do not require WhatsApp as part of the tutoring setup. I normally reply within 24 hours on business days, excluding Canadian statutory holidays.",
+      "after": "Between sessions, students can contact me by email or, where arranged, Google Chat. After enrolment, parents may also choose to communicate through WhatsApp; I do not require WhatsApp as part of the tutoring setup. I normally reply within 24 hours on business days, excluding Canadian statutory holidays."
+    },
+    {
+      "before": "Students can send me a quick question through the private Auxesis Portal if they get stuck. I can answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately.",
+      "after": "Students can send a quick question using our agreed contact method if they get stuck. I can answer a brief question outside a session. Questions requiring a fuller explanation, substantial review or extended support are best addressed during a scheduled session. Extra support can be booked in 30-minute increments when I have availability, and detailed marking or extended feedback can be handled during a session or arranged separately."
+    },
+    {
+      "before": "I keep parents informed about what we are working on, how things are progressing and anything I think they should know. Some families want more frequent updates than others, so communication is adapted accordingly.",
+      "after": "I discuss what we are working on, how things are progressing and useful next steps with the student and, where appropriate, their parent or guardian. Communication is adapted to the student and family rather than following a fixed reporting schedule."
+    },
+    {
+      "before": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The parent conversation and Meet & Greet are free.",
+      "after": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The Meet & Greet is free."
+    }
+  ],
+  "404.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    }
+  ],
+  "recommendations.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    }
+  ],
+  "privacy-consent.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where things are getting difficult. Start with a conversation, then decide whether Auxesis feels like the right fit.",
+      "after": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit. Adult students are welcome to enquire directly."
+    },
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "Auxesis Education collects only the information needed to respond to an enquiry, arrange tutoring and manage the tutoring relationship. Depending on the situation, this may include a parent or guardian’s name, email address and phone number; the student’s first name and personal Gmail address; country, optional nationality and pronouns, and time zone; grade or year level; curriculum or programme; subject; learning goals or challenges; scheduling information; and whether tutoring is being requested for more than one student. During tutoring, this also includes lesson planning, lesson notes, resource links, messages, progress reports, invoices and payment records held in the private Auxesis Portal.",
+      "after": "Auxesis Education collects information needed to respond to enquiries, arrange tutoring and manage the tutoring relationship. This may include contact details for a parent, guardian or adult student; student name and personal Gmail address for lessons; country and time zone; year or level, curriculum, subject and learning goals; and scheduling preferences. Tutoring records may include lesson plans, notes, shared resources, correspondence, progress information, invoices and payments. You do not need a Gmail address to make an enquiry."
+    },
+    {
+      "before": "Student phone numbers are not normally collected or used. Students communicate with me through their private message thread in the Auxesis Portal. Parents may choose to create a WhatsApp group after enrolment, and I am happy to participate, but WhatsApp is not a required student communication channel.",
+      "after": "Contact details are used for the communication method we agree on. Phone details on the enquiry form are optional unless you enter part of a phone contact number. Students can communicate by email or, where arranged, Google Chat. Parents may choose WhatsApp after enrolment; it is not a required student communication channel."
+    },
+    {
+      "before": "The Auxesis Education website and live private Portal run on Cloudflare Pages and Workers. Cloudflare D1 stores Portal accounts, lesson records, messages, progress reports, invoices and payment records, as well as submitted reviews and their consent and moderation status. This describes record storage; it does not mean Cloudflare collects payments or stores every document used for tutoring. The live Portal no longer runs on Floot.",
+      "after": "Cloudflare hosts this website and processes technical request information needed to operate and protect it. Website reviews are stored with Cloudflare. The student portal is not currently offered as a working student service. Historical records containing real student information entered by Amanda during development and testing remain in restricted systems and recovery copies; these records have not been deleted. They were not entered through student use of the portal."
+    },
+    {
+      "before": "Google provides Portal sign-in and processes the account information used to identify authorised users. Google Meet is used for live tutoring sessions. Google Calendar holds scheduling information, and the Google Sheets Student Tracker remains the authoritative billing record. Google Drive is used for shared lesson documents and privately stored recovery packages; these files are separate from the Cloudflare Portal database.",
+      "after": "Google services are used for tutoring and private administration, including Google Meet for lessons, Drive for shared teaching documents and restricted records, email and agreed Google Chat communications, and scheduling and billing records. Access to private business and student records is restricted. Technical service providers, including GitHub for controlled website maintenance, may temporarily process recovery information; private records are not published in the public website repository."
+    },
+    {
+      "before": "The Portal uses necessary sign-in and session cookies. Cloudflare processes technical request information to deliver the website and its services, and Google processes information needed for its sign-in and other services. These functions are separate from advertising or marketing tracking.",
+      "after": "Private sign-in and testing areas use necessary session cookies. Cloudflare Turnstile checks website enquiries for spam, and Cloudflare and Google process information needed to provide their respective services. These functions are separate from advertising or marketing tracking."
+    },
+    {
+      "before": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository.",
+      "after": "To ask about information held about you or a student, request a correction, or discuss retention or deletion, email Amanda at adsouza35@gmail.com. Some information may need to be retained for billing, recordkeeping or other applicable obligations; requests are considered in that context. Please avoid sending sensitive information that is not needed for tutoring."
+    }
+  ],
+  "subjects-programmes.html": [
+    {
+      "before": "Tell me what the student is studying, what they would like to achieve and where support would help.",
+      "after": "Tell me about the course, learning goals and where support would help. Parents and adult students are welcome to enquire."
+    },
+    {
+      "before": "ESS brings science, people and environmental decision-making together. We work on interpreting information, seeing connections between systems and perspectives, and building responses that are supported by evidence.",
+      "after": "ESS brings science, people and environmental decision-making together. We work on interpreting information, seeing connections between systems and perspectives, and building responses that are supported by evidence. Ethical guidance is also available for ESS Internal Assessments."
+    }
+  ]
+}

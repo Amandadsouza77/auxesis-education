@@ -99,3 +99,9 @@ test('OAuth only issues credentials to a user with repository write access',asyn
   t.mock.method(globalThis,'fetch',async url=>url.includes('access_token')?Response.json({access_token:'mock-token'}):Response.json({permissions:{push:false}}));assert.equal((await callback({request:req(),env})).status,403);
   t.mock.restoreAll();t.mock.method(globalThis,'fetch',async url=>url.includes('access_token')?Response.json({access_token:'mock-token'}):Response.json({permissions:{push:true}}));const response=await callback({request:req(),env});assert.equal(response.status,200);assert.match(await response.text(),/event.origin!==allowed/);assert.match(response.headers.get('content-security-policy'),/nonce-/);
 });
+test('regional timezone is retained with a server-derived dated offset in delivery',async t=>{
+ let message;t.mock.method(globalThis,'fetch',async(url,options)=>{if(url.includes('siteverify'))return Response.json({success:true,hostname:'example.com',action:'enquiry'});message=JSON.parse(options.body);return Response.json({id:'mock'});});
+ assert.equal((await submit(request({...valid,timezone:'America/Vancouver'}),env,'enquiry')).status,200);
+ assert(message.text.includes('timezone:\nAmerica/Vancouver'));
+ assert.match(message.text,/timezone_at_submission:\nUTC[+-]0[78]:00 at \d{4}-\d{2}-\d{2}T/);
+});

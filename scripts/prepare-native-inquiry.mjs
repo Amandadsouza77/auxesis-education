@@ -33,6 +33,7 @@ export function prepareNativeInquiry(directory) {
   require(supported.includes(sha(currentApp)), 'Native app.js has newer changes; compare before applying.');
 
   const writes = {
+    'inquiry/lib/time-zones.js': readFileSync(resolve(source, 'lib/time-zones.js'), 'utf8'),
     'inquiry/lib/server.js': readFileSync(resolve(source, 'lib/server.js'), 'utf8'),
     'inquiry/cloudflare/inquiry-worker.js': readFileSync(resolve(source, 'cloudflare/inquiry-worker.js'), 'utf8'),
     'inquiry-entry.js': "import nativeWorker from './staging-entry.js';\nimport {withInquiry} from './inquiry/cloudflare/inquiry-worker.js';\nexport default withInquiry(nativeWorker);\n",
