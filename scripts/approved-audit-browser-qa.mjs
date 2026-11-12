@@ -26,7 +26,7 @@ try{
  await page.goto('https://auxedu.com/enquire/',{waitUntil:'networkidle'});
  await page.waitForFunction(()=>[...document.querySelector('[name=timezone]').options].some(o=>o.value==='America/Vancouver'));
  await page.locator('[name=timezone]').selectOption('America/Vancouver');
- const zoneLabel=await page.locator('[name=timezone] option:checked').textContent();assert(zoneLabel.includes('UTC-08:00'),'Vancouver November offset must use standard time');
+ const zoneLabel=await page.locator('[name=timezone] option:checked').textContent();const offset=await page.evaluate(()=>new Intl.DateTimeFormat('en',{timeZone:'America/Vancouver',timeZoneName:'longOffset'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName').value.replace('GMT','UTC'));assert(zoneLabel.includes(offset),'Region label must match current timezone rules');
  const button=page.locator('#enquiry-form button[type=submit]');await page.waitForFunction(()=>!document.querySelector('#enquiry-form button[type=submit]').disabled);
  await button.click();assert(await page.locator('[aria-invalid=true]').count()>0,'Required fields expose invalid state');
  await page.locator('[name=name]').fill('Synthetic browser QA');await page.locator('[name=email]').fill('qa@example.invalid');await page.locator('[name=country]').fill('Canada');

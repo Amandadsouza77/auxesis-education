@@ -1,0 +1,22 @@
+name: Inspect public deployment responses without changes
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/approved-audit-diagnostics.yml]
+permissions:
+  contents: read
+jobs:
+  public-response-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inspect immutable and stable public response behavior
+        run: |
+          node --input-type=module <<'JS'
+          import {createHash} from 'node:crypto';
+          for(const host of ['https://305f9652.auxesis-education.pages.dev','https://auxesis-education.pages.dev','https://auxedu.com'])for(const path of ['/404.html','/enquire/','/app.js']){
+           const r=await fetch(host+path,{redirect:'manual'}),b=await r.text();console.log(JSON.stringify({host,path,status:r.status,location:r.headers.get('location'),hash:createHash('sha256').update(b).digest('hex'),length:b.length,prefix:b.slice(0,160)}));
+          }
+          JS
