@@ -16,6 +16,6 @@ child.stdout.on('data',chunk=>{buffer+=chunk;let pos;while((pos=buffer.indexOf('
  if(!seen){seen=true;status('pending','Listening: ready for one owner test inquiry').catch(()=>{});}else{actual++;setTimeout(()=>{try{process.kill(-child.pid,'SIGINT')}catch{}},1500);}
 }});
 const probe=setTimeout(async()=>{try{await fetch(host+'/api/enquiry',{method:'POST',headers:{Origin:host,'Content-Type':'application/json'},body:'{}'});}catch{}},15000);
-const stop=setTimeout(()=>{try{process.kill(-child.pid,'SIGINT')}catch{}},240000);
+const stop=setTimeout(()=>{try{process.kill(-child.pid,'SIGINT')}catch{}},600000);
 await new Promise(resolve=>child.on('exit',async code=>{clearTimeout(probe);clearTimeout(stop);console.log('::notice::'+JSON.stringify({traceConnected:seen,additionalPostsObserved:actual,exit:code}));await status(seen?'success':'failure',seen?'Inquiry diagnostic stream complete':'Could not connect inquiry diagnostic stream').catch(()=>{});resolve();}));
 if(!seen)process.exitCode=1;
