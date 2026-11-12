@@ -79,3 +79,15 @@ test('native inquiry accepts the verified custom domain and checks its Turnstile
   assert.equal((await worker.fetch(badOrigin,env)).status,403);assert.equal(messages,1);
   assert.equal((await worker.fetch(request(),{...env,SITE_URL:'https://untrusted.example'})).status,503);assert.equal(messages,1);
 });
+
+
+test('Resend uses the redirect mode supported by Cloudflare and rejects redirects without forwarding credentials', async t => {
+  const worker=withInquiry({fetch:()=>new Response('unchanged')});let mailRequests=0;
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(url.includes('siteverify'))return Response.json({success:true,hostname:new URL(site).hostname,action:'enquiry'});
+    mailRequests++;assert.equal(url,'https://api.resend.com/emails');assert.equal(options.redirect,'manual');
+    return new Response(null,{status:307,headers:{Location:'https://untrusted.example'}});
+  });
+  const result=await worker.fetch(new Request(site+'/api/enquiry',{method:'POST',headers:{Origin:site,'Content-Type':'application/json'},body:JSON.stringify(data)}),env);
+  assert.equal(result.status,502);assert.equal(mailRequests,1);assert.equal((await result.json()).ok,undefined);
+});

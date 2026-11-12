@@ -33,7 +33,9 @@ jobs:
         working-directory: work/staging-deployment/runtime
         run: node tests/website-reviews.test.mjs
       - name: Install the existing bundler
-        run: npm install --no-save --ignore-scripts esbuild@0.25
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
+      - name: Verify inquiry delivery in the actual Cloudflare runtime with mocked providers
+        run: node tests/inquiry-runtime.mjs
       - name: Compile the verified native source required by the preparation guard
         run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
       - name: Match live assets and prepare the inquiry-only native wrapper
