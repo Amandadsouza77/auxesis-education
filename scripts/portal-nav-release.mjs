@@ -2,6 +2,7 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
 const root=resolve('work/staging-deployment/runtime/dist');
 const baseline='work/inquiry-release.json',checkpoint='work/portal-nav-change.json';
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -56,5 +57,16 @@ try{
   }
   console.log('::notice::'+JSON.stringify({customDomainTransformedPages:transformedCustomPages,portalResponseStatusesPreserved:true}));
   console.log('::notice::Public portal links removed on every public page at both domains; exact edited HTML verified; portal entry retained. Inquiry readiness, unrelated assets, private access boundaries, settings and data are checked separately by the native release verifier.');
+ }else if(process.argv[2]==='verify-native'){
+  let last;
+  for(let attempt=0;attempt<12;attempt++){
+   last=spawnSync(process.execPath,['scripts/inquiry-release.mjs','verify'],{encoding:'utf8',maxBuffer:1024*1024});
+   if(last.status===0){process.stdout.write(last.stdout);break;}
+   // Allow the deployment alias/static edge cache to converge. Settings, access
+   // or record-fingerprint failures are not retried or hidden.
+   if(!last.stdout.includes('Unrelated public asset changed:')){process.stdout.write(last.stdout);process.stderr.write(last.stderr);throw Error('Native preservation verification failed');}
+   if(attempt===11){process.stdout.write(last.stdout);throw Error('Static deployment propagation did not converge');}
+   await new Promise(resolve=>setTimeout(resolve,3000));
+  }
  }else throw Error('Unknown portal navigation action');
 }catch(e){console.error('::error::'+e.message);process.exitCode=1;}

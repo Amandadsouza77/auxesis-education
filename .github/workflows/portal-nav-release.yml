@@ -48,10 +48,10 @@ jobs:
         run: node scripts/inquiry-release.mjs check
       - name: Deploy the public navigation edit with the existing native runtime
         run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
-      - name: Verify both domains and preserved pages, records and settings
-        run: node scripts/inquiry-release.mjs verify
       - name: Verify public portal links are absent and portal entry remains
         run: node scripts/portal-nav-release.mjs verify
+      - name: Verify both domains and preserved pages, records and settings
+        run: node scripts/portal-nav-release.mjs verify-native
       - name: Restore the prior production deployment on release failure
         if: failure()
         run: node scripts/inquiry-release.mjs rollback
