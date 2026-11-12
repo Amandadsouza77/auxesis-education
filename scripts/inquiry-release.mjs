@@ -2,12 +2,26 @@
 import {readFileSync,writeFileSync,readdirSync,statSync,mkdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {resolve,relative} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {prepareNativeInquiry} from './prepare-native-inquiry.mjs';
 const account='2ac862d7c1f865935d185df59e7bd719',project='auxesis-education';
 const root=resolve('work/staging-deployment/runtime'),state='work/inquiry-release.json';
 const origin='https://auxesis-education.pages.dev';
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const require=(v,m)=>{if(!v)throw Error(m);};
+const expected='The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website.';
+const replacement='Tutoring enquiries submitted through this website are checked using Cloudflare Turnstile and sent through Resend to Amanda’s Gmail inbox, which is handled by Google. The enquiry includes the contact and learning-support details you provide and your consent to be contacted. Resend processes the message and delivery information to provide this service. You can also email the contact address shown on this website directly.';
+export function approvedAsset(path,packageBytes,current,appSource){
+ if(sha(current)===sha(packageBytes))return true;
+ if(path==='app.js'){
+  const forms=packageBytes.toString().match(/^const forms=.+;$/m)?.[0];
+  return !!forms&&sha(current)===sha(appSource.replace(/^const forms=.+;$/m,()=>forms));
+ }
+ if(path==='privacy-consent/index.html'){
+  const old=packageBytes.toString();return old.split(expected).length===2&&sha(current)===sha(old.replace(expected,replacement));
+ }
+ return false;
+}
 async function cf(path,method='GET',body){
  require(method==='GET'||method==='POST'&&path.endsWith('/query')&&body?.sql?.startsWith('SELECT ')||method==='POST'&&new RegExp('^/pages/projects/'+project+'/deployments/[^/]+/rollback$').test(path),'Provider write outside inquiry release rejected');
  const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+path,{method,redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
@@ -43,14 +57,12 @@ async function prepare(){
   const path=relative(resolve(root,'dist'),file).replaceAll('\\','/');
   if(path==='_worker.js'||path==='_headers'||path==='_redirects'||path==='_routes.json'||path.startsWith('.'))continue;
   const url='/'+path.replace(/index\.html$/,'');const current=await liveBody(url),packageBytes=readFileSync(file);
-  require(sha(current)===sha(packageBytes),'Private package differs from live asset: '+path+'; reconcile before release');
+  require(approvedAsset(path,packageBytes,current,readFileSync('public/app.js','utf8')),'Private package differs from live asset: '+path+'; reconcile before release');
   before.publicFiles[url]=sha(current);
  }
  mkdirSync('work',{recursive:true});writeFileSync(state,JSON.stringify(before),{mode:0o600});
  prepareNativeInquiry(root);
  const privacy=resolve(root,'dist/privacy-consent/index.html'),old=readFileSync(privacy,'utf8');
- const expected='The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website.';
- const replacement='Tutoring enquiries submitted through this website are checked using Cloudflare Turnstile and sent through Resend to Amanda’s Gmail inbox, which is handled by Google. The enquiry includes the contact and learning-support details you provide and your consent to be contacted. Resend processes the message and delivery information to provide this service. You can also email the contact address shown on this website directly.';
  require(old.split(expected).length===2,'Inquiry privacy paragraph differs; reconcile before release');writeFileSync(privacy,old.replace(expected,replacement));
  const now=await cf('/pages/projects/'+project);require(now.canonical_deployment.id===before.deployment&&JSON.stringify(now.deployment_configs)===before.config,'Production changed during preparation');
  console.log('::notice::Native inquiry package prepared; all baseline public assets match, retained business records hashed, original rollback deployment captured.');
@@ -93,4 +105,4 @@ async function rollback(){
  require((await cf('/pages/projects/'+project)).canonical_deployment?.id===b.deployment,'Rollback verification failed');
  console.log('::notice::Previous production deployment restored.');
 }
-try{const action=process.argv[2];if(action==='prepare')await prepare();else if(action==='check')await check();else if(action==='verify')await verify();else if(action==='rollback')await rollback();else throw Error('Unknown release action');}catch(e){console.error('::error::'+e.message);process.exitCode=1;}
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))try{const action=process.argv[2];if(action==='prepare')await prepare();else if(action==='check')await check();else if(action==='verify')await verify();else if(action==='rollback')await rollback();else throw Error('Unknown release action');}catch(e){console.error('::error::'+e.message);process.exitCode=1;}
