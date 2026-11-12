@@ -17,7 +17,15 @@ async function businessDigest(id){const result={};for(const table of ['portal_re
  const d=await cf('/d1/database/'+id+'/query','POST',{sql:'SELECT * FROM '+table+' ORDER BY id'});const rows=d.flatMap(x=>x.results||[]);result[table]={count:rows.length,hash:sha(JSON.stringify(rows))};
  }return result;}
 function files(dir){return readdirSync(dir).flatMap(n=>{const p=resolve(dir,n);return statSync(p).isDirectory()?files(p):[p];});}
-async function liveBody(path){let r;try{r=await fetch(origin+path,{redirect:'error',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(30000)});}catch(e){throw Error('Live baseline fetch failed: '+path+' ('+(e.cause?.code||e.name)+')');}require(r.ok,'Live baseline fetch failed: '+path+' HTTP '+r.status);return Buffer.from(await r.arrayBuffer());}
+async function liveBody(path){
+ let r,url=origin+path;
+ for(let hop=0;hop<4;hop++){
+  try{r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(30000)});}catch(e){throw Error('Live baseline fetch failed: '+path+' ('+(e.cause?.code||e.name)+')');}
+  if(![301,302,303,307,308].includes(r.status))break;
+  const next=new URL(r.headers.get('Location'),url);require(next.origin===origin,'Unexpected external asset redirect: '+path);url=next.href;
+ }
+ require(r.ok||r.status===404&&path==='/404.html','Live baseline fetch failed: '+path+' HTTP '+r.status);return Buffer.from(await r.arrayBuffer());
+}
 async function prepare(){
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
