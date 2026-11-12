@@ -2,14 +2,18 @@
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+const origin=process.env.QA_ORIGIN||'https://auxedu.com';
 const routes=JSON.parse(readFileSync('templates/routes.json'));
 const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
 try{
- const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await browser.newPage(),errors=[];
+ if(process.env.QA_ORIGIN)await page.route('**/api/enquiry',route=>route.request().method()==='GET'?route.fulfill({contentType:'application/json',body:'{"ready":true,"siteKey":"1x00000000000000000000AA"}'}):route.abort());
+ page.on('pageerror',e=>errors.push(e.message));
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});
   for(const route of routes){
-   const response=await page.goto('https://auxedu.com'+route.route,{waitUntil:'networkidle',timeout:60000});assert(response.ok()||route.route==='/404.html'&&response.status()===404);
+   const response=await page.goto(origin+route.route,{waitUntil:'domcontentloaded',timeout:60000});assert(response.ok()||route.route==='/404.html'&&response.status()===404);
+   await page.evaluate(()=>document.fonts.ready);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Horizontal overflow at '+width+route.route);
    assert.equal(await page.locator('a[href^="/portal"]').count(),0);
    assert.equal(await page.locator('main h1').count(),1);
@@ -18,12 +22,12 @@ try{
   }
   console.log('::notice::All 11 public routes: layout, headings, anchors, canonical metadata and absent portal links pass at '+width+'px');
  }
- await page.setViewportSize({width:390,height:900});await page.goto('https://auxedu.com/faq/',{waitUntil:'networkidle'});
+ await page.setViewportSize({width:390,height:900});await page.goto(origin+'/faq/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('.menu-toggle');await menu.click();assert.equal(await menu.getAttribute('aria-expanded'),'true');await page.keyboard.press('Escape');assert.equal(await menu.getAttribute('aria-expanded'),'false');
  const summary=page.locator('details summary').first();await summary.focus();await page.keyboard.press('Enter');assert(await summary.evaluate(el=>el.parentElement.open));await page.keyboard.press('Space');assert(!await summary.evaluate(el=>el.parentElement.open));
- await page.goto('https://auxedu.com/recommendations/',{waitUntil:'networkidle'});assert.equal(await page.locator('.recommendation-card').count(),7);
+ await page.goto(origin+'/recommendations/',{waitUntil:'domcontentloaded'});assert.equal(await page.locator('.recommendation-card').count(),7);
  await page.route('**/turnstile/v0/api.js?*',route=>route.fulfill({contentType:'application/javascript',body:"window.turnstile={render:(el,options)=>{window.qaTurnstile=()=>options.callback('synthetic-local-only');return 1;},reset:()=>{}};"}));
- await page.goto('https://auxedu.com/enquire/',{waitUntil:'networkidle'});
+ await page.goto(origin+'/enquire/',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>[...document.querySelector('[name=timezone]').options].some(o=>o.value==='America/Vancouver'));
  await page.locator('[name=timezone]').selectOption('America/Vancouver');
  const zoneLabel=await page.locator('[name=timezone] option:checked').textContent();const offset=await page.evaluate(()=>new Intl.DateTimeFormat('en',{timeZone:'America/Vancouver',timeZoneName:'longOffset'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName').value.replace('GMT','UTC'));assert(zoneLabel.includes(offset),'Region label must match current timezone rules');

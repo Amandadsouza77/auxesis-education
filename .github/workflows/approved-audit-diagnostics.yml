@@ -20,3 +20,29 @@ jobs:
            const r=await fetch(host+path,{redirect:'manual'}),b=await r.text();console.log(JSON.stringify({host,path,status:r.status,location:r.headers.get('location'),hash:createHash('sha256').update(b).digest('hex'),length:b.length,prefix:b.slice(0,160)}));
           }
           JS
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test immutable public release before retrying production
+        env:
+          QA_ORIGIN: https://fa756108.auxesis-education.pages.dev
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.0
+          node scripts/approved-audit-browser-qa.mjs
+  restricted-record-inventory:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read only aggregate record categories and account roles
+        run: |
+          node --input-type=module <<'JS'
+          const base='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719';
+          async function cf(path,sql){if(sql&&!sql.startsWith('SELECT '))throw Error('Read-only queries required');const r=await fetch(base+path,{method:sql?'POST':'GET',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(sql?{body:JSON.stringify({sql})}:{})});if(!r.ok)throw Error('Inventory provider HTTP '+r.status);const d=await r.json();if(!d.success)throw Error('Inventory rejected');return d.result;}
+          const live=await cf('/pages/projects/auxesis-education'),production=live.deployment_configs.production.d1_databases.PORTAL_DB.id;
+          for(const [system,id] of [['production',production],['staging','4f12fc1d-3e0d-4a11-bd65-e577ce906114']])for(const [category,sql] of [['recordCategories','SELECT kind,COUNT(*) AS count FROM portal_records GROUP BY kind ORDER BY kind'],['accountRoles','SELECT role,enabled,COUNT(*) AS count FROM portal_accounts GROUP BY role,enabled ORDER BY role,enabled']]){const result=await cf('/d1/database/'+id+'/query',sql);console.log(JSON.stringify({system,category,counts:result.flatMap(r=>r.results||[]),recordWrites:0}));}
+          JS
