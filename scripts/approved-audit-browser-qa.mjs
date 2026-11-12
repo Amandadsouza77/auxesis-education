@@ -30,10 +30,11 @@ try{
  const carousel=page.locator('.recommendation-carousel').first();assert(await carousel.count()>0,'Recommendation carousel is present');
  const next=carousel.locator('xpath=following-sibling::*[1]').getByRole('button',{name:'Next',exact:true}),previous=carousel.locator('xpath=following-sibling::*[1]').getByRole('button',{name:'Previous',exact:true});
  await next.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelector('.recommendation-carousel').scrollLeft>0);
- await previous.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelector('.recommendation-carousel').scrollLeft===0);
+ await previous.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>Math.abs(document.querySelector('.recommendation-carousel').scrollLeft)<=16); // CSS scroll-snap aligns the first card after the grid padding.
  await page.route('**/turnstile/v0/api.js?*',route=>route.fulfill({contentType:'application/javascript',body:"window.turnstile={render:(el,options)=>{window.qaTurnstile=()=>options.callback('synthetic-local-only');return 1;},reset:()=>{}};"}));
  await page.goto(origin+'/enquire/',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>[...document.querySelector('[name=timezone]').options].some(o=>o.value==='America/Vancouver'));
+ const fallbackWorks=await page.evaluate(()=>{const original=Intl.supportedValuesOf;try{Intl.supportedValuesOf=undefined;AuxesisTimeZones.populateTimeZones(document.querySelector('[name=timezone]'));return [...document.querySelector('[name=timezone]').options].some(o=>o.value==='America/Vancouver');}finally{Intl.supportedValuesOf=original;}});assert(fallbackWorks,'Older browsers retain regional DST-aware selections');
  await page.locator('[name=timezone]').selectOption('America/Vancouver');
  const zoneLabel=await page.locator('[name=timezone] option:checked').textContent();const offset=await page.evaluate(()=>new Intl.DateTimeFormat('en',{timeZone:'America/Vancouver',timeZoneName:'longOffset'}).formatToParts(new Date()).find(p=>p.type==='timeZoneName').value.replace('GMT','UTC'));assert(zoneLabel.includes(offset),'Region label must match current timezone rules');
  const button=page.locator('#enquiry-form button[type=submit]');await page.waitForFunction(()=>!document.querySelector('#enquiry-form button[type=submit]').disabled);

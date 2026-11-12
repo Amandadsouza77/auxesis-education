@@ -1,5 +1,5 @@
 name: Implement approved public website corrections with preserved native runtime
-# Static normalization and persistent Turnstile traffic are handled explicitly in verification.
+# Verification follows static redirects, waits for DOM readiness and allows native carousel scroll-snap padding.
 on:
   push:
     branches: [codex/cloudflare-backend-migration]
