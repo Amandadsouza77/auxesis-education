@@ -1,0 +1,19 @@
+name: Diagnose inquiry POST rejection without sending email
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/inquiry-http-qa.yml, scripts/inquiry-http-qa.mjs]
+permissions:
+  contents: read
+jobs:
+  http-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/inquiry-http-qa.mjs
