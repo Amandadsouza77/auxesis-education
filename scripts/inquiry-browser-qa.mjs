@@ -7,7 +7,7 @@ try{
  for(const host of ['https://auxesis-education.pages.dev','https://auxedu.com']){
   for(const width of [390,1440]){
    await page.setViewportSize({width,height:900});
-   const r=await page.goto(host+'/enquire/',{waitUntil:'networkidle',timeout:60000});assert(r.ok());
+   const r=await page.goto(host+'/enquire/',{waitUntil:'domcontentloaded',timeout:60000});assert(r.ok());
    await page.locator('#enquiry-form').waitFor();
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overflow');
    await page.waitForFunction(()=>document.querySelector('#enquiry-form button[type=submit]')?.disabled===false,null,{timeout:45000});
@@ -15,7 +15,7 @@ try{
    console.log('::notice::Inquiry form renders and enables at '+width+'px on '+host);
   }
  }
- await page.goto('https://auxedu.com/enquire/',{waitUntil:'networkidle',timeout:60000});
+ await page.goto('https://auxedu.com/enquire/',{waitUntil:'domcontentloaded',timeout:60000});
  await page.locator('[name=name]').fill('QA inquiry — authorized website test');
  await page.locator('[name=email]').fill('adsouza35@gmail.com');
  await page.locator('[name=country]').fill('Canada');
