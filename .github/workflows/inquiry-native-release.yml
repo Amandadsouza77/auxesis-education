@@ -32,10 +32,12 @@ jobs:
       - name: Verify the retained private review implementation
         working-directory: work/staging-deployment/runtime
         run: node tests/website-reviews.test.mjs
-      - name: Match live assets and prepare the inquiry-only native wrapper
-        run: node scripts/inquiry-release.mjs prepare
       - name: Install the existing bundler
         run: npm install --no-save --ignore-scripts esbuild@0.25
+      - name: Compile the verified native source required by the preparation guard
+        run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+      - name: Match live assets and prepare the inquiry-only native wrapper
+        run: node scripts/inquiry-release.mjs prepare
       - name: Bundle the retained native runtime with the inquiry route
         run: npx esbuild work/staging-deployment/runtime/inquiry-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
       - name: Verify production has not changed since preparation
