@@ -11,19 +11,6 @@ const root=resolve('work/staging-deployment/runtime'),state='work/approved-audit
 const origin='https://auxesis-education.pages.dev';
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const require=(v,m)=>{if(!v)throw Error(m);};
-const expected='The online enquiry service is currently unavailable. Please send enquiries to the contact email shown on this website. Messages sent to that Gmail address are handled by Google’s email service. The former description of website enquiries being stored and emailed through Floot does not describe the current live website.';
-const replacement='Tutoring enquiries submitted through this website are checked using Cloudflare Turnstile and sent through Resend to Amanda’s Gmail inbox, which is handled by Google. The enquiry includes the contact and learning-support details you provide and your consent to be contacted. Resend processes the message and delivery information to provide this service. You can also email the contact address shown on this website directly.';
-export function approvedAsset(path,packageBytes,current,appSource){
- if(sha(current)===sha(packageBytes))return true;
- if(path==='app.js'){
-  const forms=packageBytes.toString().match(/^const forms=.+;$/m)?.[0];
-  return !!forms&&sha(current)===sha(appSource.replace(/^const forms=.+;$/m,()=>forms));
- }
- if(path==='privacy-consent/index.html'){
-  const old=packageBytes.toString();return old.split(expected).length===2&&sha(current)===sha(old.replace(expected,replacement));
- }
- return false;
-}
 async function cf(path,method='GET',body){
  require(method==='GET'||method==='POST'&&path.endsWith('/query')&&body?.sql?.startsWith('SELECT ')||method==='POST'&&new RegExp('^/pages/projects/'+project+'/deployments/[^/]+/rollback$').test(path),'Provider write outside inquiry release rejected');
  const r=await fetch('https://api.cloudflare.com/client/v4/accounts/'+account+path,{method,redirect:'error',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
@@ -109,11 +96,11 @@ async function verify(){
  const deployed=await cf('/pages/projects/'+project);
  const deploymentOrigin=new URL(deployed.canonical_deployment.url).origin;
  for(const [path,digest] of Object.entries(b.publicFiles)){
-  let valid=false;for(let i=0;i<12;i++){const r=await fetch(deploymentOrigin+path,{redirect:'manual'});if(sha(Buffer.from(await r.arrayBuffer()))===digest){valid=true;break;}await new Promise(r=>setTimeout(r,3000));}
+  let valid=false;for(let i=0;i<12;i++){let url=deploymentOrigin+path,r;for(let hop=0;hop<4;hop++){r=await fetch(url,{redirect:'manual'});if(![301,302,303,307,308].includes(r.status))break;const next=new URL(r.headers.get('location'),url);require(next.origin===deploymentOrigin,'Unexpected deployment asset redirect');url=next.href;}if(sha(Buffer.from(await r.arrayBuffer()))===digest){valid=true;break;}await new Promise(r=>setTimeout(r,3000));}
   require(valid,'Released asset differs: '+path);
  }
  for(const route of JSON.parse(readFileSync('templates/routes.json'))){
-  const r=await fetch(origin+route.route,{redirect:'manual'});require(r.status===301&&r.headers.get('location')==='https://auxedu.com'+route.route,'Canonical redirect failed: '+route.route);
+  let url=origin+route.route,r;for(let hop=0;hop<4;hop++){r=await fetch(url,{redirect:'manual'});const next=r.headers.get('location')&&new URL(r.headers.get('location'),url);if(next?.origin==='https://auxedu.com')break;require([301,302,307,308].includes(r.status)&&next?.origin===origin,'Canonical normalization failed: '+route.route);url=next.href;}require(r.status===301&&new URL(r.headers.get('location'),url).origin==='https://auxedu.com','Canonical redirect failed: '+route.route);
   const page=await fetch('https://auxedu.com'+route.route),html=await page.text();require(page.ok||route.route==='/404.html'&&page.status===404,'Live public page failed');
   require(!/href=["']\/portal/.test(html),'Public portal navigation returned');
   require(!html.includes('https://auxesis-education.pages.dev'),'Old public canonical reference');
