@@ -1,6 +1,29 @@
 # Inquiry email delivery — native Cloudflare release
 
-## Current live failure (checked 4 November 2026)
+## Current production status — 11 November 2026, America/Toronto
+
+The native repair was deployed successfully at approximately 8:31 PM EST in
+commit `23f7c663f83d0cff1d65736311e3f560409f4f0b`, deployment
+https://029efea2.auxesis-education.pages.dev . Release/verification run:
+https://github.com/Amandadsouza77/auxesis-education/actions/runs/43135051600 .
+Both https://auxedu.com and https://auxesis-education.pages.dev now report
+inquiry readiness. Browser QA at 390px and 1440px confirmed enabled forms and
+no overflow on both domains (run 43135435361). Live privacy wording names
+Turnstile, Resend and the Gmail receiving mailbox. Unrelated public assets,
+configuration and retained business-record fingerprints were verified unchanged.
+
+**Final Gmail receipt is still unverified.** Automated browser QA could not
+obtain a human Turnstile verification and sent no inquiry. The owner must submit
+one synthetic inquiry with the text "QA ONLY — website inquiry delivery test".
+Then verify the connected designated Gmail receipt and Reply-To before declaring
+recruitment-ready. Do not bypass spam protection or assume provider acceptance
+is inbox delivery. The authoritative Living Development Report was updated in
+place and verified on 11 November; its ten sections contain the current checkpoint.
+
+The following diagnosis/setup instructions describe the pre-repair failure and
+the retained native release process; they do not mean the missing route persists.
+
+## Historical live failure (checked 4 November; repaired 11 November 2026)
 
 The public `/enquire/` page contains the enquiry form. Its JavaScript still
 requests `/api/enquiry?delivery=portal&kind=enquiry`. Both that URL and
@@ -145,12 +168,9 @@ Live verification remains required after configuration and deployment:
 4. Check a failed request retains entered values and shows an error. Do not alter
    production credentials to force a failure; use local mocks for provider errors.
 
-Current status: the native fix is prepared and local checks pass. Live HTTP
-inspection established the missing route. The private runtime could not be
-recovered with the expired/rejected deployment credential, and email/Turnstile
-configuration is unverified. Production deployment, browser interaction and
-actual Gmail delivery are not complete. No test email has been sent in this work.
-
+Current status: production native integration and route/browser checks are now
+verified; final human-completed submission and Gmail receipt remain outstanding.
+The original Cloudflare and Google recovery blockers have been resolved.
 
 ## Authorized Resend continuation — 11 November 2026, America/Toronto
 
@@ -165,7 +185,7 @@ Protected run 41759704924 attempt 2 reached Google and failed with an unusable
 saved grant. Diagnostic run 43133328151 established HTTP 400 invalid_grant.
 Isolated consent refresh run 43133782887 succeeded, restoring the existing
 migration-auth preview consent URL without production or configuration changes.
-The owner must renew access there; no new Calendar scope is requested.
+The owner completed reconnection there; no new Calendar scope was requested.
 
 The native inquiry wrapper now allows only the verified pages.dev origin and
 https://auxedu.com when SITE_URL is one of those approved origins. It passes the
@@ -180,5 +200,5 @@ the live baseline. It patches only app.js, the inquiry privacy paragraph and the
 native Worker bundle. It records the current deployment for rollback, checks
 business-record fingerprints with read-only SQL, preserves bindings/secrets,
 and verifies readiness on both public domains after deployment. It does not run
-the ordinary Python build, migrations or portal synchronization. Actual browser
+the ordinary Python build, migrations or portal synchronization. Actual human-completed browser
 submission and Gmail receipt remain required before recruitment readiness.
