@@ -1,0 +1,22 @@
+name: Verify public inquiry form and send one authorized QA inquiry
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/inquiry-browser-qa.yml, scripts/inquiry-browser-qa.mjs]
+permissions:
+  contents: read
+jobs:
+  public-inquiry-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser test tooling
+        run: npm install --no-save --ignore-scripts playwright@1.56
+      - name: Check mobile and desktop behavior, then attempt the authorized synthetic inquiry
+        run: node scripts/inquiry-browser-qa.mjs
