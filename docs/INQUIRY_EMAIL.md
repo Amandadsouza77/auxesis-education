@@ -2,15 +2,26 @@
 
 ## Current production status — 11 November 2026, America/Toronto
 
-The native repair was deployed successfully at approximately 8:31 PM EST in
-commit `23f7c663f83d0cff1d65736311e3f560409f4f0b`, deployment
-https://029efea2.auxesis-education.pages.dev . Release/verification run:
-https://github.com/Amandadsouza77/auxesis-education/actions/runs/43135051600 .
+The initial repair deployed at 8:31 PM EST. The Cloudflare runtime correction
+was deployed successfully at approximately 9:05 PM EST in
+commit `9b8e0dcda7cfcf000f735a98101bca6aa7a0cea2`, deployment
+https://a49011a5.auxesis-education.pages.dev . Release/verification run:
+https://github.com/Amandadsouza77/auxesis-education/actions/runs/43138836609 .
 Both https://auxedu.com and https://auxesis-education.pages.dev now report
 inquiry readiness. Browser QA at 390px and 1440px confirmed enabled forms and
 no overflow on both domains (run 43135435361). Live privacy wording names
 Turnstile, Resend and the Gmail receiving mailbox. Unrelated public assets,
 configuration and retained business-record fingerprints were verified unchanged.
+
+Root cause of the first real test failures: `redirect: 'error'` was added to
+the Resend request, but Cloudflare Workers rejects that option with a TypeError
+before sending. Safe trace run 43137856026 captured HTTP 502 in the Resend stage;
+actual workerd reproduced the constructor failure. The deployed fix uses
+`redirect: 'manual'` and rejects non-2xx responses without forwarding credentials.
+`tests/inquiry-runtime.mjs` now gates releases using real workerd with mocked
+providers; the full local suite has 118 passes and one skipped fixture. Node-only
+fetch mocks did not catch the original platform incompatibility.
+Reference: https://developers.cloudflare.com/workers/runtime-apis/request/
 
 **Final Gmail receipt is still unverified.** Automated browser QA could not
 obtain a human Turnstile verification and sent no inquiry. The owner must submit
