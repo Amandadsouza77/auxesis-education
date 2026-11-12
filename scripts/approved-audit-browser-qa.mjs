@@ -26,6 +26,11 @@ try{
  const menu=page.locator('.menu-toggle');await menu.click();assert.equal(await menu.getAttribute('aria-expanded'),'true');await page.keyboard.press('Escape');assert.equal(await menu.getAttribute('aria-expanded'),'false');
  const summary=page.locator('details summary').first();await summary.focus();await page.keyboard.press('Enter');assert(await summary.evaluate(el=>el.parentElement.open));await page.keyboard.press('Space');assert(!await summary.evaluate(el=>el.parentElement.open));
  await page.goto(origin+'/recommendations/',{waitUntil:'domcontentloaded'});assert.equal(await page.locator('.recommendation-card').count(),7);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const carousel=page.locator('.recommendation-carousel').first();assert(await carousel.count()>0,'Recommendation carousel is present');
+ const next=carousel.locator('xpath=following-sibling::*[1]').getByRole('button',{name:'Next',exact:true}),previous=carousel.locator('xpath=following-sibling::*[1]').getByRole('button',{name:'Previous',exact:true});
+ await next.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelector('.recommendation-carousel').scrollLeft>0);
+ await previous.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelector('.recommendation-carousel').scrollLeft===0);
  await page.route('**/turnstile/v0/api.js?*',route=>route.fulfill({contentType:'application/javascript',body:"window.turnstile={render:(el,options)=>{window.qaTurnstile=()=>options.callback('synthetic-local-only');return 1;},reset:()=>{}};"}));
  await page.goto(origin+'/enquire/',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>[...document.querySelector('[name=timezone]').options].some(o=>o.value==='America/Vancouver'));

@@ -1,4 +1,5 @@
 name: Implement approved public website corrections with preserved native runtime
+# Static normalization and persistent Turnstile traffic are handled explicitly in verification.
 on:
   push:
     branches: [codex/cloudflare-backend-migration]
@@ -44,7 +45,7 @@ jobs:
         run: npx esbuild work/staging-deployment/runtime/inquiry-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
       - name: Verify production has not changed since preparation
         run: node scripts/approved-audit-release.mjs check
-      - name: Deploy the public navigation edit with the existing native runtime
+      - name: Deploy approved corrections with the existing native runtime
         run: npx --yes wrangler@4 pages deploy work/staging-deployment/runtime/dist --project-name=auxesis-education --branch=main --commit-hash="$GITHUB_SHA" --commit-dirty=false
       - name: Verify deployed copy, canonical routes, enquiry readiness and preserved private data
         run: node scripts/approved-audit-release.mjs verify
