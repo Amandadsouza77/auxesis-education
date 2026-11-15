@@ -63,7 +63,7 @@ jobs:
       - name: Checkout exact SEO candidate for isolated tests
         uses: actions/checkout@v4
         with:
-          ref: d9b6e652dcc596972986cf37643c2c7fe9575148
+          ref: 424930c36e02a6913ad08929536ccdd8f043d3c5
           path: seo-candidate
           persist-credentials: false
       - name: Install isolated test dependencies
