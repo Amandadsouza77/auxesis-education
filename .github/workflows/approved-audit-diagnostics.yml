@@ -73,7 +73,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ''
           GOOGLE_CLIENT_SECRET: ''
         run: |
-          node work/staging-deployment/runtime/tests/website-reviews.test.mjs
+          (cd work/staging-deployment/runtime && node tests/website-reviews.test.mjs)
           node tests/inquiry-runtime.mjs
       - name: Combine verified runtime with pinned candidate without deploying
         env:
