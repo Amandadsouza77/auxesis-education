@@ -20,19 +20,19 @@ async function businessDigest(id){const result={};for(const table of ['portal_re
  const d=await cf('/d1/database/'+id+'/query','POST',{sql:'SELECT * FROM '+table+' ORDER BY id'});const rows=d.flatMap(x=>x.results||[]);result[table]={count:rows.length,hash:sha(JSON.stringify(rows))};
  }return result;}
 function files(dir){return readdirSync(dir).flatMap(n=>{const p=resolve(dir,n);return statSync(p).isDirectory()?files(p):[p];});}
-async function liveBody(path){
- let r,url=origin+path;
+async function liveBody(path,base=origin){
+ let r,url=base+path;
  for(let hop=0;hop<4;hop++){
   try{r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(30000)});}catch(e){throw Error('Live baseline fetch failed: '+path+' ('+(e.cause?.code||e.name)+')');}
   if(![301,302,303,307,308].includes(r.status))break;
-  const next=new URL(r.headers.get('Location'),url);require(next.origin===origin,'Unexpected external asset redirect: '+path);url=next.href;
+  const next=new URL(r.headers.get('Location'),url);require(next.origin===base,'Unexpected external asset redirect: '+path);url=next.href;
  }
  require(r.ok||r.status===404&&path==='/404.html','Live baseline fetch failed: '+path+' HTTP '+r.status);return Buffer.from(await r.arrayBuffer());
 }
 async function prepare(){
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
- require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='0b4935c3e47654003dd5ffebea6f783a7e441ab3','Live source changed; reconcile approved corrections before deploying');
+ require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='3a6c9279307bce5752d53a70e8eb58c8074f8681','Live source changed; reconcile approved corrections before deploying');
  require(live.canonical_deployment?.id,'Rollback deployment unavailable');
  require(v.PRODUCTION_SYNC_ENABLED?.value==='false'&&v.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Disabled automation guards required');
  require(v.SITE_URL?.value===origin,'Preserve verified initial inquiry origin');
@@ -42,13 +42,14 @@ async function prepare(){
  const db=config.d1_databases.PORTAL_DB.id;
  require(db!=='4f12fc1d-3e0d-4a11-bd65-e577ce906114','Production/staging isolation required');
  const before={deployment:live.canonical_deployment.id,config:JSON.stringify(live.deployment_configs),source:JSON.stringify(live.source),db,business:await businessDigest(db),publicFiles:{}};
- // Refuse to overwrite newer live assets or any private route from an old package.
- for(const file of files(resolve(root,'dist'))){
-  const path=relative(resolve(root,'dist'),file).replaceAll('\\','/');
-  if(path==='_worker.js'||path==='_headers'||path==='_redirects'||path==='_routes.json'||path.startsWith('.'))continue;
-  const url='/'+path.replace(/index\.html$/,'');const current=await liveBody(url),packageBytes=readFileSync(file);
-  const captured=JSON.parse(readFileSync('content/approved-baseline-hashes.json'));
-  require(captured[path]?sha(current)===captured[path]:sha(current)===sha(packageBytes),'Live baseline changed: '+path+'; reconcile before release');
+ // Compare every independently verified current production asset before preparation.
+ const captured=JSON.parse(readFileSync('content/seo-production-baseline-hashes.json'));
+ const immutable=new URL(live.canonical_deployment.url).origin;
+ require(immutable==='https://eafcafe8.auxesis-education.pages.dev','Unexpected immutable production deployment');
+ for(const [path,digest] of Object.entries(captured)){
+  const url='/'+path.replace(/index\.html$/,'');
+  const current=await liveBody(url,immutable);
+  require(sha(current)===digest,'Live baseline changed: '+path+'; reconcile before release');
   before.publicFiles[url]=sha(current);
  }
  mkdirSync('work',{recursive:true});writeFileSync(state,JSON.stringify(before),{mode:0o600});
@@ -73,6 +74,8 @@ async function prepare(){
   require(label!=='production'||counts.portal_records>0,'Expected retained testing records missing');
   console.log('::notice::Retained restricted record inventory '+JSON.stringify({system:label,counts,recordWrites:0}));
  }
+ const candidateAssets=files(resolve(root,'dist')).map(file=>relative(resolve(root,'dist'),file).replaceAll('\\\\','/')).filter(path=>!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.')).sort();
+ require(JSON.stringify(candidateAssets)===JSON.stringify(Object.keys(captured).sort()),'Candidate asset inventory differs from current production');
  for(const file of files(resolve(root,'dist'))){const path=relative(resolve(root,'dist'),file);if(!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.'))before.publicFiles['/'+path.replace(/index\.html$/,'')]=sha(readFileSync(file));}
  writeFileSync(state,JSON.stringify(before),{mode:0o600});
  const now=await cf('/pages/projects/'+project);require(now.canonical_deployment.id===before.deployment&&JSON.stringify(now.deployment_configs)===before.config,'Production changed during preparation');
