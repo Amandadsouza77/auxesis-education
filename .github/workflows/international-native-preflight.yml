@@ -63,7 +63,7 @@ jobs:
       - name: Checkout exact SEO candidate for isolated tests
         uses: actions/checkout@v4
         with:
-          ref: 904c52ec37d8baffd7c91e0e87870589ccf1fb39
+          ref: d9b6e652dcc596972986cf37643c2c7fe9575148
           path: seo-candidate
           persist-credentials: false
       - name: Install isolated test dependencies
@@ -154,6 +154,8 @@ jobs:
           process.chdir('seo-candidate');
           const {applyPublicCopy}=await import('./seo-candidate/scripts/approved-public-copy.mjs');
           applyPublicCopy(root+'/dist');
+          const {addInternationalRoutes}=await import('./seo-candidate/scripts/international-public-wrapper.mjs');
+          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))));
           if(hash(readFileSync(root+'/staging-entry.js'))!==nativeBefore)throw Error('Native source changed');
           const home=readFileSync(root+'/dist/index.html','utf8');
           if(!home.includes('<title>IB Biology &amp; Chemistry Tutoring | Auxesis Education</title>'))throw Error('Candidate SEO title missing');
