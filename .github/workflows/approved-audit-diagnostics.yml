@@ -98,11 +98,11 @@ jobs:
            writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
            applyPublicCopy(root+'/dist');
            const css=root+'/dist/styles.css';
-           writeFileSync(css,readFileSync(css,'utf8')+'\\n.field select{min-width:0;max-width:100%}.field-hint{font-weight:400;font-size:.85rem}\\n');
+           writeFileSync(css,readFileSync(css,'utf8')+'\n.field select{min-width:0;max-width:100%}.field-hint{font-weight:400;font-size:.85rem}\n');
            await build({entryPoints:['lib/time-zones.js'],bundle:true,format:'iife',globalName:'AuxesisTimeZones',outfile:root+'/dist/time-zones.js'});
            for(const name of ['robots.txt','sitemap.xml']){
             let t=readFileSync(root+'/dist/'+name,'utf8').replaceAll('https://auxesis-education.pages.dev','https://auxedu.com');
-            if(name==='robots.txt')t=t.replace('Disallow: /api/','Disallow: /api/\\nDisallow: /portal/\\nDisallow: /resources/');
+            if(name==='robots.txt')t=t.replace('Disallow: /api/','Disallow: /api/\nDisallow: /portal/\nDisallow: /resources/');
             writeFileSync(root+'/dist/'+name,t);
            }
            const files=d=>readdirSync(d).flatMap(n=>{const p=resolve(d,n);return statSync(p).isDirectory()?files(p):[p]});
