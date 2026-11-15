@@ -1,5 +1,7 @@
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {applySeoMetadata} from './seo-metadata.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -15,7 +17,9 @@ export function applyPublicCopy(root){
   if(file==='enquire.html')html=html.replace('<script defer src="/app.js">','<script defer src="/time-zones.js"></script><script defer src="/app.js">');
   // Add an accessible explanation only at the timezone field, preserving form controls.
   if(file==='enquire.html')html=html.replace(/<select\b[^>]*name="timezone"[^>]*>[\s\S]*?<\/select>/,s=>s.replace('<select','<select aria-describedby="timezone-help"')+'<span id="timezone-help" class="field-hint">Choose the student’s region / city. The displayed offset is for today; the region accounts for daylight saving. Please check the suggested selection.</span>');
+  if(file!=='404.html')html=applySeoMetadata(file,html);
   const target=resolve(root,file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html'));mkdirSync(dirname(target),{recursive:true});writeFileSync(target,html);
  }
 }
-if(process.argv[2])applyPublicCopy(process.argv[2]);
+if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
+
