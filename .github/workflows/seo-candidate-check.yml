@@ -95,3 +95,10 @@ jobs:
           } finally { await browser.close(); }
           console.log('Synthetic candidate: 10 routes at four viewport widths passed; no enquiry submitted.');
           JS
+
+      - name: Check keyboard access and intercepted enquiry states
+        env:
+          QA_ORIGIN: http://127.0.0.1:8765
+        run: |
+          npx esbuild lib/time-zones.js --bundle --format=iife --global-name=AuxesisTimeZones --outfile=/tmp/auxesis-seo-candidate/time-zones.js
+          node scripts/approved-audit-browser-qa.mjs
