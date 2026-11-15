@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs
+      - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs tests/seo-international-wrapper.test.mjs
       - name: Verify recorded Phase 1 immutable asset baseline
         run: |
           node --input-type=module <<'JS'
