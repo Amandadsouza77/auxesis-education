@@ -7,6 +7,7 @@ permissions:
   contents: read
 jobs:
   preflight:
+    if: github.event.head_commit.message == 'Phase 2 protected preflight only'
     runs-on: ubuntu-latest
     environment: auxesis-migration-preview
     timeout-minutes: 15
