@@ -1,5 +1,6 @@
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {applySeoMetadata} from './seo-metadata.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
@@ -20,5 +21,5 @@ export function applyPublicCopy(root){
   const target=resolve(root,file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html'));mkdirSync(dirname(target),{recursive:true});writeFileSync(target,html);
  }
 }
-if(process.argv[2])applyPublicCopy(process.argv[2]);
+if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
 
