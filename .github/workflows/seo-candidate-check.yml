@@ -88,6 +88,16 @@ jobs:
              const sizes=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
              assert.ok(sizes.scroll<=sizes.client+1,JSON.stringify({path,width,...sizes}));
             }
+            for(const [id,href] of [['ib','/ib-biology-tutoring/'],['ib','/ib-chemistry-tutoring/'],['alevel','/a-level-biology-tutoring/'],['gcse','/gcse-igcse-science-tutoring/']]){
+             await page.goto('http://127.0.0.1:8765/subjects-programmes/',{waitUntil:'domcontentloaded'});
+             assert.equal(await page.locator('.programme-nav a').count(),5);
+             await page.locator('#'+id+'>summary').click();
+             const link=page.locator('#'+id+' a[href="'+href+'"]');
+             assert.equal(await link.count(),1);
+             assert.equal(await link.isVisible(),true);
+             await link.click();
+             assert.equal(new URL(page.url()).pathname,href);
+            }
             await page.goto('http://127.0.0.1:8765/enquire/',{waitUntil:'domcontentloaded'});
             assert.equal(await page.locator('#enquiry-form').count(),1);
             await page.close();
