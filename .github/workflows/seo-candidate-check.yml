@@ -106,7 +106,7 @@ jobs:
           let s=readFileSync('scripts/approved-audit-browser-qa.mjs','utf8');
           const start=s.indexOf(" await page.goto(origin+'/recommendations/'"),end=s.indexOf(" await page.route('**/turnstile/",start);
           if(start<0||end<0)throw Error('Could not isolate synthetic candidate tests');
-          s=s.slice(0,start)+s.slice(end);
+          s=(s.slice(0,start)+s.slice(end)).replace('Keyboard menu/accordions, recommendations,','Keyboard menu/accordions,');
           writeFileSync('scripts/synthetic-phase2-qa.mjs',s);
           JS
           node scripts/synthetic-phase2-qa.mjs
