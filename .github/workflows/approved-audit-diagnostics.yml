@@ -168,6 +168,7 @@ jobs:
           cp -a /tmp/auxesis-clean-runtime work/staging-deployment/runtime
           ln -s ../work seo-candidate/work
           cd seo-candidate
+          ../node_modules/.bin/esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
           node --check scripts/approved-audit-release.mjs
           node scripts/approved-audit-release.mjs prepare
           node scripts/approved-audit-release.mjs check
