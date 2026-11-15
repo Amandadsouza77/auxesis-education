@@ -52,6 +52,13 @@ jobs:
                if(dest.pathname.startsWith('/api/')||dest.pathname.startsWith('/portal/'))continue;
                const result=await page.request.get(dest.href);
                assert.ok(result.status()<400,JSON.stringify({source:path,href,status:result.status()}));
+               if(dest.hash&&result.headers()['content-type']?.includes('text/html')){
+                const targetPage=await browser.newPage();
+                await targetPage.goto(dest.origin+dest.pathname,{waitUntil:'domcontentloaded'});
+                const found=await targetPage.evaluate(id=>!!document.getElementById(id)||!!document.getElementsByName(id).length,decodeURIComponent(dest.hash.slice(1)));
+                await targetPage.close();
+                assert.ok(found,JSON.stringify({source:path,href,problem:'missing fragment'}));
+               }
               }
              }
              const sizes=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
