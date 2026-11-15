@@ -119,7 +119,8 @@ jobs:
              url=n.href;
             }
             if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
-            if(sha(Buffer.from(await r.arrayBuffer()))!==sha(readFileSync(file)))throw Error('Asset differs from production: '+path);
+            const actual=Buffer.from(await r.arrayBuffer()),expected=readFileSync(file);
+            if(sha(actual)!==sha(expected)){if(path==='robots.txt')console.log(JSON.stringify({actual:actual.toString(),expected:expected.toString()}));throw Error('Asset differs from production: '+path);}
             count++;
            }
            console.log('PASS: '+count+' reconstructed static assets match the immutable production deployment.');
