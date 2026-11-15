@@ -1,0 +1,36 @@
+name: Verify released SEO without writes
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/seo-live-verification.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify public SEO and enquiry readiness
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const origin='https://auxedu.com', routes=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/'];
+          const titles=new Set(),descs=new Set();
+          for(const path of routes){
+           const r=await fetch(origin+path,{redirect:'follow',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(30000)});
+           assert.ok(r.ok,path+' '+r.status);
+           const html=await r.text(),title=html.match(/<title>(.*?)<\/title>/i)?.[1],description=html.match(/<meta name="description" content="([^"]*)"/i)?.[1],canonical=html.match(/<link rel="canonical" href="([^"]*)"/i)?.[1];
+           assert.ok(title&&description,path);assert.equal(canonical,origin+path);assert.ok(!titles.has(title));assert.ok(!descs.has(description));titles.add(title);descs.add(description);
+           if(path==='/'){
+            assert.equal(title,'IB Biology &amp; Chemistry Tutoring | Auxesis Education');
+            const raw=html.match(/<script type="application\/ld\+json">(.*?)<\/script>/i)?.[1];assert.ok(raw);const data=JSON.parse(raw);assert.equal(data['@type'],'EducationalOrganization');assert.equal(data.url,origin+'/');
+           }
+          }
+          const robots=await (await fetch(origin+'/robots.txt')).text();assert.ok(robots.includes(origin+'/sitemap.xml'));
+          const sitemap=await (await fetch(origin+'/sitemap.xml')).text();for(const route of routes)assert.ok(sitemap.includes(origin+route),route);
+          for(const path of ['/api/','/portal/','/admin/','/resources/'])assert.ok(!sitemap.includes(origin+path),path);
+          const ready=await fetch(origin+'/api/enquiry'),body=await ready.json();assert.ok(ready.ok&&body.ready&&body.siteKey);
+          console.log('PASS: 10 live titles/descriptions and canonicals, homepage organization JSON-LD, sitemap, robots and enquiry readiness. No enquiry submitted.');
+          JS
