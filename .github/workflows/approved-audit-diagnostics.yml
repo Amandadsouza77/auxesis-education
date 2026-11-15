@@ -75,6 +75,56 @@ jobs:
         run: |
           (cd work/staging-deployment/runtime && node tests/website-reviews.test.mjs)
           node tests/inquiry-runtime.mjs
+      - name: Verify reconstructed production static assets
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          node --input-type=module <<'JS'
+          import {cpSync,mkdtempSync,readFileSync,writeFileSync,readdirSync,statSync,rmSync} from 'node:fs';
+          import {resolve,relative,join} from 'node:path';
+          import {tmpdir} from 'node:os';
+          import {createHash} from 'node:crypto';
+          import {build} from 'esbuild';
+          import {prepareNativeInquiry} from './scripts/prepare-native-inquiry.mjs';
+          import {applyPublicCopy} from './scripts/approved-public-copy.mjs';
+          const tmp=mkdtempSync(join(tmpdir(),'auxesis-native-baseline-')),root=join(tmp,'runtime');
+          const sha=b=>createHash('sha256').update(b).digest('hex');
+          try{
+           cpSync('work/staging-deployment/runtime',root,{recursive:true});
+           await build({entryPoints:[root+'/staging-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
+           prepareNativeInquiry(root);
+           const app=root+'/dist/app.js';
+           writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
+           applyPublicCopy(root+'/dist');
+           const css=root+'/dist/styles.css';
+           writeFileSync(css,readFileSync(css,'utf8')+'\\n.field select{min-width:0;max-width:100%}.field-hint{font-weight:400;font-size:.85rem}\\n');
+           await build({entryPoints:['lib/time-zones.js'],bundle:true,format:'iife',globalName:'AuxesisTimeZones',outfile:root+'/dist/time-zones.js'});
+           for(const name of ['robots.txt','sitemap.xml']){
+            let t=readFileSync(root+'/dist/'+name,'utf8').replaceAll('https://auxesis-education.pages.dev','https://auxedu.com');
+            if(name==='robots.txt')t=t.replace('Disallow: /api/','Disallow: /api/\\nDisallow: /portal/\\nDisallow: /resources/');
+            writeFileSync(root+'/dist/'+name,t);
+           }
+           const files=d=>readdirSync(d).flatMap(n=>{const p=resolve(d,n);return statSync(p).isDirectory()?files(p):[p]});
+           let count=0;
+           for(const file of files(root+'/dist')){
+            let path=relative(root+'/dist',file).replaceAll('\\\\','/');
+            if(['_worker.js','_headers','_redirects','_routes.json'].includes(path)||path.startsWith('.'))continue;
+            let url='https://eafcafe8.auxesis-education.pages.dev/'+path.replace(/index\\.html$/,'');
+            let r;for(let hop=0;hop<4;hop++){
+             r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
+             if(![301,302,303,307,308].includes(r.status))break;
+             const n=new URL(r.headers.get('location'),url);
+             if(n.origin!=='https://eafcafe8.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
+             url=n.href;
+            }
+            if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
+            if(sha(Buffer.from(await r.arrayBuffer()))!==sha(readFileSync(file)))throw Error('Asset differs from production: '+path);
+            count++;
+           }
+           console.log('PASS: '+count+' reconstructed static assets match the immutable production deployment.');
+          }finally{rmSync(tmp,{recursive:true,force:true})}
+          JS
       - name: Combine verified runtime with pinned candidate without deploying
         env:
           CLOUDFLARE_API_TOKEN: ''
