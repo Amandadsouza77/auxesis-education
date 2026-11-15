@@ -106,7 +106,7 @@ jobs:
             writeFileSync(root+'/dist/'+name,t);
            }
            const files=d=>readdirSync(d).flatMap(n=>{const p=resolve(d,n);return statSync(p).isDirectory()?files(p):[p]});
-           let count=0;
+           let count=0,manifest={};
            for(const file of files(root+'/dist')){
             let path=relative(root+'/dist',file).replaceAll('\\\\','/');
             if(['_worker.js','_headers','_redirects','_routes.json'].includes(path)||path.startsWith('.'))continue;
@@ -121,8 +121,9 @@ jobs:
             if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
             const actual=Buffer.from(await r.arrayBuffer()),expected=readFileSync(file);
             if(sha(actual)!==sha(expected)){if(path==='robots.txt')console.log(JSON.stringify({actual:actual.toString(),expected:expected.toString()}));throw Error('Asset differs from production: '+path);}
-            count++;
+            manifest[path]=sha(expected);count++;
            }
+           console.log('PUBLIC_ASSET_MANIFEST '+JSON.stringify(manifest));
            console.log('PASS: '+count+' reconstructed static assets match the immutable production deployment.');
           }finally{rmSync(tmp,{recursive:true,force:true})}
           JS
