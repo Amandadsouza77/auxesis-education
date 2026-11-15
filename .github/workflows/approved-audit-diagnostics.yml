@@ -56,3 +56,53 @@ jobs:
             console.log(JSON.stringify({productionCommit:expected,deploymentId:dep.id,immutableOrigin:origin,publicPagesCompared:files(tmp).length,packageChecksumVerified:true,automationDisabled:true,productionUnchanged:true,providerWrites:0}));
           }finally{rmSync(tmp,{recursive:true,force:true})}
           JS
+
+      - name: Checkout exact SEO candidate for isolated tests
+        uses: actions/checkout@v4
+        with:
+          ref: ea004ca35c199cb9eb6b2eba33f6bc0222549636
+          path: seo-candidate
+          persist-credentials: false
+      - name: Install isolated test dependencies
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
+      - name: Test recovered private runtime and mocked enquiry
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          node work/staging-deployment/runtime/tests/website-reviews.test.mjs
+          node tests/inquiry-runtime.mjs
+      - name: Combine verified runtime with pinned candidate without deploying
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {resolve} from 'node:path';
+          import {createHash} from 'node:crypto';
+          import {prepareNativeInquiry} from './scripts/prepare-native-inquiry.mjs';
+          import {build} from 'esbuild';
+          const root=resolve('work/staging-deployment/runtime');
+          const hash=x=>createHash('sha256').update(x).digest('hex');
+          const nativeBefore=hash(readFileSync(root+'/staging-entry.js'));
+          prepareNativeInquiry(root);
+          let app=root+'/dist/app.js';
+          writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
+          writeFileSync(root+'/inquiry/lib/time-zones.js',readFileSync('lib/time-zones.js'));
+          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',readFileSync('cloudflare/public-site-worker.js'));
+          writeFileSync(root+'/inquiry-entry.js',"import nativeWorker from './staging-entry.js';\nimport {withInquiry} from './inquiry/cloudflare/inquiry-worker.js';\nimport {withPublicSite} from './inquiry/cloudflare/public-site-worker.js';\nexport default withPublicSite(withInquiry(nativeWorker));\n");
+          process.chdir('seo-candidate');
+          const {applyPublicCopy}=await import('./seo-candidate/scripts/approved-public-copy.mjs');
+          applyPublicCopy(root+'/dist');
+          if(hash(readFileSync(root+'/staging-entry.js'))!==nativeBefore)throw Error('Native source changed');
+          const home=readFileSync(root+'/dist/index.html','utf8');
+          if(!home.includes('<title>IB Biology &amp; Chemistry Tutoring | Auxesis Education</title>'))throw Error('Candidate SEO title missing');
+          const enquiry=readFileSync(root+'/dist/enquire/index.html','utf8');
+          if(!enquiry.includes('id="enquiry-form"'))throw Error('Enquiry form missing');
+          await build({entryPoints:[root+'/inquiry-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
+          console.log('PASS: verified native source retained, candidate HTML assembled and native worker bundled locally; no deployment.');
+          JS
