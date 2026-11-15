@@ -10,7 +10,7 @@ test('assembled pages retain one canonical and unique titles and descriptions',(
  try {
   applyPublicCopy(dir);
   const walk=d=>readdirSync(d).flatMap(n=>{const p=join(d,n);return statSync(p).isDirectory()?walk(p):[p]});
-  const pages=walk(dir).filter(p=>p.endsWith('.html')); assert.equal(pages.length,11);
+  const pages=walk(dir).filter(p=>p.endsWith('.html')); assert.equal(pages.length,15);
   const titles=new Set(),descriptions=new Set();
   for(const file of pages){
    const html=readFileSync(file,'utf8'); if(relative(dir,file)==='404.html')continue;
