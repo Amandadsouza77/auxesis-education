@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync,copyFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -10,6 +10,8 @@ for (const mode of ['unchanged','different-release','own-release']) test('rollba
  const root=mkdtempSync(join(tmpdir(),'auxesis-rollback-test-'));
  try {
   mkdirSync(join(root,'work'));
+  mkdirSync(join(root,'content'));
+  copyFileSync('content/approved-public-corrections.json',join(root,'content','approved-public-corrections.json'));
   writeFileSync(join(root,'work','approved-audit-release.json'),JSON.stringify({deployment:'saved-deployment'}));
   const script=resolve('scripts/approved-audit-release.mjs');
   const runner=`
