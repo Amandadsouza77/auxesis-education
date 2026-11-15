@@ -17,6 +17,27 @@ jobs:
         with:
           node-version: '24'
       - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs
+      - name: Verify recorded Phase 1 immutable asset baseline
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const manifest=JSON.parse(readFileSync('content/international-previous-baseline-hashes.json'));
+          const origin='https://efe1f29d.auxesis-education.pages.dev';
+          for(const [path,digest] of Object.entries(manifest)){
+           let url=origin+'/'+path.replace(/index\\.html$/,''),r;
+           for(let i=0;i<4;i++){
+            r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
+            if(![301,302,303,307,308].includes(r.status))break;
+            const next=new URL(r.headers.get('location'),url);
+            if(next.origin!==origin)throw Error('Unexpected redirect '+path);
+            url=next.href;
+           }
+           if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset HTTP failure '+path+': '+r.status);
+           if(createHash('sha256').update(Buffer.from(await r.arrayBuffer())).digest('hex')!==digest)throw Error('Baseline mismatch '+path);
+          }
+          console.log('PASS: '+Object.keys(manifest).length+' immutable Phase 1 assets match.');
+          JS
       - name: Prepare synthetic static candidate
         run: |
           mkdir -p /tmp/auxesis-seo-candidate
