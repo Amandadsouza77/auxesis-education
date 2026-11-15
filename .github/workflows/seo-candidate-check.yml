@@ -2,7 +2,7 @@ name: SEO candidate browser checks (no deployment)
 on:
   push:
     branches: [codex/international-seo-phase2]
-    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, content/international-pages.json, tests/seo-*.test.mjs]
+    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, content/international-pages.json, content/international-previous-baseline-hashes.json, tests/seo-*.test.mjs]
 permissions:
   contents: read
 jobs:
