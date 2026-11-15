@@ -1,0 +1,57 @@
+name: SEO candidate browser checks (no deployment)
+on:
+  push:
+    branches: [codex/seo-metadata-review]
+    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, tests/seo-*.test.mjs]
+permissions:
+  contents: read
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs
+      - name: Prepare synthetic static candidate
+        run: |
+          mkdir -p /tmp/auxesis-seo-candidate
+          cp -R public/. /tmp/auxesis-seo-candidate/
+          node scripts/approved-public-copy.mjs /tmp/auxesis-seo-candidate
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/auxesis-seo-candidate >/tmp/auxesis-seo-http.log 2>&1 &
+      - name: Install browser test tools
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Check candidate pages at mobile and desktop widths
+        run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright';
+          import assert from 'node:assert/strict';
+          const browser=await chromium.launch({headless:true});
+          const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/'];
+          try {
+           for(const width of [320,390,768,1440]){
+            const page=await browser.newPage({viewport:{width,height:900}});
+            await page.route('**/api/**',r=>r.abort());
+            await page.route('**/cdn-cgi/**',r=>r.abort());
+            for(const path of paths){
+             const response=await page.goto('http://127.0.0.1:8765'+path,{waitUntil:'domcontentloaded'});
+             assert.equal(response.status(),200,path);
+             assert.equal(await page.locator('h1').count(),1,path);
+             assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://auxedu.com'+path,path);
+             assert.ok(await page.title(),path);
+             const sizes=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+             assert.ok(sizes.scroll<=sizes.client+1,JSON.stringify({path,width,...sizes}));
+            }
+            await page.goto('http://127.0.0.1:8765/enquire/',{waitUntil:'domcontentloaded'});
+            assert.equal(await page.locator('#enquiry-form').count(),1);
+            await page.close();
+           }
+          } finally { await browser.close(); }
+          console.log('Synthetic candidate: 10 routes at four viewport widths passed; no enquiry submitted.');
+          JS
