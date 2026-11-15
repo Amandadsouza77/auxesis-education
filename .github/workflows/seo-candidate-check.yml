@@ -45,6 +45,15 @@ jobs:
              assert.equal(await page.locator('h1').count(),1,path);
              assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://auxedu.com'+path,path);
              assert.ok(await page.title(),path);
+             if(width===1440){
+              const links=await page.locator('a[href]').evaluateAll(as=>as.map(a=>a.getAttribute('href')).filter(h=>h&&h.startsWith('/')&&!h.startsWith('//')));
+              for(const href of new Set(links)){
+               const dest=new URL(href,'http://127.0.0.1:8765'+path);
+               if(dest.pathname.startsWith('/api/')||dest.pathname.startsWith('/portal/'))continue;
+               const result=await page.request.get(dest.href);
+               assert.ok(result.status()<400,JSON.stringify({source:path,href,status:result.status()}));
+              }
+             }
              const sizes=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
              assert.ok(sizes.scroll<=sizes.client+1,JSON.stringify({path,width,...sizes}));
             }
