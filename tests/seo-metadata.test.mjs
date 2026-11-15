@@ -26,3 +26,23 @@ test('approved public assembly includes canonical metadata and retains approved 
  const home=readFileSync(join(dir,'index.html'),'utf8');assert.match(home,/<title>IB Biology &amp; Chemistry Tutoring \| Auxesis Education<\/title>/);assert.equal(JSON.parse(home.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1]).url,'https://auxedu.com/');
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('programme links remain inside their corresponding expandable sections',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'auxesis-programmes-'));
+ try {
+  applyPublicCopy(dir);
+  const html=readFileSync(join(dir,'subjects-programmes/index.html'),'utf8');
+  const nav=html.match(/<nav class="programme-nav wrap"[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(nav); assert.equal((nav.match(/<a /g)||[]).length,5);
+  for(const [id,paths] of Object.entries({
+   ib:['/ib-biology-tutoring/','/ib-chemistry-tutoring/'],
+   alevel:['/a-level-biology-tutoring/'],
+   gcse:['/gcse-igcse-science-tutoring/']
+  })){
+   const details=html.match(new RegExp('<details class="programme-disclosure" id="'+id+'">[\\s\\S]*?<\\/details>'))?.[0];
+   assert.ok(details,id);
+   for(const path of paths){assert.ok(details.includes('href="'+path+'"'),id+' '+path);assert.ok(!nav.includes('href="'+path+'"'));}
+  }
+  assert.equal((html.match(/<details class="programme-disclosure"/g)||[]).length,5);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

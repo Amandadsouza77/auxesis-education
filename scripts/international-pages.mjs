@@ -6,8 +6,13 @@ const once=(s,old,replacement,label)=>{if(s.split(old).length!==2)throw Error('E
 export function applyInternational(root){
  const programmes=resolve(root,'subjects-programmes/index.html'),about=resolve(root,'about-amanda/index.html');
  let template=readFileSync(programmes,'utf8');
- const links=pages.map(p=>'<a href="/'+p.slug+'/">'+escape(p.heading)+'</a>').join('');
- template=once(template,'</nav><section class="section programme-accordion-section">',links+'</nav><section class="section programme-accordion-section">','programme navigation');
+ const cardLinks=[
+  ['<h3>Biology — Standard & Higher Level</h3><p>We work on understanding how biological ideas connect, interpreting data, evaluating investigations and applying knowledge in unfamiliar contexts. I also provide ethical guidance for Biology Internal Assessments and Extended Essays.</p>', '<p><a class="text-link" href="/ib-biology-tutoring/">Explore IB Biology tutoring</a></p>'],
+  ['<h3>Chemistry — Standard & Higher Level</h3><p>Students work on making sense of the models behind the chemistry, not just completing calculations, and on connecting explanations, evidence and chemical reasoning. Ethical guidance is also available for Chemistry <span class="keep-together">Internal Assessments.</span></p>', '<p><a class="text-link" href="/ib-chemistry-tutoring/">Explore IB Chemistry tutoring</a></p>'],
+  ['<p>We work on the detail students need to know, practical and data-handling skills, and the ability to apply biological ideas and explain them clearly.</p>', '<p><a class="text-link" href="/a-level-biology-tutoring/">Explore AS and A-Level Biology tutoring</a></p>'],
+  ['<p>Support is available for Biology and Chemistry, including the Biology and Chemistry components of Combined or Coordinated Science. We work from the student’s specification and school course, clearing up difficult ideas and using questions to make sure the understanding holds when it has to be applied. Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.</p>', '<p><a class="text-link" href="/gcse-igcse-science-tutoring/">Explore GCSE and IGCSE Biology and Chemistry tutoring</a></p>']
+ ];
+ for(const [anchor,link] of cardLinks) template=once(template,anchor,anchor+link,'programme detail link');
  writeFileSync(programmes,template);
  let biography=readFileSync(about,'utf8');
  biography=once(biography,'<h3>Professional credentials</h3>','<h3>Professional credentials</h3><p>An Ontario Certified Teacher holding Qualified Teacher Status (QTS) in the United Kingdom.</p>','qualification heading');
