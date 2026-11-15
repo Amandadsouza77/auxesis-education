@@ -89,6 +89,7 @@ jobs:
           const root=resolve('work/staging-deployment/runtime');
           const hash=x=>createHash('sha256').update(x).digest('hex');
           const nativeBefore=hash(readFileSync(root+'/staging-entry.js'));
+          await build({entryPoints:[root+'/staging-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
           prepareNativeInquiry(root);
           let app=root+'/dist/app.js';
           writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
