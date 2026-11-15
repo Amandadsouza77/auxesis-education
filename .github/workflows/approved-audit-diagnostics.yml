@@ -69,7 +69,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ''
           GOOGLE_CLIENT_SECRET: ''
-        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0 playwright@1.56.0
       - name: Test recovered private runtime and mocked enquiry
         env:
           CLOUDFLARE_API_TOKEN: ''
@@ -172,3 +172,12 @@ jobs:
           node --check scripts/approved-audit-release.mjs
           node scripts/approved-audit-release.mjs prepare
           node scripts/approved-audit-release.mjs check
+
+      - name: Test native candidate interface with intercepted enquiry
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+          QA_ORIGIN: http://127.0.0.1:8765
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory work/staging-deployment/runtime/dist >/tmp/auxesis-native-qa.log 2>&1 &
+          node scripts/approved-audit-browser-qa.mjs
