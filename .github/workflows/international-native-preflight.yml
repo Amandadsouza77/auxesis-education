@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   preflight:
-    if: github.event.head_commit.message == 'Phase 2 protected preflight only'
+    if: github.event.head_commit.message == '[CF-Pages-Skip] Phase 2 protected preflight only'
     runs-on: ubuntu-latest
     environment: auxesis-migration-preview
     timeout-minutes: 15
@@ -113,12 +113,12 @@ jobs:
            for(const file of files(root+'/dist')){
             let path=relative(root+'/dist',file).replaceAll('\\\\','/');
             if(['_worker.js','_headers','_redirects','_routes.json'].includes(path)||path.startsWith('.'))continue;
-            let url='https://eafcafe8.auxesis-education.pages.dev/'+path.replace(/index\\.html$/,'');
+            let url='https://efe1f29d.auxesis-education.pages.dev/'+path.replace(/index\.html$/,'');
             let r;for(let hop=0;hop<4;hop++){
              r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
              if(![301,302,303,307,308].includes(r.status))break;
              const n=new URL(r.headers.get('location'),url);
-             if(n.origin!=='https://eafcafe8.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
+             if(n.origin!=='https://efe1f29d.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
              url=n.href;
             }
             if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
@@ -183,3 +183,4 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 --directory work/staging-deployment/runtime/dist >/tmp/auxesis-native-qa.log 2>&1 &
           cd seo-candidate
           node scripts/approved-audit-browser-qa.mjs
+
