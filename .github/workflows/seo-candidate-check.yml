@@ -1,8 +1,8 @@
 name: SEO candidate browser checks (no deployment)
 on:
   push:
-    branches: [codex/seo-metadata-review]
-    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, tests/seo-*.test.mjs]
+    branches: [codex/international-seo-phase2]
+    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, content/international-pages.json, tests/seo-*.test.mjs]
 permissions:
   contents: read
 jobs:
@@ -34,7 +34,7 @@ jobs:
           import {chromium} from 'playwright';
           import assert from 'node:assert/strict';
           const browser=await chromium.launch({headless:true});
-          const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/'];
+          const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/','/ib-biology-tutoring/','/ib-chemistry-tutoring/','/gcse-igcse-science-tutoring/','/a-level-biology-tutoring/'];
           try {
            for(const width of [320,390,768,1440]){
             const page=await browser.newPage({viewport:{width,height:900}});
