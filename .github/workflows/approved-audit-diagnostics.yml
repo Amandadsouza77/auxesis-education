@@ -1,4 +1,4 @@
-name: Inspect public deployment responses without changes
+name: Read-only SEO release preflight
 on:
   push:
     branches: [codex/cloudflare-backend-migration]
@@ -6,43 +6,53 @@ on:
 permissions:
   contents: read
 jobs:
-  public-response-check:
+  preflight:
     runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Inspect immutable and stable public response behavior
-        run: |
-          node --input-type=module <<'JS'
-          import {createHash} from 'node:crypto';
-          for(const host of ['https://305f9652.auxesis-education.pages.dev','https://auxesis-education.pages.dev','https://auxedu.com'])for(const path of ['/404.html','/enquire/','/app.js']){
-           const r=await fetch(host+path,{redirect:'manual'}),b=await r.text();console.log(JSON.stringify({host,path,status:r.status,location:r.headers.get('location'),hash:createHash('sha256').update(b).digest('hex'),length:b.length,prefix:b.slice(0,160)}));
-          }
-          JS
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Test immutable public release before retrying production
-        env:
-          QA_ORIGIN: https://fa756108.auxesis-education.pages.dev
-        run: |
-          npm install --no-save --ignore-scripts playwright@1.56.0
-          node scripts/approved-audit-browser-qa.mjs
-  restricted-record-inventory:
-    runs-on: ubuntu-latest
-    environment: auxesis-migration-preview
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    steps:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Read only aggregate record categories and account roles
+      - name: Recover and verify private runtime without deployment
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Compare current immutable release with recorded public source
         run: |
           node --input-type=module <<'JS'
-          const base='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719';
-          async function cf(path,sql){if(sql&&!sql.startsWith('SELECT '))throw Error('Read-only queries required');const r=await fetch(base+path,{method:sql?'POST':'GET',headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'},...(sql?{body:JSON.stringify({sql})}:{})});if(!r.ok)throw Error('Inventory provider HTTP '+r.status);const d=await r.json();if(!d.success)throw Error('Inventory rejected');return d.result;}
-          const live=await cf('/pages/projects/auxesis-education'),production=live.deployment_configs.production.d1_databases.PORTAL_DB.id;
-          for(const [system,id] of [['production',production],['staging','4f12fc1d-3e0d-4a11-bd65-e577ce906114']])for(const [category,sql] of [['recordCategories','SELECT kind,COUNT(*) AS count FROM portal_records GROUP BY kind ORDER BY kind'],['accountRoles','SELECT role,enabled,COUNT(*) AS count FROM portal_accounts GROUP BY role,enabled ORDER BY role,enabled']]){const result=await cf('/d1/database/'+id+'/query',sql);console.log(JSON.stringify({system,category,counts:result.flatMap(r=>r.results||[]),recordWrites:0}));}
+          import {createHash} from 'node:crypto';
+          import {readFileSync,mkdtempSync,readdirSync,statSync,rmSync} from 'node:fs';
+          import {join,relative} from 'node:path';
+          import {tmpdir} from 'node:os';
+          import {applyPublicCopy} from './scripts/approved-public-copy.mjs';
+          const expected='3a6c9279307bce5752d53a70e8eb58c8074f8681';
+          const api='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/pages/projects/auxesis-education';
+          const req=async()=>{const r=await fetch(api,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw Error('Cloudflare project HTTP '+r.status);const data=await r.json();if(!data.success)throw Error('Cloudflare project rejected');return data.result;};
+          const before=await req(),dep=before.canonical_deployment;
+          if(!dep?.id||dep.deployment_trigger?.metadata?.commit_hash!==expected)throw Error('Current production deployment differs from recorded baseline');
+          const origin=new URL(dep.url).origin;
+          if(!origin.endsWith('.auxesis-education.pages.dev'))throw Error('Unexpected deployment host');
+          const cfg=before.deployment_configs.production;
+          if(cfg.env_vars.PRODUCTION_SYNC_ENABLED?.value!=='false'||cfg.env_vars.PRODUCTION_AUTOMATION_ENABLED?.value!=='false')throw Error('Production automation guard differs');
+          const hash=b=>createHash('sha256').update(b).digest('hex');
+          const tmp=mkdtempSync(join(tmpdir(),'auxesis-seo-preflight-'));
+          try{
+            applyPublicCopy(tmp);
+            const files=d=>readdirSync(d).flatMap(n=>{const p=join(d,n);return statSync(p).isDirectory()?files(p):[p]});
+            for(const file of files(tmp)){
+              const path='/'+relative(tmp,file).replaceAll('\\','/').replace(/index\.html$/,'');
+              let url=origin+path,response;
+              for(let n=0;n<4;n++){response=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});if(![301,302,303,307,308].includes(response.status))break;const next=new URL(response.headers.get('location'),url);if(next.origin!==origin)throw Error('Unexpected asset redirect '+path);url=next.href}
+              if(!response.ok && !(path==='/404.html'&&response.status===404))throw Error('Asset unavailable '+path+' '+response.status);
+              if(hash(Buffer.from(await response.arrayBuffer()))!==hash(readFileSync(file)))throw Error('Released page differs from regenerated baseline: '+path);
+            }
+            const after=await req();
+            if(after.canonical_deployment?.id!==dep.id||JSON.stringify(after.deployment_configs)!==JSON.stringify(before.deployment_configs)||JSON.stringify(after.source)!==JSON.stringify(before.source))throw Error('Production changed during preflight');
+            console.log(JSON.stringify({productionCommit:expected,deploymentId:dep.id,immutableOrigin:origin,publicPagesCompared:files(tmp).length,packageChecksumVerified:true,automationDisabled:true,productionUnchanged:true,providerWrites:0}));
+          }finally{rmSync(tmp,{recursive:true,force:true})}
           JS
