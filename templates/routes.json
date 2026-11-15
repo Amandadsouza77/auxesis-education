@@ -53,5 +53,25 @@
     "name": "tutoring-policies",
     "route": "/tutoring-policies/",
     "path": "tutoring-policies/index.html"
+  },
+  {
+    "name": "ib-biology-tutoring",
+    "route": "/ib-biology-tutoring/",
+    "path": "ib-biology-tutoring/index.html"
+  },
+  {
+    "name": "ib-chemistry-tutoring",
+    "route": "/ib-chemistry-tutoring/",
+    "path": "ib-chemistry-tutoring/index.html"
+  },
+  {
+    "name": "gcse-igcse-science-tutoring",
+    "route": "/gcse-igcse-science-tutoring/",
+    "path": "gcse-igcse-science-tutoring/index.html"
+  },
+  {
+    "name": "a-level-biology-tutoring",
+    "route": "/a-level-biology-tutoring/",
+    "path": "a-level-biology-tutoring/index.html"
   }
 ]
