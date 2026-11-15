@@ -22,6 +22,8 @@ jobs:
           node-version: '24'
       - name: Recover and verify private runtime without deployment
         run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Preserve clean temporary runtime for dry run
+        run: cp -a work/staging-deployment/runtime /tmp/auxesis-clean-runtime
       - name: Compare current immutable release with recorded public source
         run: |
           node --input-type=module <<'JS'
@@ -60,7 +62,7 @@ jobs:
       - name: Checkout exact SEO candidate for isolated tests
         uses: actions/checkout@v4
         with:
-          ref: ea004ca35c199cb9eb6b2eba33f6bc0222549636
+          ref: d01eb2664230e3cc96fb3e98d41c4dc33483642a
           path: seo-candidate
           persist-credentials: false
       - name: Install isolated test dependencies
@@ -159,3 +161,13 @@ jobs:
           await build({entryPoints:[root+'/inquiry-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
           console.log('PASS: verified native source retained, candidate HTML assembled and native worker bundled locally; no deployment.');
           JS
+
+      - name: Run candidate release guard in prepare-only mode
+        run: |
+          rm -rf work/staging-deployment/runtime
+          cp -a /tmp/auxesis-clean-runtime work/staging-deployment/runtime
+          ln -s ../work seo-candidate/work
+          cd seo-candidate
+          node --check scripts/approved-audit-release.mjs
+          node scripts/approved-audit-release.mjs prepare
+          node scripts/approved-audit-release.mjs check
