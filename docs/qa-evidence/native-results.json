@@ -1,0 +1,61 @@
+{
+  "outcomes": [
+    "PASS valid custom-domain review: explicit success, stored pending, absent publicly",
+    "PASS invalid rejected",
+    "PASS missing-consent rejected",
+    "PASS missing-token rejected",
+    "PASS honeypot silently discarded; native HTTP 200 decoy preserved",
+    "PASS too-fast rejected",
+    "PASS cross-origin rejected",
+    "PASS unapproved-host rejected",
+    "PASS replay rejected after delay with unique content and no new record",
+    "PASS anonymous and non-owner management denied; local owner approves/rejects; publication follows moderation"
+  ],
+  "negativeEvidence": [
+    {
+      "scenario": "invalid",
+      "httpStatus": 422,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "missing-consent",
+      "httpStatus": 422,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "missing-token",
+      "httpStatus": 403,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "honeypot",
+      "httpStatus": 200,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "too-fast",
+      "httpStatus": 429,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "cross-origin",
+      "httpStatus": 403,
+      "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "unapproved-host",
+      "httpStatus": 403,
+      "storedRecordsAdded": 0
+    }
+  ],
+  "isolatedDatabase": true,
+  "initialReviews": 0,
+  "finalReviews": 1,
+  "finalStatuses": [
+    "rejected"
+  ],
+  "isolatedDataHash": "75ac5453fe1e91b3d7d2c073517d69aa1a4d3d09c88a0a651b4224d87ef082ff",
+  "privateAccountsUnchanged": true,
+  "outboundRequests": 0,
+  "productionD1Used": false
+}

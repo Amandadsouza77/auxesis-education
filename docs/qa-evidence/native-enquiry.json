@@ -1,0 +1,12 @@
+{
+  "assembledCandidate": true,
+  "readiness": true,
+  "consentRejectedBeforeProviders": true,
+  "mockedSuccess": true,
+  "recipientPreserved": true,
+  "visitorReplyToPreserved": true,
+  "providerFailureNotSuccess": true,
+  "mockedProviderCalls": 4,
+  "realEmailsSent": 0,
+  "productionD1Used": false
+}
