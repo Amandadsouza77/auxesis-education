@@ -57,12 +57,6 @@
             "text": "Examine Earth's climate systems, factors that influence climate, scientific evidence of climate change and the effects of environmental changes on natural and human systems. Students develop skills in interpreting evidence, evaluating information and making connections between scientific processes and real-world issues."
           }
         ]
-      },
-      {
-        "title": "MYP Science Support",
-        "code": "IB Middle Years Programme · Assessment-specific",
-        "intro": "Students following the IB Middle Years Programme receive support with the scientific content taught at their school, just as they would with any other science curriculum. Where relevant, lessons also address the MYP assessment criteria in relation to a student's specific assessment task. This helps students understand the expectations, develop appropriate scientific skills and communicate their understanding effectively while completing their own work independently.",
-        "topics": []
       }
     ],
     "skillsHeading": "Developing Essential Scientific Skills",
@@ -107,7 +101,13 @@
         "IB Biology tutoring",
         "/ib-biology-tutoring/"
       ]
-    ]
+    ],
+    "mypSupport": {
+      "title": "MYP Science Support",
+      "code": "IB Middle Years Programme · Assessment-specific",
+      "intro": "Students following the IB Middle Years Programme receive support with the scientific content taught at their school, just as they would with any other science curriculum. Where relevant, lessons also address the MYP assessment criteria in relation to a student's specific assessment task. This helps students understand the expectations, develop appropriate scientific skills and communicate their understanding effectively while completing their own work independently.",
+      "topics": []
+    }
   },
   {
     "slug": "ontario-grade-11-12-biology-chemistry-tutoring",
