@@ -30,33 +30,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: node scripts/prelaunch-runtime-recover.mjs
-      - name: Inspect native binding interface names only
-        run: |
-          node --input-type=module <<'JS'
-          import {readFileSync,readdirSync,statSync} from 'node:fs';
-          const root='work/staging-deployment/runtime';
-          const files=d=>readdirSync(d).flatMap(n=>{const p=d+'/'+n;return statSync(p).isDirectory()?files(p):[p]});
-          const keys=new Set();
-          for(const file of [root+'/staging-entry.js',...files(root+'/cloudflare')].filter(f=>f.endsWith('.js'))){for(const m of readFileSync(file,'utf8').matchAll(/\.([A-Z][A-Z0-9_]{2,})\b/g))keys.add(m[1]);}
-          console.log('Native binding interface names (no values): '+JSON.stringify([...keys].sort()));
-          for(const file of files(root+'/cloudflare').filter(f=>f.endsWith('.js')&&/review|form/.test(f))){const source=readFileSync(file,'utf8');console.log(JSON.stringify({module:file.split('/').at(-1),exports:[...source.matchAll(/export\s+(?:async\s+)?(?:function|const|class)\s+(\w+)/g)].map(m=>m[1])}));}
-          JS
-      - name: Inspect isolated review table schema only
-        run: |
-          python3 - <<'PYSQL'
-          import sqlite3,json,pathlib
-          db=sqlite3.connect(':memory:')
-          for file in sorted(pathlib.Path('work/staging-deployment/runtime/cloudflare/migrations').glob('*.sql')):db.executescript(file.read_text())
-          for table in ['website_review_tokens','website_review_rate_limits']:
-           print(json.dumps({'table':table,'columns':[{'name':r[1],'type':r[2]} for r in db.execute('PRAGMA table_info('+table+')')]}))
-          PYSQL
       - name: Verify existing native tests in isolated fixtures
         working-directory: work/staging-deployment/runtime
         run: node tests/website-reviews.test.mjs
       - name: Checkout exact PR candidate without credentials
         uses: actions/checkout@v4
         with:
-          ref: ded767822f1a098368cabccc9a8776504812e3c1
+          ref: c0f2e48f60d3979db7cb02fc9c899e3e944cd71e
           path: candidate
           persist-credentials: false
       - name: Install test tools without provider credentials
