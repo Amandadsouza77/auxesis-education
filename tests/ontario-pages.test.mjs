@@ -59,6 +59,35 @@ test('builds accessible collapsed course sections from existing public design',(
   }
   assert(!junior.includes('<strong>MYP Science Support</strong>'));
   assert(junior.includes('Explore the IB Middle Years Programme'));
+  // Senior: teaching approach before courses, then assessment and progression.
+  const seniorSections=[
+    '<h2>Developing Advanced Scientific Skills</h2>',
+    '<h3>Knowledge and Understanding</h3>',
+    '<h3>Thinking and Investigation</h3>',
+    '<h3>Communication</h3>',
+    '<h3>Application</h3>',
+    '<h2>Ontario Courses Offered</h2>',
+    '<h3>Ontario Biology Tutoring</h3>',
+    '<h4 class="ontario-course-heading">Grade 11 Biology<span class="ontario-course-code">SBI3U',
+    '<h4 class="ontario-course-heading">Grade 11 Biology<span class="ontario-course-code">SBI3C',
+    '<h4 class="ontario-course-heading">Grade 12 Biology<span class="ontario-course-code">SBI4U',
+    '<h3>Ontario Chemistry Tutoring</h3>',
+    '<h4 class="ontario-course-heading">Grade 11 Chemistry<span class="ontario-course-code">SCH3U',
+    '<h4 class="ontario-course-heading">Grade 12 Chemistry<span class="ontario-course-code">SCH4U',
+    '<h4 class="ontario-course-heading">Grade 12 Chemistry<span class="ontario-course-code">SCH4C',
+    '<h2>Assessment Support</h2>',
+    '<h2>Preparing for Further Study</h2>',
+    '<h2>Getting Started</h2>'
+  ];
+  last=-1;
+  for(const section of seniorSections){
+    const current=senior.indexOf(section);
+    assert(current>last,'Senior section out of order or missing: '+section);
+    last=current;
+  }
+  assert(senior.includes('<h5>Diversity of Living Things</h5>'));
+  assert(senior.includes('<h5>Organic Chemistry</h5>'));
+  assert(senior.includes('<summary><h4 class="ontario-course-heading">'));
   assert(senior.includes('SCH4C'));
   assert(junior.includes('specific assessment task'));
   const sitemap=readFileSync(resolve(root,'sitemap.xml'),'utf8');
