@@ -69,17 +69,30 @@ try{
 
    const gaps=await page.locator('.subject-detail-page>.section+.section').evaluateAll(es=>es.map(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-e.previousElementSibling.firstElementChild.lastElementChild.getBoundingClientRect().bottom));
    assert(gaps.length>0&&gaps.every(g=>g>=0&&g<=32),slug+' excessive section gaps '+JSON.stringify(gaps));
+   if(slug==='ontario-grade-11-12-biology-chemistry-tutoring'){
+    const shared=page.locator('.page-hero p').filter({hasText:'In Biology, students learn'});
+    assert.equal(await shared.count(),1,'Senior course-wide teaching statement appears once in the introduction');
+    assert((await shared.innerText()).includes('In Chemistry, they learn'),'Shared introduction covers Chemistry too');
+    assert(await shared.evaluate(e=>Boolean(e.compareDocumentPosition(document.querySelector('.ontario-course-list'))&Node.DOCUMENT_POSITION_FOLLOWING)),'Shared statement precedes all six senior courses');
+    if(width===1440||width===390)await page.locator('.page-hero').screenshot({path:output+'/senior-shared-introduction-'+width+'.png'});
+   }
    for(const course of await page.locator('details.ontario-course').all()){
     await course.locator('summary').focus();await page.keyboard.press('Enter');
     const gap=await course.evaluate(e=>e.querySelector('.ontario-course-body>p').getBoundingClientRect().top-e.querySelector('.ontario-course-code').getBoundingClientRect().bottom);
     assert(gap>=12&&gap<=24,slug+' course code/description gap: '+gap);
     assert((await course.locator('.ontario-course-body>p').first().innerText()).startsWith('This course '),'Course introduction avoids repeated grade/subject label');
+    if(slug==='ontario-grade-11-12-biology-chemistry-tutoring'){
+     assert.equal(await course.locator('.ontario-course-body>p').count(),1,'Each senior course has only its course description before topics');
+     assert.equal(await course.locator('.ontario-course-body>:last-child').getAttribute('class'),'ontario-topic','Last topic has no unrelated course-wide statement after it');
+     if(width===1440&&(await course.innerText()).includes('SBI3U'))await course.screenshot({path:output+'/senior-biology-topics-after.png'});
+    }
     if(width===1440&&(await course.innerText()).includes('SCH4U'))await course.screenshot({path:output+'/ontario-course-intro-after.png'});
     await page.keyboard.press('Enter');
    }
    if(slug==='gcse-igcse-science-tutoring')await page.screenshot({path:output+'/subject-detail-after-'+width+'.png',fullPage:true});
   }
   results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at '+width+'px');
+  results.push('PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
  }
  const page=await browser.newPage({viewport:{width:390,height:900}});

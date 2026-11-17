@@ -16,8 +16,7 @@ function replaceExactlyOnce(source, search, replacement, label){
 function renderCourse(course,senior=false){
  const topicTag=senior?'h5':'h4';
  const body = '<p>'+escape(course.intro)+'</p>'+
-  (course.topics||[]).map(topic=>'<div class="ontario-topic"><'+topicTag+'>'+escape(topic.title)+'</'+topicTag+'><p>'+escape(topic.text)+'</p></div>').join('')+
-  (course.ending?para(course.ending):'');
+  (course.topics||[]).map(topic=>'<div class="ontario-topic"><'+topicTag+'>'+escape(topic.title)+'</'+topicTag+'><p>'+escape(topic.text)+'</p></div>').join('');
  const heading=senior
   ?'<h4 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h4>'
   :'<h3 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h3>';
