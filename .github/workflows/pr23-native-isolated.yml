@@ -36,7 +36,7 @@ jobs:
       - name: Checkout exact PR candidate without credentials
         uses: actions/checkout@v4
         with:
-          ref: 68e0e290145cb97197ce57b8344c7c837862d8b9
+          ref: 13ebe61c6e9c063c7798bcd2bee663ebb42dc8a9
           path: candidate
           persist-credentials: false
       - name: Install test tools without provider credentials
@@ -52,6 +52,11 @@ jobs:
         env:
           QA_NATIVE_ROOT: ${{ github.workspace }}/work/staging-deployment/runtime
         run: node tests/native-review-isolated.mjs
+      - name: Test assembled candidate enquiry with local provider mocks
+        working-directory: candidate
+        env:
+          QA_NATIVE_ROOT: ${{ github.workspace }}/work/staging-deployment/runtime
+        run: node tests/native-enquiry-isolated.mjs
       - name: Test enquiry with mocked providers in actual workerd
         working-directory: candidate
         run: node tests/inquiry-runtime.mjs
