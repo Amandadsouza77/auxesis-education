@@ -29,6 +29,10 @@ jobs:
             const bytes=Buffer.from(await r.arrayBuffer());
             writeFileSync('work/public-baseline/'+path.replaceAll('/','_'),bytes);
             manifest[path]=createHash('sha256').update(bytes).digest('hex');
+            const live=await fetch('https://auxedu.com/'+path,{redirect:'error'});
+            if(!live.ok)throw Error('Current public asset unavailable '+path);
+            const current=createHash('sha256').update(Buffer.from(await live.arrayBuffer())).digest('hex');
+            if(current!==manifest[path])throw Error('Current production differs from recorded deployment: '+path);
           }
           for(const host of ['https://auxedu.com','https://auxesis-education.pages.dev']){
             const r=await fetch(host+'/api/enquiry',{redirect:'error'});
