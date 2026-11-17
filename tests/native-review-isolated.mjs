@@ -38,6 +38,10 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const wait=c=>new Promise(r=>setTimeout(r,c.notBefore+50));
  const valid={review:'Synthetic isolated runtime review. Never production.',public_label:'Ephemeral QA',rating:5,consent:true};
  const ip='192.0.2.'+(++ipIndex),cfg=await config(ip);console.log('Native minimum delay milliseconds: '+cfg.notBefore);
+ console.log('Isolated form/review tables: '+JSON.stringify((await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE '%form%' OR name LIKE '%review%') ORDER BY name").all()).results));
+ for(const part of cfg.token.split('.')){try{const data=JSON.parse(Buffer.from(part,'base64url').toString());console.log('Synthetic token claim interface: '+JSON.stringify({keys:Object.keys(data),numeric:Object.fromEntries(Object.entries(data).filter(([,v])=>typeof v==='number'))}));}catch{}}
+ try{const {open}=await import(root+'/cloudflare/crypto.js');const data=JSON.parse(await open('0000000000000000000000000000000000000000000000000000000000000000',cfg.token));console.log('Synthetic decrypted token claim interface: '+JSON.stringify({keys:Object.keys(data),numeric:Object.fromEntries(Object.entries(data).filter(([,v])=>typeof v==='number'))}));}catch{console.log('Synthetic token uses a different envelope; no contents logged.');}
+
  await wait(cfg);
  const response=await send('',{method:'POST',ip,body:{...valid,form_token:cfg.token}});const body=await json(response);assert.equal(response.status,200,JSON.stringify(body));assert.equal(body.ok,true);
  const stored=(await db.prepare('SELECT id,status,comment FROM website_reviews').all()).results;assert.equal(stored.length,1);assert.equal(stored[0].status,'pending');assert.equal(stored[0].comment,valid.review);
