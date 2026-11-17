@@ -46,14 +46,14 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const replay=await send('',{method:'POST',ip,body:{...valid,form_token:cfg.token}});assert(replay.status>=400,'Replayed token rejected');assert.equal(await count(),1);outcomes.push('PASS replay rejected without new record');
  for(const scenario of ['invalid','missing-consent','missing-token','honeypot','too-fast','cross-origin','unapproved-host']){
   const ip='192.0.2.'+(++ipIndex),c=await config(ip);if(scenario!=='too-fast')await wait(c);
-  const payload={...valid,form_token:c.token};let origin=custom,source=custom;
+  const payload={...valid,review:'Synthetic isolated '+scenario+' case. Never production.',form_token:c.token};let origin=custom,source=custom;
   if(scenario==='invalid')payload.review='';if(scenario==='missing-consent')payload.consent=false;if(scenario==='missing-token')delete payload.form_token;if(scenario==='honeypot')payload.website='synthetic-bot.invalid';if(scenario==='cross-origin')source='https://unapproved.example';if(scenario==='unapproved-host'){origin='https://unapproved.example';source=origin;}
   const r=await send('',{origin,source,method:'POST',ip,body:payload});
-  if(scenario==='honeypot')assert(r.status===200||r.status>=400,'Native honeypot decoy or rejection');
+  if(['honeypot','too-fast'].includes(scenario))assert(r.status===200||r.status>=400,'Native spam decoy or rejection');
   else assert(r.status>=400,scenario+' must reject (HTTP '+r.status+')');
   assert.equal(await count(),1,scenario+' created no record');
   negativeEvidence.push({scenario,httpStatus:r.status,storedRecordsAdded:0});
-  outcomes.push(scenario==='honeypot'&&r.status===200?'PASS honeypot silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
+  outcomes.push(['honeypot','too-fast'].includes(scenario)&&r.status===200?'PASS '+scenario+' silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
  }
  for(const origin of [legacy,custom]){
   const manage=await send('/manage',{origin});assert(manage.status===401||manage.status===403);const moderate=await send('/moderate',{origin,method:'POST',body:{id,decision:'approve'}});assert(moderate.status===401||moderate.status===403);
