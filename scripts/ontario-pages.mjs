@@ -58,7 +58,7 @@ export function applyOntario(root){
   writeFileSync(sitemap,xml);
  }
  const cssPath=resolve(root,'styles.css');
- const css=String.raw\`
+ const css=String.raw`
 /* Ontario course accordions: follow accessible native disclosure pattern. */
 .ontario-course-list{max-width:none}
 .ontario-course-code{display:block;color:var(--slate-violet);font:500 .9rem/1.5 var(--sans);margin-top:.3rem}
@@ -72,7 +72,7 @@ export function applyOntario(root){
 .ontario-tagline{font:500 1.35rem/1.5 var(--sans);margin:1.5rem 0 1rem}
 .ontario-related li{margin:.45rem 0}
 @media(max-width:650px){.ontario-skill-grid{grid-template-columns:1fr}.ontario-course-body{padding-right:0}}
-\`;
+`;
  writeFileSync(cssPath,readFileSync(cssPath,'utf8')+'\n'+css);
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)&&process.argv[2])applyOntario(process.argv[2]);
