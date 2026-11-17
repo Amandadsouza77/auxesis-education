@@ -20,6 +20,7 @@ jobs:
           node --input-type=module <<'JS'
           import {writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
+          import {normalizePublicEmail} from './scripts/public-baseline-normalize.mjs';
           const origin='https://b55b1719.auxesis-education.pages.dev';
           const paths=['styles.css','reviews.js','programmes.js','site-config.js','app.js','subjects-programmes/','enquire/','recommendations/'];
           const manifest={};
@@ -35,8 +36,8 @@ jobs:
             writeFileSync('work/public-baseline/current-'+path.replaceAll('/','_'),liveBytes);
             const current=createHash('sha256').update(liveBytes).digest('hex');
             if(current!==manifest[path]){
-              const a=bytes.toString(),b=liveBytes.toString();let i=0;while(i<Math.min(a.length,b.length)&&a[i]===b[i])i++;
-              console.log(JSON.stringify({baselineDifference:path,immutableLength:a.length,currentLength:b.length,at:i,immutable:a.slice(Math.max(0,i-80),i+250),current:b.slice(Math.max(0,i-80),i+250)}));
+              if(normalizePublicEmail(bytes.toString())!==normalizePublicEmail(liveBytes.toString()))throw Error('Substantive current production difference: '+path);
+              console.log(path+': matches immutable HTML after normalizing Cloudflare email obfuscation only');
             }
           }
           for(const host of ['https://auxedu.com','https://auxesis-education.pages.dev']){

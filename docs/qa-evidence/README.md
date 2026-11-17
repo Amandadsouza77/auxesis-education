@@ -11,3 +11,5 @@ Reproduce: capture public baseline with `.github/workflows/programme-form-qa.yml
 The active public review config on auxedu.com returns HTTP 403 `Unauthorized hostname`; the legacy hostname returns a JSON token config and useful HTTP 422 validation. The candidate adapter and browser feedback pass isolated tests. A valid review stored as pending, native token/replay protections, and moderation must still be verified with the protected private runtime. That environment rejected this branch; no release/security setting was changed to bypass it.
 
 The historical `npm run build` fails on the unchanged missing `content/pages/ib-biology-tutoring.json`; production uses the separate protected native assembly. The public fixture assembly passes, but is not a replacement for that production build.
+
+Current auxedu.com assets were compared with the immutable baseline. CSS and scripts match byte-for-byte; the three affected HTML pages differ only by Cloudflare email obfuscation and its decoder script. The QA comparison normalizes that exact reversible transformation; no Cloudflare email-protection setting was changed.
