@@ -69,6 +69,7 @@ jobs:
         run: |
           mkdir -p /tmp/auxesis-seo-candidate
           cp -R public/. /tmp/auxesis-seo-candidate/
+          printf '%s' '<urlset><url><loc>https://auxedu.com/</loc></url></urlset>' > /tmp/auxesis-seo-candidate/sitemap.xml
           node scripts/approved-public-copy.mjs /tmp/auxesis-seo-candidate
           python3 -m http.server 8765 --bind 127.0.0.1 --directory /tmp/auxesis-seo-candidate >/tmp/auxesis-seo-http.log 2>&1 &
       - name: Install browser test tools
