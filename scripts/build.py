@@ -86,7 +86,7 @@ def build():
         doc=doc.replace('%%COMPONENT:cta%%',shared['cta']).replace('%%VERIFY_URL%%',e(rec['verification_url']))
         for group,cards in groups.items(): doc=doc.replace('%%CARDS:'+group+'%%',cards)
         # Active navigation comes from the requested route, exactly as in the original shell.
-        if route['route'] in ['/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/subjects-programmes/','/recommendations/','/enquire/']:
+        if route['route'] in ['/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/subjects-programmes/','/recommendations/','/enquire/','/faq/','/tutoring-policies/']:
             doc=re.sub(r'(<nav id="main-navigation"[^>]*>.*?href="'+re.escape(route['route'])+r'")>',r'\1 aria-current="page">',doc,count=1,flags=re.S)
         if logo!='/assets/logo.png': doc=doc.replace('src="/assets/logo.png"',f'src="{e(logo)}"')
         if portrait:

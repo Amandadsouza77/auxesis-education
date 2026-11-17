@@ -7,9 +7,11 @@ import {applyPublicCopy} from './approved-public-copy.mjs';
 import {addInternationalRoutes,addOntarioRoutes} from './international-public-wrapper.mjs';
 import {build} from 'esbuild';
 import {prepareNativeInquiry} from './prepare-native-inquiry.mjs';
+import {normalizePublicEmail} from './public-baseline-normalize.mjs';
 const account='2ac862d7c1f865935d185df59e7bd719',project='auxesis-education';
 const root=resolve('work/staging-deployment/runtime'),state='work/approved-audit-release.json';
 const origin='https://auxesis-education.pages.dev';
+const publicHash=(path,bytes)=>sha(path.endsWith('.html')?normalizePublicEmail(bytes.toString()):bytes);
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const require=(v,m)=>{if(!v)throw Error(m);};
 async function cf(path,method='GET',body){
@@ -31,10 +33,12 @@ async function liveBody(path,base=origin){
  require(r.ok||r.status===404&&path==='/404.html','Live baseline fetch failed: '+path+' HTTP '+r.status);return Buffer.from(await r.arrayBuffer());
 }
 async function prepare(){
+ const baseline=JSON.parse(readFileSync('content/pr23-production-baseline.json','utf8'));
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
- require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='0bcf8624a4f0b7b92ec5a4ebdeb0ca963712a910','Live source changed; reconcile approved corrections before deploying');
- require(live.canonical_deployment?.id,'Rollback deployment unavailable');
+ require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash===baseline.productionCommit,'Live source changed; reconcile approved corrections before deploying');
+ require(live.canonical_deployment?.id===baseline.deploymentId,'Pinned rollback deployment changed');
+ require(sha(JSON.stringify(live.deployment_configs))===baseline.configHash&&sha(JSON.stringify(live.source))===baseline.sourceHash,'Recorded production configuration or source changed');
  require(v.PRODUCTION_SYNC_ENABLED?.value==='false'&&v.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Disabled automation guards required');
  require(v.SITE_URL?.value===origin,'Preserve verified initial inquiry origin');
  require(v.ENQUIRY_TO?.value==='adsouza35@gmail.com','Unexpected inquiry recipient');
@@ -44,13 +48,13 @@ async function prepare(){
  require(db!=='4f12fc1d-3e0d-4a11-bd65-e577ce906114','Production/staging isolation required');
  const before={deployment:live.canonical_deployment.id,config:JSON.stringify(live.deployment_configs),source:JSON.stringify(live.source),db,business:await businessDigest(db),publicFiles:{}};
  // Compare every independently verified current production asset before preparation.
- const captured=JSON.parse(readFileSync('content/ontario-previous-baseline-hashes.json'));
+ const captured=baseline.publicAssetHashes;
  const immutable=new URL(live.canonical_deployment.url).origin;
- require(immutable==='https://332ab895.auxesis-education.pages.dev','Unexpected immutable production deployment');
+ require(immutable===baseline.immutableOrigin,'Unexpected immutable production deployment');
  for(const [path,digest] of Object.entries(captured)){
   const url='/'+path.replace(/index\.html$/,'');
   const current=await liveBody(url,immutable);
-  require(sha(current)===digest,'Live baseline changed: '+path+'; reconcile before release');
+  require(publicHash(path,current)===digest,'Live baseline changed: '+path+'; reconcile before release');
   before.publicFiles[url]=sha(current);
  }
  mkdirSync('work',{recursive:true});writeFileSync(state,JSON.stringify(before),{mode:0o600});
@@ -76,7 +80,7 @@ async function prepare(){
   console.log('::notice::Retained restricted record inventory '+JSON.stringify({system:label,counts,recordWrites:0}));
  }
  const candidateAssets=files(resolve(root,'dist')).map(file=>relative(resolve(root,'dist'),file).replaceAll('\\\\','/')).filter(path=>!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.')).sort();
- const expectedAssets=[...Object.keys(captured),...JSON.parse(readFileSync('content/ontario-pages.json','utf8')).map(p=>p.slug+'/index.html')].sort();
+ const expectedAssets=Object.keys(captured).sort();
  require(JSON.stringify(candidateAssets)===JSON.stringify(expectedAssets),'Candidate asset inventory differs from approved international pages');
  for(const file of files(resolve(root,'dist'))){const path=relative(resolve(root,'dist'),file);if(!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.'))before.publicFiles['/'+path.replace(/index\.html$/,'')]=sha(readFileSync(file));}
  writeFileSync(state,JSON.stringify(before),{mode:0o600});
@@ -98,6 +102,8 @@ async function verify(){
  for(const host of [origin,'https://auxedu.com']){
   const r=await fetch(host+'/api/enquiry',{headers:{'Cache-Control':'no-cache'},redirect:'error'});const d=await r.json();require(r.ok&&d.ready&&d.siteKey,'Inquiry readiness unavailable on '+host);
  }
+ const invalid=await fetch('https://auxedu.com/api/enquiry',{method:'POST',redirect:'error',headers:{Origin:'https://auxedu.com','Content-Type':'application/json'},body:JSON.stringify({consent:false})});
+ const invalidResult=await invalid.json();require(invalid.status===400&&invalidResult.ok!==true&&invalidResult.error,'Live enquiry validation failed');
  const deployed=await cf('/pages/projects/'+project);
  const deploymentOrigin=new URL(deployed.canonical_deployment.url).origin;
  for(const [path,digest] of Object.entries(b.publicFiles)){
@@ -118,6 +124,8 @@ async function verify(){
  require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash===process.env.GITHUB_SHA,'Unexpected production commit');
  require(JSON.stringify(live.deployment_configs)===b.config&&JSON.stringify(live.source)===b.source,'Production configuration changed');
  require(JSON.stringify(await businessDigest(b.db))===JSON.stringify(b.business),'Retained business records changed');
+ const checkpoint={commit:process.env.GITHUB_SHA,deploymentId:live.canonical_deployment.id,immutableOrigin:new URL(live.canonical_deployment.url).origin,rollbackDeployment:b.deployment,workerHash:sha(readFileSync(resolve(root,'dist/_worker.js'))),publicAssets:Object.keys(b.publicFiles).length,enquiryReadyBothDomains:true,invalidEnquiryRejected:true,recordsUnchanged:true,configurationUnchanged:true,realEmailsSent:0};
+ writeFileSync('work/approved-release-verification.json',JSON.stringify(checkpoint,null,2));console.log('APPROVED_RELEASE_CHECKPOINT '+JSON.stringify(checkpoint));
  console.log('::notice::Inquiry readiness verified on both domains; unrelated assets, native access boundaries, records and settings preserved. Prior end-to-end inbox receipt is retained; current provider integration is tested with mocked providers and live readiness without sending a duplicate enquiry.');
 }
 async function rollback(){

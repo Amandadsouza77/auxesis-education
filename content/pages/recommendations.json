@@ -22,8 +22,8 @@
     },
     {
       "key": "recommendations-004",
-      "label": "A: Read recommendations on Amanda’s LinkedIn profile",
-      "text": "Read recommendations on Amanda’s LinkedIn profile"
+      "label": "A: Read complete recommendations on LinkedIn",
+      "text": "Read complete recommendations on LinkedIn"
     },
     {
       "key": "recommendations-005",
@@ -58,7 +58,7 @@
     {
       "key": "recommendations-011",
       "label": "P: These are individual experiences. The references to grades describe those famili",
-      "text": "These are individual experiences. The references to grades describe those families’ experiences; they are not promises of a particular result. Read the complete recommendations on LinkedIn for their full context."
+      "text": "These are individual experiences. The references to grades describe those families’ experiences; they are not promises of a particular result."
     },
     {
       "key": "recommendations-013",
@@ -103,7 +103,12 @@
     {
       "key": "recommendations-021",
       "label": "A: Next: Enquire",
-      "text": "Next: Enquire"
+      "text": "Next: FAQs"
+    },
+    {
+      "key": "recommendations-022",
+      "label": "P: Recommendation link context",
+      "text": "for their full context."
     }
   ],
   "title": "Recommendations & Reviews | Auxesis Education",

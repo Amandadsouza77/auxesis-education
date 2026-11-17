@@ -78,7 +78,7 @@
     {
       "key": "how-tutoring-works-015",
       "label": "P: There is no pressure to decide during that meeting. Take time afterwards and mes",
-      "text": "There is no pressure to decide during that meeting. Take time and message me if you would like to proceed. I confirm the arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
+      "text": "There is no pressure to decide during that meeting. Take time to consider it, then contact me if you would like to proceed. I confirm the arrangements and first session date with you, and we decide what to tackle first. The first paid session is a tutoring lesson. I begin with the priorities we have identified and adjust the questions, pace and level of support as I see how the student thinks and what they understand."
     },
     {
       "key": "how-tutoring-works-038",
@@ -97,7 +97,7 @@
     },
     {
       "key": "how-tutoring-works-016",
-      "label": "P: SMART goals. Clear next steps.",
+      "label": "H2: SMART goals. Clear next steps.",
       "text": "SMART goals. Clear next steps."
     },
     {
@@ -127,13 +127,13 @@
     },
     {
       "key": "how-tutoring-works-022",
-      "label": "P: Making the sessions useful",
-      "text": "Making the sessions useful"
+      "label": "P: Feedback & communication",
+      "text": "Feedback & communication"
     },
     {
       "key": "how-tutoring-works-024",
-      "label": "P: I suggest additional practice when it will genuinely support the student’s learn",
-      "text": "I suggest additional practice when it will genuinely support the student’s learning. Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is."
+      "label": "P: Practice is the student’s responsibility.",
+      "text": "Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is."
     },
     {
       "key": "how-tutoring-works-025",
@@ -198,7 +198,7 @@
     {
       "key": "how-tutoring-works-043",
       "label": "A: Preparation & support",
-      "text": "Preparation & support"
+      "text": "Communication & support"
     },
     {
       "key": "how-tutoring-works-044",
@@ -209,6 +209,11 @@
       "key": "how-tutoring-works-045",
       "label": "H2: Communication with students and parents",
       "text": "Communication with students and parents"
+    },
+    {
+      "key": "how-tutoring-works-046",
+      "label": "P: Collaborative goals and clear next steps",
+      "text": "Together, we identify areas to strengthen and set specific, manageable goals. We agree on clear next steps and when to review progress, using the student’s work to recognise improvement and decide what to tackle next."
     }
   ],
   "title": "How Tutoring Works | Auxesis Education",

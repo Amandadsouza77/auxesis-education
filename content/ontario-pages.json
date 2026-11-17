@@ -15,7 +15,7 @@
       {
         "title": "Grade 9 Science",
         "code": "SNC1W · De-streamed",
-        "intro": "Ontario's de-streamed Grade 9 Science course introduces students to fundamental concepts in Biology, Chemistry, Physics, and Earth and Space Science.",
+        "intro": "This course introduces students to fundamental concepts in Biology, Chemistry, Physics, and Earth and Space Science.",
         "topics": [
           {
             "title": "Biology: Sustainable Ecosystems and Climate Change",
@@ -38,7 +38,7 @@
       {
         "title": "Grade 10 Science",
         "code": "SNC2D · Academic | SNC2P · Applied",
-        "intro": "Grade 10 Science builds on the foundations established in Grade 9, allowing students to develop a deeper understanding of scientific concepts and strengthen their investigation and problem-solving skills. Support is adapted to the expectations, learning approaches and assessment requirements of the student's specific course.",
+        "intro": "This course builds on the foundations established in Grade 9, allowing students to develop a deeper understanding of scientific concepts and strengthen their investigation and problem-solving skills. Support is adapted to the expectations, learning approaches and assessment requirements of the student's specific course.",
         "topics": [
           {
             "title": "Biology: Tissues, Organs and Systems",
@@ -114,21 +114,22 @@
     "title": "Ontario Grade 11 & 12 Biology and Chemistry Tutoring | Auxesis",
     "description": "Personalized online Ontario Grade 11 and 12 Biology and Chemistry tutoring. Support for university and college preparation courses and assessment skills.",
     "heading": "Ontario Senior Secondary Biology and Chemistry Tutoring",
-    "subheading": "Grades 11 and 12 Biology and Chemistry",
+    "subheading": "Grades 11 and 12",
     "strapline": "Deepening Scientific Understanding and Developing Analytical Confidence",
     "intro": [
       "Senior secondary science introduces students to increasingly complex biological and chemical systems, requiring deeper conceptual understanding, stronger analytical skills and greater independence.",
       "I provide personalized, one-to-one online tutoring aligned with the Ontario curriculum, supporting students through university and college preparation pathways.",
-      "Using interactive models, visual simulations, guided investigations and structured problem-solving, I help students connect scientific ideas, understand underlying principles and apply their knowledge to unfamiliar situations. Rather than focusing solely on memorizing information or following procedures, lessons emphasize the reasoning behind scientific processes and the development of transferable academic skills."
+      "Lessons are tailored to the student's course expectations, learning needs and goals. Using interactive models, visual simulations, guided investigations, structured explanations and worked examples, I help students connect scientific ideas and understand underlying principles rather than relying on memorization or procedures alone.",
+      "In Biology, students learn to interpret biological diagrams and experimental evidence, analyse data, explain processes and connect structures with functions. In Chemistry, they learn to move between chemical representations, explain reactions at the particle level and solve multi-step calculations through logical reasoning. Across both subjects, lessons develop conceptual understanding, practical scientific skills, clear explanations and the confidence to apply knowledge independently in unfamiliar and real-world contexts."
     ],
     "courseGroups": [
       {
-        "heading": "Ontario Biology Tutoring",
+        "heading": "Biology Tutoring",
         "courses": [
           {
             "title": "Grade 11 Biology",
             "code": "SBI3U · University Preparation",
-            "intro": "Grade 11 Biology introduces students to the diversity and complexity of living organisms, exploring how biological systems function, change and interact.",
+            "intro": "This course introduces students to the diversity and complexity of living organisms, exploring how biological systems function, change and interact.",
             "topics": [
               {
                 "title": "Diversity of Living Things",
@@ -150,25 +151,23 @@
                 "title": "Plants: Anatomy, Growth and Function",
                 "text": "Plant structures, physiological processes and their relationships to environmental conditions."
               }
-            ],
-            "ending": "Lessons develop the ability to interpret biological diagrams, explain complex processes, analyse information and apply scientific reasoning."
+            ]
           },
           {
             "title": "Grade 11 Biology",
             "code": "SBI3C · College Preparation",
-            "intro": "College-preparation Biology focuses on understanding biological systems and their applications in everyday life, health, technology and the environment.",
+            "intro": "This course focuses on understanding biological systems and their applications in everyday life, health, technology and the environment.",
             "topics": [
               {
                 "title": "Areas of study",
                 "text": "Cellular biology, microbiology, genetics, mammalian anatomy and plants in the natural environment."
               }
-            ],
-            "ending": "Tutoring supports conceptual understanding, practical scientific skills, interpretation of information and the application of biological knowledge to real-world situations."
+            ]
           },
           {
             "title": "Grade 12 Biology",
             "code": "SBI4U · University Preparation",
-            "intro": "Grade 12 Biology examines biological processes at the molecular, cellular and systems levels.",
+            "intro": "This course examines biological processes at the molecular, cellular and systems levels.",
             "topics": [
               {
                 "title": "Biochemistry",
@@ -190,18 +189,17 @@
                 "title": "Population Dynamics",
                 "text": "Population growth, interactions and ecological relationships."
               }
-            ],
-            "ending": "Through visual models, guided analysis and structured explanations, students develop a deeper understanding of biological systems and the relationships between their structures and functions. Particular attention is given to interpreting experimental evidence, analysing data, constructing scientific explanations and applying biological concepts to unfamiliar scenarios."
+            ]
           }
         ]
       },
       {
-        "heading": "Ontario Chemistry Tutoring",
+        "heading": "Chemistry Tutoring",
         "courses": [
           {
             "title": "Grade 11 Chemistry",
             "code": "SCH3U · University Preparation",
-            "intro": "Grade 11 Chemistry establishes the foundation for understanding chemical behaviour, quantitative relationships and the interactions between substances.",
+            "intro": "This course establishes the foundation for understanding chemical behaviour, quantitative relationships and the interactions between substances.",
             "topics": [
               {
                 "title": "Structure and Bonding",
@@ -223,13 +221,12 @@
                 "title": "Gases and Atmosphere",
                 "text": "Gases and atmospheric chemistry."
               }
-            ],
-            "ending": "Students learn to move confidently between chemical representations, explain reactions at the particle level and approach calculations through logical, structured reasoning."
+            ]
           },
           {
             "title": "Grade 12 Chemistry",
             "code": "SCH4U · University Preparation",
-            "intro": "Grade 12 Chemistry develops a more advanced understanding of chemical structures, reactions and systems.",
+            "intro": "This course develops a more advanced understanding of chemical structures, reactions and systems.",
             "topics": [
               {
                 "title": "Organic Chemistry",
@@ -251,20 +248,18 @@
                 "title": "Electrochemistry",
                 "text": "Oxidation and reduction, electrochemical cells and electrolysis."
               }
-            ],
-            "ending": "Lessons combine conceptual explanations, worked examples, visual representations and opportunities to apply learning independently. Students develop confidence in interpreting chemical systems, constructing explanations and solving multi-step problems."
+            ]
           },
           {
             "title": "Grade 12 Chemistry",
             "code": "SCH4C · College Preparation",
-            "intro": "College-preparation Chemistry develops practical chemical knowledge and problem-solving skills with applications in industry, technology, health and the environment.",
+            "intro": "This course develops practical chemical knowledge and problem-solving skills with applications in industry, technology, health and the environment.",
             "topics": [
               {
                 "title": "Areas of study",
                 "text": "Matter and qualitative analysis, organic chemistry, electrochemistry, chemical calculations and chemistry in the environment."
               }
-            ],
-            "ending": "Tutoring is tailored to the course expectations and the student's learning goals, with an emphasis on understanding scientific principles and applying them accurately in practical contexts."
+            ]
           }
         ]
       }

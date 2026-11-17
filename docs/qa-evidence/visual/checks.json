@@ -1,0 +1,12 @@
+{
+  "pages": 17,
+  "layouts": 68,
+  "widths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "minimumButtonContrast": 4.552883655000035,
+  "interactionProbes": 68
+}

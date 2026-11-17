@@ -1,0 +1,85 @@
+name: Programme and form QA (no deployment)
+on:
+  push:
+    branches: [codex/programme-form-quality]
+permissions:
+  contents: read
+jobs:
+  public-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Capture public production baseline without submitting forms
+        run: |
+          mkdir -p work/public-baseline
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {normalizePublicEmail} from './scripts/public-baseline-normalize.mjs';
+          const origin='https://b55b1719.auxesis-education.pages.dev';
+          const paths=['styles.css','reviews.js','programmes.js','site-config.js','app.js','subjects-programmes/','enquire/','recommendations/'];
+          const manifest={};
+          for(const path of paths){
+            const r=await fetch(origin+'/'+path,{redirect:'error'});
+            if(!r.ok)throw Error('Public baseline HTTP '+r.status+' '+path);
+            const bytes=Buffer.from(await r.arrayBuffer());
+            writeFileSync('work/public-baseline/'+path.replaceAll('/','_'),bytes);
+            manifest[path]=createHash('sha256').update(bytes).digest('hex');
+            const live=await fetch('https://auxedu.com/'+path,{redirect:'error'});
+            if(!live.ok)throw Error('Current public asset unavailable '+path);
+            const liveBytes=Buffer.from(await live.arrayBuffer());
+            writeFileSync('work/public-baseline/current-'+path.replaceAll('/','_'),liveBytes);
+            const current=createHash('sha256').update(liveBytes).digest('hex');
+            if(current!==manifest[path]){
+              if(normalizePublicEmail(bytes.toString())!==normalizePublicEmail(liveBytes.toString()))throw Error('Substantive current production difference: '+path);
+              console.log(path+': matches immutable HTML after normalizing Cloudflare email obfuscation only');
+            }
+          }
+          for(const host of ['https://auxedu.com','https://auxesis-education.pages.dev']){
+            const r=await fetch(host+'/api/enquiry',{redirect:'error'});
+            const data=await r.json();
+            if(!r.ok||!data.ready)throw Error('Enquiry readiness failed');
+            console.log(host+' enquiry ready: true');
+          }
+          writeFileSync('work/public-baseline/hashes.json',JSON.stringify(manifest,null,2));
+          console.log('Eight public assets captured. GET only; no submissions or provider writes.');
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-production-baseline
+          path: work/public-baseline
+          retention-days: 7
+      - run: npm install --no-save --ignore-scripts esbuild@0.25
+      - run: npm test
+      - name: Install browser tools for isolated public fixtures
+        run: npm install --no-save --ignore-scripts esbuild@0.25 playwright@1.56.0
+      - run: test -x /usr/bin/google-chrome
+      - name: Assemble public fixtures and run responsive form regression
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node scripts/prepare-programme-form-qa.mjs
+          node scripts/programme-form-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-form-qa-evidence
+          path: work/qa-evidence
+          retention-days: 14
+      - name: Audit all public layouts and verify the visual system
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node scripts/visual-consistency-audit.mjs work/after work/visual-after
+          node scripts/visual-consistency-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-visual-consistency-evidence
+          path: work/visual-after
+          retention-days: 14

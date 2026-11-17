@@ -1,0 +1,12 @@
+{
+  "verifiedCandidate": "72c7f18332612f856388293d8d6c8a8e031d4e9f",
+  "trustedWorkflowCommit": "d3ea3c955c7f441dbfd8d6a2adfdcabf7be85db2",
+  "nativeRun": "https://github.com/Amandadsouza77/auxesis-education/actions/runs/44104772698",
+  "publicRun": "https://github.com/Amandadsouza77/auxesis-education/actions/runs/44105035928",
+  "packageSha256": "bccdaba4e8d4af564feddf7e72cb0648092c8ccef86c742db7fd658a89bc371e",
+  "completedAt": "2026-11-17T14:35:58Z",
+  "merged": false,
+  "deployed": false,
+  "publicWorkflowCommit": "6ee70607a14883e2404ab2f941a4416474fe3c8f",
+  "liveReviewProbesRemoved": true
+}

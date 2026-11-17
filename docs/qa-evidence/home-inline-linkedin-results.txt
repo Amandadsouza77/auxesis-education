@@ -1,0 +1,6 @@
+PASS: homepage verification contains one inline underlined LinkedIn word; mouse/keyboard destination remains the existing profile. Checked at 320, 390, 768, 1024 and 1440px. External target requests intercepted; no external profile-content verification claimed.
+PASS 320px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 390px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 768px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 1024px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 1440px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials

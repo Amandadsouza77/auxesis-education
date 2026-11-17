@@ -1,0 +1,21 @@
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 320px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 320px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 320px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 320px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 390px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 390px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 390px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 390px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 768px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 768px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 768px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 768px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 1440px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 1440px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 1440px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 1440px
+PASS: review required fields/consent, JSON validation errors, non-JSON hostname error, HTTP 200 ok:false, retained values, real-success-only confirmation (all intercepted)
+PASS: enquiry required fields, Other selections, consent, missing spam check, retained data on provider failure and business-day confirmation; two intercepted POSTs, zero real emails
+PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure
+PASS: internal destinations and fragments across 16 public pages; seven existing recommendation cards intact
+PASS: concise destination links and consistent AS & A-Level / GCSE & IGCSE names across all 16 public pages

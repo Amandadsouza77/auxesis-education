@@ -1,0 +1,86 @@
+{
+  "index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "Getting started",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "We begin with a free Meet & Greet to discuss the course, learning goals and where support would help. It’s a chance to get to know each other before you decide whether tutoring feels right."
+  },
+  "about-auxesis/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "A first conversation",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "A free Meet & Greet is a chance to discuss the student’s goals and how this approach could support them. We can explore what would be useful before you decide whether to begin."
+  },
+  "about-amanda/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "Meet your tutor",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "Start with a free Meet & Greet to talk about the course, current challenges and learning goals. It gives us a chance to get to know each other and see whether we would work well together."
+  },
+  "recommendations/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "Your next step",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "If the experiences here sound like the kind of support you are looking for, start with a free Meet & Greet. We’ll talk about the course, goals and what would help."
+  },
+  "faq/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "A Meet & Greet to talk things through",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "A free Meet & Greet gives us time to discuss your questions, the course and where support would help. You can get a feel for working together before deciding whether to begin."
+  },
+  "tutoring-policies/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "Clear from the start",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "A free Meet & Greet gives us time to discuss the course and learning goals. I’ll confirm the tutoring arrangements before you decide whether to proceed."
+  },
+  "privacy-consent/index.html": {
+    "beforeHeading": "Let’s talk about the next step.",
+    "heading": "A conversation to begin",
+    "beforeText": "Tell me about the course, learning goals and where support would help. We start with a Meet & Greet, then you can decide whether Auxesis feels like the right fit.",
+    "text": "Share the course, learning goals and the support you are looking for. We can discuss these in a free Meet & Greet before you decide whether to start tutoring."
+  },
+  "subjects-programmes/index.html": {
+    "beforeHeading": "From enquiry to first lesson.",
+    "heading": "Find the right starting point",
+    "beforeText": "Find out what happens after an enquiry, how the Meet & Greet works and how lessons begin.",
+    "text": "Tell me which course the student is taking and where support would help. A free Meet & Greet lets us discuss priorities and decide whether Auxesis is a good fit."
+  },
+  "ib-biology-tutoring/index.html": {
+    "beforeHeading": "Discuss the student’s needs",
+    "heading": "IB Biology: getting started",
+    "beforeText": "Share the course, examination board where relevant, and the areas where support would help. We can discuss whether Auxesis is a good fit.",
+    "text": "Share the student’s SL or HL course and the topics or skills they would like to strengthen. We can discuss their priorities in a free Meet & Greet before deciding whether tutoring is a good fit."
+  },
+  "ib-chemistry-tutoring/index.html": {
+    "beforeHeading": "Discuss the student’s needs",
+    "heading": "An introduction to IB Chemistry support",
+    "beforeText": "Share the course, examination board where relevant, and the areas where support would help. We can discuss whether Auxesis is a good fit.",
+    "text": "Tell me about the student’s SL or HL course and where the chemistry is proving difficult. A free Meet & Greet gives us a chance to discuss their goals and the support that would be useful."
+  },
+  "a-level-biology-tutoring/index.html": {
+    "beforeHeading": "Discuss the student’s needs",
+    "heading": "AS & A-Level: getting started",
+    "beforeText": "Share the course, examination board where relevant, and the areas where support would help. We can discuss whether Auxesis is a good fit.",
+    "text": "Share the examination board and the areas of Biology where support would help. We can talk through the student’s course and priorities during a free Meet & Greet."
+  },
+  "gcse-igcse-science-tutoring/index.html": {
+    "beforeHeading": "Discuss the student’s needs",
+    "heading": "A first conversation about science",
+    "beforeText": "Share the course, examination board where relevant, and the areas where support would help. We can discuss whether Auxesis is a good fit.",
+    "text": "Send the examination board, course and Biology or Chemistry topics the student wants to focus on. A free Meet & Greet lets us discuss those needs and confirm whether the support is suitable."
+  },
+  "ontario-grade-9-10-science-tutoring/index.html": {
+    "beforeHeading": "Getting Started",
+    "heading": "Grades 9–10: getting started",
+    "beforeText": "Every student begins with a free Meet & Greet to discuss their current course, learning needs and goals. Lessons are then designed around the individual student, supporting both immediate classroom learning and longer-term scientific understanding.",
+    "text": "Begin with a free Meet & Greet to discuss the student’s Science course, current questions and learning goals. Together, we can identify a useful starting point."
+  },
+  "ontario-grade-11-12-biology-chemistry-tutoring/index.html": {
+    "beforeHeading": "Getting Started",
+    "heading": "A Meet & Greet for senior science",
+    "beforeText": "Begin with a free Meet & Greet to discuss the student's course, current challenges and learning goals. Lessons are then tailored to their individual needs, whether they are building understanding of difficult concepts, strengthening analytical skills or developing greater confidence in Biology or Chemistry.",
+    "text": "A free Meet & Greet gives us time to discuss the student’s Biology or Chemistry course and their goals for Grades 11 or 12. We can then consider the support that would be useful."
+  }
+}

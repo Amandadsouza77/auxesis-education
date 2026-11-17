@@ -35,7 +35,7 @@ if(enquiry){
 }
 function formUnavailable(form,kind,temporary=false){
   const note=form.querySelector('.delivery-note');
-  if(note){if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please email Amanda at ';note.hidden=false;}
+  if(note){if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please try again later.';note.hidden=false;}
   form.dataset.deliveryUnavailable='true';
   const button=form.querySelector('button[type="submit"]');button.disabled=true;
   button.textContent=temporary?'Form temporarily unavailable':kind==='enquiry'?'Online enquiries coming soon':'Online reviews coming soon';
@@ -84,7 +84,7 @@ for(const [id,statusId,kind,success] of forms){
       if(!response.ok)throw new Error('Availability check failed');const config=await response.json();
       if(!config.ready||!config.siteKey)throw new Error('Email is not configured');
       await setupSpamCheck(config.siteKey);button.disabled=false;
-    }).catch(()=>{formUnavailable(form,kind,true);status.textContent='Online enquiries are temporarily unavailable. Please email adsouza35@gmail.com.';});
+    }).catch(()=>{formUnavailable(form,kind,true);status.textContent='Online enquiries are temporarily unavailable. Please try again later.';});
   }
   else if(portalDelivery){const button=form.querySelector('button[type="submit"]');button.disabled=true;refreshFormCheck().then(config=>{formCheck=config;button.disabled=false;}).catch(()=>formUnavailable(form,kind,true));}
   else if(!window.AUXESIS?.turnstileSiteKey)formUnavailable(form,kind);

@@ -24,7 +24,7 @@ export function applySeoMetadata(file, html) {
   html = replaceOnce(html, /<title>[\s\S]*?<\/title>/gi, `<title>${escapeHtml(title)}</title>`, `${file} title`);
   html = replaceOnce(html, /<meta\s+name="description"\s+content="[^"]*"\s*\/?\s*>/gi, `<meta name="description" content="${escapeHtml(description)}">`, `${file} description`);
   if (file === 'home.html') {
-    const schema = { '@context':'https://schema.org', '@type':'EducationalOrganization', name:'Auxesis Education', url:'https://auxedu.com/', email:'adsouza35@gmail.com', logo:'https://auxedu.com/assets/logo-header-transparent.svg' };
+    const schema = { '@context':'https://schema.org', '@type':'EducationalOrganization', name:'Auxesis Education', url:'https://auxedu.com/', logo:'https://auxedu.com/assets/logo-header-transparent.svg' };
     if (/application\/ld\+json/i.test(html)) throw Error('Review existing structured data before adding organization schema');
     html = replaceOnce(html, /<\/head>/gi, `<script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script></head>`, 'head close');
   }

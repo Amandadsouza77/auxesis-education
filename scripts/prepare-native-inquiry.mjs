@@ -33,6 +33,7 @@ export function prepareNativeInquiry(directory) {
   require(supported.includes(sha(currentApp)), 'Native app.js has newer changes; compare before applying.');
 
   const writes = {
+    'inquiry/cloudflare/crypto.js': readFileSync(resolve(source, 'cloudflare/crypto.js'), 'utf8'),
     'inquiry/lib/time-zones.js': readFileSync(resolve(source, 'lib/time-zones.js'), 'utf8'),
     'inquiry/lib/server.js': readFileSync(resolve(source, 'lib/server.js'), 'utf8'),
     'inquiry/cloudflare/inquiry-worker.js': readFileSync(resolve(source, 'cloudflare/inquiry-worker.js'), 'utf8'),

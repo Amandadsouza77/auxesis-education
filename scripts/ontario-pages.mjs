@@ -16,8 +16,7 @@ function replaceExactlyOnce(source, search, replacement, label){
 function renderCourse(course,senior=false){
  const topicTag=senior?'h5':'h4';
  const body = '<p>'+escape(course.intro)+'</p>'+
-  (course.topics||[]).map(topic=>'<div class="ontario-topic"><'+topicTag+'>'+escape(topic.title)+'</'+topicTag+'><p>'+escape(topic.text)+'</p></div>').join('')+
-  (course.ending?para(course.ending):'');
+  (course.topics||[]).map(topic=>'<div class="ontario-topic"><'+topicTag+'>'+escape(topic.title)+'</'+topicTag+'><p>'+escape(topic.text)+'</p></div>').join('');
  const heading=senior
   ?'<h4 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h4>'
   :'<h3 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h3>';
@@ -36,7 +35,7 @@ function renderPage(page,template){
  const assessmentSection='<section class="section ontario-assessment"><div class="wrap"><h2>Assessment Support</h2>'+paragraphs(page.assessment)+'</div></section>';
  const related='<section class="section ontario-related"><div class="wrap"><h2>Explore Related Support</h2><ul>'+page.related.map(([name,url])=>'<li><a href="'+escape(url)+'">'+escape(name)+'</a></li>').join('')+'</ul></div></section>';
  const conclusionSection='<section class="section"><div class="wrap"><h2>'+escape(page.conclusionHeading)+'</h2>'+paragraphs(page.conclusion)+'</div></section>';
- const mypSection=page.mypSupport?'<section class="section ontario-myp"><div class="wrap"><h2>Additional Support: IB MYP Science</h2><p class="eyebrow">'+escape(page.mypSupport.code)+'</p>'+para(page.mypSupport.intro)+'<p><a class="text-link" href="/subjects-programmes/">Explore the IB Middle Years Programme</a></p></div></section>':'';
+ const mypSection=page.mypSupport?'<section class="section ontario-myp"><div class="wrap"><h2>Additional Support: IB MYP Science</h2><p class="eyebrow">'+escape(page.mypSupport.code)+'</p>'+para(page.mypSupport.intro)+'<p><a class="text-link" href="/subjects-programmes/#myp">Explore the IB Middle Years Programme</a></p></div></section>':'';
  const contentSections=page.mypSupport?skills+assessmentSection+courseMarkup+conclusionSection+mypSection:skills+courseMarkup+assessmentSection+conclusionSection;
  const main='<main id="main"><section class="page-hero"><div class="wrap"><a class="back-link" href="/subjects-programmes/">Back to Subjects &amp; Programmes</a><p class="eyebrow">One-to-one online tutoring</p><h1>'+escape(page.heading)+'</h1><p class="lead">'+escape(page.subheading)+'</p><h2 class="ontario-tagline">'+escape(page.strapline)+'</h2>'+paragraphs(page.intro)+'</div></section>'+contentSections+related+'<section class="section"><div class="wrap"><h2>'+escape(page.ctaHeading)+'</h2>'+para(page.cta)+'<p><a class="button" href="/enquire/">'+escape(page.ctaText)+'</a></p><p><a href="/tutoring-policies/#academic-integrity">Read the academic-integrity policy</a></p></div></section></main>';
  let html=template;

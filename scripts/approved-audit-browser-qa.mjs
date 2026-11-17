@@ -3,12 +3,14 @@ import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const origin=process.env.QA_ORIGIN||'https://auxedu.com';
-const routes=JSON.parse(readFileSync('templates/routes.json'));
-const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+const routes=[...Object.keys(JSON.parse(readFileSync('content/approved-public-corrections.json'))).map(f=>({route:f==='home.html'?'/':f==='404.html'?'/404.html':'/'+f.replace('.html','')+'/'})),...JSON.parse(readFileSync('content/international-pages.json')).map(p=>({route:'/'+p.slug+'/'})),...JSON.parse(readFileSync('content/ontario-pages.json')).map(p=>({route:'/'+p.slug+'/'}))];
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox']});
 try{
  const page=await browser.newPage(),errors=[];
  if(process.env.QA_ORIGIN)await page.route('**/api/enquiry',route=>route.request().method()==='GET'?route.fulfill({contentType:'application/json',body:'{"ready":true,"siteKey":"1x00000000000000000000AA"}'}):route.abort());
  page.on('pageerror',e=>errors.push(e.message));
+ // Public review-token GETs issue anti-spam records; intercept during browser QA.
+ await page.route('**/api/reviews/config',r=>r.fulfill({json:{ready:false}}));
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});
   for(const route of routes){
@@ -20,7 +22,7 @@ try{
    const broken=await page.evaluate(()=>[...document.querySelectorAll('a[href^="#"]')].map(a=>a.getAttribute('href')).filter(h=>h.length>1&&!document.getElementById(decodeURIComponent(h.slice(1)))));assert.deepEqual(broken,[],route.route+' broken anchors');
    if(route.route!=='/404.html')assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://auxedu.com'+route.route);
   }
-  console.log('::notice::All 11 public routes: layout, headings, anchors, canonical metadata and absent portal links pass at '+width+'px');
+  console.log(`::notice::All ${routes.length} public routes: layout, headings, anchors, canonical metadata and absent portal links pass at ${width}px`);
  }
  await page.setViewportSize({width:390,height:900});await page.goto(origin+'/faq/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('.menu-toggle');await menu.click();assert.equal(await menu.getAttribute('aria-expanded'),'true');await page.keyboard.press('Escape');assert.equal(await menu.getAttribute('aria-expanded'),'false');

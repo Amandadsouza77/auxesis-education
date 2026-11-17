@@ -1,0 +1,6 @@
+PASS 320px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
+PASS 390px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
+PASS 580px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
+PASS 768px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
+PASS 1024px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
+PASS 1440px: enquiry on its own row; Policies/FAQ grouped below (stacked on phones); original destinations, keyboard order/focus and 44px targets retained; no overflow.
