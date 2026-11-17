@@ -4,6 +4,7 @@ import {readFileSync,readdirSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createHash,randomBytes} from 'node:crypto';
 import * as runtime from 'miniflare';
+import {spawnSync} from 'node:child_process';
 const root=resolve(process.env.QA_NATIVE_ROOT||'work/staging-deployment/runtime');
 const legacy='https://auxesis-education.pages.dev',custom='https://auxedu.com';
 const digest=s=>createHash('sha256').update(s).digest('hex');
@@ -14,8 +15,16 @@ try{
  const db=await mf.getD1Database('PORTAL_DB','native-candidate-review-qa');
  const migrations=root+'/cloudflare/migrations';
  for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')).sort()){
-  const sql=readFileSync(migrations+'/'+file,'utf8').replace(/--[^\n]*/g,'');
-  for(const statement of sql.split(';').map(x=>x.trim()).filter(Boolean))await db.prepare(statement).run();
+  const parsed=spawnSync('python3',['-c',`import sys,sqlite3,json
+text=sys.stdin.read();statements=[];buffer=''
+for char in text:
+ buffer+=char
+ if char==';' and sqlite3.complete_statement(buffer):
+  statements.append(buffer);buffer=''
+if buffer.strip() and not all(not line.strip() or line.lstrip().startswith('--') for line in buffer.splitlines()):raise ValueError('Incomplete migration SQL')
+print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),encoding:'utf8'});
+  assert.equal(parsed.status,0,'Migration statement parser');
+  for(const statement of JSON.parse(parsed.stdout))await db.prepare(statement).run();
  }
  const initial=await db.prepare('SELECT COUNT(*) AS n FROM website_reviews').first();assert.equal(initial.n,0,'Only a new empty local review database is allowed');
  const session=randomBytes(32).toString('base64url');
