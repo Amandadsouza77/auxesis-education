@@ -1,0 +1,4 @@
+PASS: Feedback & communication replaces Making the sessions useful as the decorative label.
+PASS: the sentence beginning I suggest additional practice is removed; remaining practice policy and communication/feedback paragraphs are retained.
+PASS: public assembly and editable page/default copy agree; actual heading levels are unchanged.
+PASS: all 17 pages at four widths and 68 focus/hover probes pass the existing visual preservation checks with these explicit owner wording changes.

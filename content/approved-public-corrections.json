@@ -159,6 +159,14 @@
     {
       "before": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The parent conversation and Meet & Greet are free.",
       "after": "Send an enquiry with the subject, programme and kind of support you are looking for. I will confirm the rate, currency and payment arrangements before you decide whether to proceed. The Meet & Greet is free."
+    },
+    {
+      "before": "Making the sessions useful",
+      "after": "Feedback & communication"
+    },
+    {
+      "before": "I suggest additional practice when it will genuinely support the student’s learning. Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is.",
+      "after": "Practice is the student’s responsibility. If practice is not completed, we simply begin the next session from where the student is."
     }
   ],
   "404.html": [
