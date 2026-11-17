@@ -40,6 +40,29 @@ jobs:
           if(mismatches.length){console.log(JSON.stringify({mismatches}));throw Error('Baseline mismatches');}
           console.log('PASS: '+Object.keys(manifest).length+' immutable Phase 1 assets match.');
           JS
+      - name: Capture and compare verified Phase 2 static baseline
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const old=JSON.parse(readFileSync('content/international-previous-baseline-hashes.json','utf8'));
+          const newPages=JSON.parse(readFileSync('content/international-pages.json','utf8')).map(p=>p.slug+'/index.html');
+          const allowed=new Set(['about-amanda/index.html','subjects-programmes/index.html','sitemap.xml',...newPages]);
+          const paths=[...Object.keys(old),...newPages].sort(), manifest={};
+          for(const path of paths){
+           let url='https://332ab895.auxesis-education.pages.dev/'+path.replace(/index\\.html$/,''),r;
+           for(let i=0;i<4;i++){r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
+            if(![301,302,303,307,308].includes(r.status))break;
+            const next=new URL(r.headers.get('location'),url);
+            if(next.origin!=='https://332ab895.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);url=next.href;
+           }
+           if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
+           manifest[path]=createHash('sha256').update(Buffer.from(await r.arrayBuffer())).digest('hex');
+           if(old[path]&&!allowed.has(path)&&old[path]!==manifest[path])throw Error('Unexpected Phase 2 asset change: '+path);
+          }
+          console.log('PHASE2_BASELINE_MANIFEST '+JSON.stringify(manifest));
+          console.log('PASS: 55 immutable Phase 2 assets compared; only approved page, biography and sitemap changes allowed.');
+          JS
       - name: Prepare synthetic static candidate
         run: |
           mkdir -p /tmp/auxesis-seo-candidate
