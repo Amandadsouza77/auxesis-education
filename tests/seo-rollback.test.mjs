@@ -13,6 +13,7 @@ for (const mode of ['unchanged','different-release','own-release']) test('rollba
   mkdirSync(join(root,'content'));
   copyFileSync('content/approved-public-corrections.json',join(root,'content','approved-public-corrections.json'));
   copyFileSync('content/international-pages.json',join(root,'content','international-pages.json'));
+  copyFileSync('content/ontario-pages.json',join(root,'content','ontario-pages.json'));
   writeFileSync(join(root,'work','approved-audit-release.json'),JSON.stringify({deployment:'saved-deployment'}));
   const script=resolve('scripts/approved-audit-release.mjs');
   const runner=`
