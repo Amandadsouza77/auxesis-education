@@ -1222,5 +1222,9 @@
   "privacy-consent-012": {
     "text": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository.",
     "raw": "GitHub Actions is used for controlled deployment and migration workflows, which can temporarily process recovery data. GitHub is not the live Portal database, and private production records are not published in the public website repository."
+  },
+  "recommendations-022": {
+    "raw": "for their full context.",
+    "text": "for their full context."
   }
 }

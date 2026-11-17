@@ -5,6 +5,9 @@ import {readFileSync,existsSync,mkdirSync,writeFileSync} from 'node:fs';
 import {resolve,extname} from 'node:path';
 import assert from 'node:assert/strict';
 const output=resolve('work/qa-evidence');mkdirSync(output,{recursive:true});
+const cards=html=>html.match(/<figure class="recommendation-card">[\s\S]*?<\/figure>/g)||[];
+assert.equal(cards(readFileSync('work/after/recommendations/index.html','utf8')).length,7);
+assert.deepEqual(cards(readFileSync('work/after/recommendations/index.html','utf8')),cards(readFileSync('work/before/recommendations/index.html','utf8')),'All seven existing review excerpts, attribution and dates remain exactly intact');
 const servers=[];
 for(const [folder,port] of [['before',8766],['after',8767]]){
  const root=resolve('work/'+folder);
@@ -96,6 +99,20 @@ try{
    }
    if(slug==='gcse-igcse-science-tutoring')await page.screenshot({path:output+'/subject-detail-after-'+width+'.png',fullPage:true});
   }
+  await page.goto('http://127.0.0.1:8767/recommendations/',{waitUntil:'domcontentloaded'});await page.evaluate(()=>document.fonts.ready);
+  const invitation=page.locator('.review-invitation'),reviewLink=invitation.getByRole('link',{name:'Leave a review',exact:true});
+  const invitationSize=await reviewLink.evaluate(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,parent:e.parentElement.getBoundingClientRect().width,gap:e.getBoundingClientRect().top-document.querySelector('.page-hero .lead').getBoundingClientRect().bottom}));
+  assert(Math.abs(invitationSize.width-invitationSize.parent)<1&&invitationSize.height>=44,'Review invitation fills content width with accessible target');
+  assert(invitationSize.gap>=32&&invitationSize.gap<=64,'Review invitation has a clear compact gap above it');
+  const calloutStyles=await page.locator('.cta-band .button').evaluateAll(es=>es.map(e=>{const s=getComputedStyle(e);return s.backgroundColor+'/'+s.color;}));assert(calloutStyles.every(s=>s===calloutStyles[0]),'Review invitation uses existing enquiry callout colours');
+  const contextLink=page.locator('.recommendations-intro p a');assert.equal(await contextLink.count(),1);assert.equal(await contextLink.innerText(),'Read complete recommendations on LinkedIn');assert.equal(await contextLink.getAttribute('href'),'https://www.linkedin.com/in/adsouza35/');
+  assert((await contextLink.evaluate(e=>getComputedStyle(e).textDecorationLine)).includes('underline'),'Inline LinkedIn link is underlined');
+  assert.equal(await page.locator('.recommendations-intro .reading-column>a').count(),0,'Duplicate standalone recommendation link removed');
+  assert((await page.locator('.recommendations-intro p').innerText()).endsWith('for their full context.'));
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Recommendations have no horizontal overflow');
+  if(width===390||width===1440){await invitation.screenshot({path:output+'/review-invitation-'+width+'.png'});await page.locator('.recommendations-intro').screenshot({path:output+'/recommendations-inline-link-'+width+'.png'});}
+  await reviewLink.focus();await page.keyboard.press('Enter');await page.waitForURL('**/#review-form');assert(await page.locator('#review-form').isVisible(),'Keyboard invitation reaches the existing review form');
+  results.push('PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at '+width+'px');
   results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at '+width+'px');
   results.push('PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');

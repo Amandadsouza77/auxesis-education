@@ -6,6 +6,7 @@ import {applyInternational} from './international-pages.mjs';
 import {applyOntario} from './ontario-pages.mjs';
 import {applyProgrammeFormCorrections} from './programme-form-corrections.mjs';
 import {applyPublicLinkLabels} from './public-link-labels.mjs';
+import {applyRecommendationsPresentation} from './recommendations-presentation.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -43,6 +44,7 @@ export function applyPublicCopy(root){
  applyInternational(root);
  applyOntario(root);
  applyProgrammeFormCorrections(root);
+ applyRecommendationsPresentation(root);
  const detailPages=[...JSON.parse(readFileSync('content/international-pages.json')), ...JSON.parse(readFileSync('content/ontario-pages.json'))];
  applyPublicLinkLabels(root,[...Object.keys(edits).map(file=>file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html')),...detailPages.map(p=>p.slug+'/index.html')]);
 }
