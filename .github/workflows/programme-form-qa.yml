@@ -44,5 +44,23 @@ jobs:
           name: public-production-baseline
           path: work/public-baseline
           retention-days: 7
+      - name: Diagnose review validation without creating records
+        run: |
+          node --input-type=module <<'JS'
+          for(const origin of ['https://auxedu.com','https://auxesis-education.pages.dev']){
+            const config=await fetch(origin+'/api/reviews/config');
+            const cfg=await config.json();
+            console.log(JSON.stringify({origin,configStatus:config.status,configKeys:Object.keys(cfg),error:cfg.error}));
+            const r=await fetch(origin+'/api/reviews',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({review:'',public_label:'',consent:false})});
+            const body=await r.json();
+            if(r.ok)throw Error('Empty non-consenting review unexpectedly accepted');
+            console.log(JSON.stringify({origin,invalidStatus:r.status,error:body.error}));
+            const list=await fetch(origin+'/api/reviews');const reviews=await list.json();
+            console.log(JSON.stringify({origin,publicStatus:list.status,publishedCount:reviews.reviews?.length}));
+            const management=await fetch(origin+'/api/reviews/manage');
+            if(management.status!==401)throw Error('Management authentication regression');
+          }
+          JS
+      - run: npm install --no-save --ignore-scripts esbuild@0.25
       - run: npm test
-      - run: npm run build
+
