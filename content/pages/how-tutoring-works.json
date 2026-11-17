@@ -97,7 +97,7 @@
     },
     {
       "key": "how-tutoring-works-016",
-      "label": "P: SMART goals. Clear next steps.",
+      "label": "H2: SMART goals. Clear next steps.",
       "text": "SMART goals. Clear next steps."
     },
     {
@@ -209,6 +209,11 @@
       "key": "how-tutoring-works-045",
       "label": "H2: Communication with students and parents",
       "text": "Communication with students and parents"
+    },
+    {
+      "key": "how-tutoring-works-046",
+      "label": "P: Collaborative goals and clear next steps",
+      "text": "Together, we identify areas to strengthen and set specific, manageable goals. We agree on clear next steps and when to review progress, using the student’s work to recognise improvement and decide what to tackle next."
     }
   ],
   "title": "How Tutoring Works | Auxesis Education",

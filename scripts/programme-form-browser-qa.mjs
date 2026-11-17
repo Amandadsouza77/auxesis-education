@@ -29,7 +29,7 @@ try{
    assert.equal(await page.locator('.programme-disclosure[open]').count(),5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' programme overflow '+width);
    const copy=await page.locator('main').evaluate(e=>{const clone=e.cloneNode(true);clone.querySelectorAll('a,.programme-experience').forEach(n=>n.remove());return [...clone.querySelectorAll('p,h1,h2,h3')].map(n=>n.textContent.trim()).filter(Boolean);});
-   const text=copy.map(s=>s.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE & IGCSE').replaceAll('AS and A-Level','AS & A-Level').replace('Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.','Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.')).sort().join('\n');if(state==='before')programmeText=text;else assert.equal(text,programmeText,'Programme body copy preserved except explicit owner wording changes');
+   const text=copy.map(s=>s.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE & IGCSE').replaceAll('AS and A-Level','AS & A-Level').replace('Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.','Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.').replace(' Adult students are welcome to enquire directly.','')).sort().join('\n');if(state==='before')programmeText=text;else assert.equal(text,programmeText,'Programme body copy preserved except explicit owner wording changes');
    if(state==='after'){
     assert.equal(await page.locator('.programme-links').count(),5);
     assert.equal(await page.locator('.programme-experience').count(),1);assert((await page.locator('.programme-experience').innerText()).includes('IB Biology Assistant Examiner'));assert.equal(await page.locator('.programme-experience a').count(),0);
@@ -122,12 +122,20 @@ try{
   assert(informationGap>=40&&informationGap<=64,'Home information/recommendation gap is compact: '+informationGap);
   for(const label of ['SMART goals','Communication & support'])assert.equal(await page.locator('.home-support-links').getByRole('link',{name:label,exact:true}).count(),1);
   if(width===390||width===1440)await page.locator('.home-getting-started').screenshot({path:output+'/home-support-navigation-'+width+'.png'});
+  await page.locator('.home-support-links').getByRole('link',{name:'SMART goals',exact:true}).click();await page.waitForURL('**/#smart-goals');await page.waitForLoadState('domcontentloaded');
+  const goals=page.locator('#smart-goals');assert.equal(await goals.getByRole('heading',{level:2}).innerText(),'SMART goals. Clear next steps.');
+  const goalsCopy=goals.locator('.smart-goals-copy');assert((await goalsCopy.innerText()).includes('specific, manageable goals'));assert((await goalsCopy.innerText()).includes('when to review progress'));
+  const contrast=await goalsCopy.evaluate(e=>{const rgb=s=>s.match(/[\d.]+/g).slice(0,3).map(Number);const luminance=c=>c.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);const a=luminance(rgb(getComputedStyle(e).color)),b=luminance(rgb(getComputedStyle(e.closest('section')).backgroundColor));return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);});assert(contrast>=4.5,'SMART goals explanation has readable text contrast');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'SMART goals page has no horizontal overflow');
+  if(width===390||width===1440)await goals.screenshot({path:output+'/smart-goals-'+width+'.png'});
+  await page.goto('http://127.0.0.1:8767/',{waitUntil:'domcontentloaded'});
   const menu=page.locator('.menu-toggle');if(await menu.isVisible()){await menu.focus();await page.keyboard.press('Enter');assert.equal(await menu.getAttribute('aria-expanded'),'true');}
   const faqLink=page.locator('#main-navigation').getByRole('link',{name:'FAQs',exact:true});assert(await faqLink.isVisible());await faqLink.focus();await page.keyboard.press('Enter');await page.waitForURL('**/faq/');await page.waitForLoadState('domcontentloaded');
   assert.equal(await page.locator('#main-navigation [aria-current="page"]').innerText(),'FAQs');
   await page.getByRole('link',{name:'Next: Policies',exact:true}).click();await page.waitForURL('**/tutoring-policies/');await page.waitForLoadState('domcontentloaded');assert.equal(await page.locator('#main-navigation [aria-current="page"]').innerText(),'Policies');
   await page.getByRole('link',{name:'Next: Enquire',exact:true}).click();await page.waitForURL('**/enquire/');
   results.push('PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at '+width+'px');
+  results.push('PASS: SMART goals has a real H2, concise collaborative explanation, review steps, 4.5:1-or-better text contrast and no overflow at '+width+'px');
   results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at '+width+'px');
   results.push('PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
@@ -189,6 +197,7 @@ try{
   assert(!(await page.content()).includes('adsouza35@gmail.com'),path+' personal address absent from public HTML');
   for(const href of ['/faq/','/tutoring-policies/'])assert.equal(await page.locator('#main-navigation>a[href="'+href+'"]').count(),1,path+' important page in primary menu');
   const displayed=await page.locator('body').innerText();
+  assert(!/adult students (?:can|are welcome)/i.test(displayed),path+' redundant adult self-arrangement lines removed');
   assert(!/GCSE\s*(?:\/|and)\s*IGCSE/i.test(displayed),path+' GCSE & IGCSE naming is consistent');
   assert(!/AS and A-Level/i.test(displayed),path+' AS & A-Level naming is consistent');
   const labels=await page.locator('a[href]').allTextContents();

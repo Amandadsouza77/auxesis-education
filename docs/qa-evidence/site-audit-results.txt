@@ -34,5 +34,5 @@ PASS: editable core templates render with SMART-goal anchors and the ordered pag
 PASS: final metadata normalization leaves all previously tested page bodies unchanged.
 PASS: manual editorial review completed for 16 public pages plus 404; authentic testimonials were preserved.
 Editorial fixes: concise links and programme names; clearer suitability wording; one grammar fragment corrected; clearer decision wording; public contact instructions use the enquiry form.
-Optional owner recommendations: explain SMART goals in one or two sentences; clarify adult eligibility in the homepage wording; consider shortening the longer About Auxesis philosophy section. These optional changes were not made.
+Owner follow-up: SMART goals now has a short explanation; the repeated adult self-arrangement/welcome lines were removed at the owner’s request. A separate page for adult and returning learners is a possible future idea, not part of this change. Shortening the About Auxesis philosophy section remains optional.
 Unit suite: 137 passed, zero failed, one pre-existing skip. No production form submissions, inbox emails, record access or hosting-setting changes were needed.

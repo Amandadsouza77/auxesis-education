@@ -1,0 +1,39 @@
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 320px
+PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at 320px
+PASS: SMART goals has a real H2, concise collaborative explanation, review steps, 4.5:1-or-better text contrast and no overflow at 320px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 320px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 320px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 320px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 390px
+PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at 390px
+PASS: SMART goals has a real H2, concise collaborative explanation, review steps, 4.5:1-or-better text contrast and no overflow at 390px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 390px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 390px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 390px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 768px
+PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at 768px
+PASS: SMART goals has a real H2, concise collaborative explanation, review steps, 4.5:1-or-better text contrast and no overflow at 768px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 768px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 768px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 768px
+PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at 1440px
+PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at 1440px
+PASS: SMART goals has a real H2, concise collaborative explanation, review steps, 4.5:1-or-better text contrast and no overflow at 1440px
+PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at 1440px
+PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at 1440px
+PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 1440px
+PASS: review required fields/consent, JSON validation errors, non-JSON hostname error, HTTP 200 ok:false, retained values, real-success-only confirmation (all intercepted)
+PASS: enquiry required fields, Other selections, consent, missing spam check, retained data on provider failure and business-day confirmation; two intercepted POSTs, zero real emails
+PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure
+PASS: internal destinations, fragments, primary navigation, heading hierarchy and no personal address across 16 public pages plus 404; seven original review cards byte-for-byte intact
+PASS: concise destination links and consistent AS & A-Level / GCSE & IGCSE names across all public pages
+
+PASS 320px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 390px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 768px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 1024px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+PASS 1440px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials
+
+PASS: redundant adult self-arrangement/welcome lines absent across 16 public pages plus 404; operational privacy references remain.
+PASS: editable template renders a real SMART-goals H2 and concise collaborative explanation.
+Unit suite: 137 passed, zero failed, one pre-existing skip. Private preview only; no real submissions or inbox emails.

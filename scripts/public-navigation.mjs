@@ -32,11 +32,15 @@ export function applyPublicNavigation(root,files){
   if(file==='how-tutoring-works/index.html'){
    const marker='<section class="statement-band">';
    if(html.split(marker).length!==2)throw Error('Expected one SMART goals statement band');
-   html=html.replace(marker,'<section class="statement-band" id="smart-goals">')
+   const goals=JSON.parse(readFileSync('content/pages/how-tutoring-works.json','utf8')).blocks.find(b=>b.key==='how-tutoring-works-046')?.text;
+   if(!goals)throw Error('SMART goals explanation missing');
+   const escapedGoals=goals.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+   html=html.replace(marker,'<section class="statement-band smart-goals-block" id="smart-goals">')
+    .replace('<p>SMART goals. Clear next steps.</p>','<h2>SMART goals. Clear next steps.</h2><p class="smart-goals-copy">'+escapedGoals+'</p>')
     .replace('<a href="#sessions">Sessions</a>','<a href="#smart-goals">SMART goals</a><a href="#sessions">Sessions</a>')
     .replace('<a href="#preparation">Preparation &amp; support</a>','<a href="#preparation">Communication &amp; support</a>');
-   html=html.replace('Parents and adult students can use the enquiry form or email me directly.','Parents and adult students can use the enquiry form.')
-    .replace('Take time and message me if you would like to proceed.','Take time to consider it, then contact me if you would like to proceed.');
+   html=html.replace('</head>','<style id="smart-goals-presentation">.smart-goals-block{background:var(--teal-dark,#006B67);color:var(--alabaster)}.smart-goals-block h2{font:400 clamp(1.85rem,3.5vw,3rem)/1.14 var(--serif);letter-spacing:-.025em;margin:0 0 1rem;color:inherit}.smart-goals-block p.smart-goals-copy{max-width:60rem;font:400 1rem/1.68 var(--sans);letter-spacing:normal;text-wrap:pretty;margin:0}</style></head>');
+   html=html.replace('Take time and message me if you would like to proceed.','Take time to consider it, then contact me if you would like to proceed.');
   }
   if(file==='about-auxesis/index.html')html=html.replace('Because the real value of education is not just what students achieve today, but what they become capable of tomorrow.','The real value of education is not just what students achieve today, but what they become capable of tomorrow.');
   if(file==='privacy-consent/index.html')html=html.replace('You can also email the contact address shown on this website directly.','You can contact Amanda using the enquiry form.')
