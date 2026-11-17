@@ -25,9 +25,11 @@ try{
    for(const summary of await page.locator('.programme-disclosure>summary').all()){await summary.focus();await page.keyboard.press('Enter');}
    assert.equal(await page.locator('.programme-disclosure[open]').count(),5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' programme overflow '+width);
-   const text=await page.locator('main').innerText();if(state==='before')programmeText=text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n');else assert.equal(text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n'),programmeText,'Programme wording preserved');
+   const background=page.locator('.programme-experience');
+   const text=(await page.locator('main').innerText()).replace(await background.count()?await background.innerText():'\u0000','');if(state==='before')programmeText=text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n');else assert.equal(text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n'),programmeText,'Programme wording preserved');
    if(state==='after'){
     assert.equal(await page.locator('.programme-links').count(),5);
+    assert.equal(await page.locator('.programme-experience').count(),1);assert((await page.locator('.programme-experience').innerText()).includes('IB Biology Assistant Examiner'));assert.equal(await page.locator('.programme-experience a').getAttribute('href'),'/about-amanda/');
     assert(await page.locator('.programme-support').evaluate(e=>Boolean(e.compareDocumentPosition(document.querySelector('.programme-nav'))&Node.DOCUMENT_POSITION_FOLLOWING)),'Support introduction precedes programme navigation');
     assert.equal(await page.locator('.programme-support h2').evaluate(e=>getComputedStyle(e).fontSize),await page.locator('#ib summary h2').evaluate(e=>getComputedStyle(e).fontSize),'Shared support heading uses the programme heading scale');
 
@@ -56,6 +58,8 @@ try{
     await page.screenshot({path:output+'/a-level-title-after-'+width+'.png'});
    }
    if(await page.locator('.subject-topics').count()){
+    for(const name of ['An experienced teacher','Experienced science teaching','Experience across curricula'])assert.equal(await page.getByRole('heading',{name,exact:true}).count(),0,'Shared background is consolidated, not repeated');
+    assert.equal(await page.getByRole('heading',{name:'Explore related support',exact:true}).count(),1,'Related navigation remains');
     assert.equal(await page.locator('.subject-topics>div>h2').innerText(),'Topics covered');
     const topicSizes=await page.locator('.subject-topic h3').evaluateAll(es=>es.map(e=>parseFloat(getComputedStyle(e).fontSize)));
     assert(topicSizes.length>0&&topicSizes.every(n=>n<parseFloat(referenceHeadingSize)),slug+' subtopics are smaller H3s');
