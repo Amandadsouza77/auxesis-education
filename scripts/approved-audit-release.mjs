@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {resolve,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {applyPublicCopy} from './approved-public-copy.mjs';
-import {addInternationalRoutes} from './international-public-wrapper.mjs';
+import {addInternationalRoutes,addOntarioRoutes} from './international-public-wrapper.mjs';
 import {build} from 'esbuild';
 import {prepareNativeInquiry} from './prepare-native-inquiry.mjs';
 const account='2ac862d7c1f865935d185df59e7bd719',project='auxesis-education';
@@ -33,7 +33,7 @@ async function liveBody(path,base=origin){
 async function prepare(){
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
- require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='30d97bef00054b752db0dc1b32582d60a297bf4c','Live source changed; reconcile approved corrections before deploying');
+ require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='0bcf8624a4f0b7b92ec5a4ebdeb0ca963712a910','Live source changed; reconcile approved corrections before deploying');
  require(live.canonical_deployment?.id,'Rollback deployment unavailable');
  require(v.PRODUCTION_SYNC_ENABLED?.value==='false'&&v.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Disabled automation guards required');
  require(v.SITE_URL?.value===origin,'Preserve verified initial inquiry origin');
@@ -44,9 +44,9 @@ async function prepare(){
  require(db!=='4f12fc1d-3e0d-4a11-bd65-e577ce906114','Production/staging isolation required');
  const before={deployment:live.canonical_deployment.id,config:JSON.stringify(live.deployment_configs),source:JSON.stringify(live.source),db,business:await businessDigest(db),publicFiles:{}};
  // Compare every independently verified current production asset before preparation.
- const captured=JSON.parse(readFileSync('content/international-previous-baseline-hashes.json'));
+ const captured=JSON.parse(readFileSync('content/ontario-previous-baseline-hashes.json'));
  const immutable=new URL(live.canonical_deployment.url).origin;
- require(immutable==='https://efe1f29d.auxesis-education.pages.dev','Unexpected immutable production deployment');
+ require(immutable==='https://332ab895.auxesis-education.pages.dev','Unexpected immutable production deployment');
  for(const [path,digest] of Object.entries(captured)){
   const url='/'+path.replace(/index\.html$/,'');
   const current=await liveBody(url,immutable);
@@ -58,7 +58,7 @@ async function prepare(){
  // Preserve the native enquiry-only bootstrap, while updating its approved response wording.
  const app=resolve(root,'dist/app.js');writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
  writeFileSync(resolve(root,'inquiry/lib/time-zones.js'),readFileSync('lib/time-zones.js'));
- writeFileSync(resolve(root,'inquiry/cloudflare/public-site-worker.js'),addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))));
+ writeFileSync(resolve(root,'inquiry/cloudflare/public-site-worker.js'),addOntarioRoutes(addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))),JSON.parse(readFileSync('content/ontario-pages.json','utf8'))));
  writeFileSync(resolve(root,'inquiry-entry.js'),"import nativeWorker from './staging-entry.js';\nimport {withInquiry} from './inquiry/cloudflare/inquiry-worker.js';\nimport {withPublicSite} from './inquiry/cloudflare/public-site-worker.js';\nexport default withPublicSite(withInquiry(nativeWorker));\n");
  applyPublicCopy(resolve(root,'dist'));
  const css=resolve(root,'dist/styles.css');writeFileSync(css,readFileSync(css,'utf8')+'\n.field select{min-width:0;max-width:100%}.field-hint{font-weight:400;font-size:.85rem}\n');
@@ -76,7 +76,7 @@ async function prepare(){
   console.log('::notice::Retained restricted record inventory '+JSON.stringify({system:label,counts,recordWrites:0}));
  }
  const candidateAssets=files(resolve(root,'dist')).map(file=>relative(resolve(root,'dist'),file).replaceAll('\\\\','/')).filter(path=>!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.')).sort();
- const expectedAssets=[...Object.keys(captured),...JSON.parse(readFileSync('content/international-pages.json','utf8')).map(p=>p.slug+'/index.html')].sort();
+ const expectedAssets=[...Object.keys(captured),...JSON.parse(readFileSync('content/ontario-pages.json','utf8')).map(p=>p.slug+'/index.html')].sort();
  require(JSON.stringify(candidateAssets)===JSON.stringify(expectedAssets),'Candidate asset inventory differs from approved international pages');
  for(const file of files(resolve(root,'dist'))){const path=relative(resolve(root,'dist'),file);if(!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.'))before.publicFiles['/'+path.replace(/index\.html$/,'')]=sha(readFileSync(file));}
  writeFileSync(state,JSON.stringify(before),{mode:0o600});

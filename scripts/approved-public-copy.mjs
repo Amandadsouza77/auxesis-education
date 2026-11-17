@@ -3,6 +3,7 @@ import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {applySeoMetadata} from './seo-metadata.mjs';
 import {applyInternational} from './international-pages.mjs';
+import {applyOntario} from './ontario-pages.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -22,6 +23,7 @@ export function applyPublicCopy(root){
   const target=resolve(root,file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html'));mkdirSync(dirname(target),{recursive:true});writeFileSync(target,html);
  }
  applyInternational(root);
+ applyOntario(root);
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
 

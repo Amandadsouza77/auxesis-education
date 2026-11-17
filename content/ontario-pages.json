@@ -1,0 +1,316 @@
+[
+  {
+    "slug": "ontario-grade-9-10-science-tutoring",
+    "title": "Ontario Grade 9 & 10 Science Tutoring | Auxesis Education",
+    "description": "One-to-one online Ontario Grade 9 and 10 science tutoring for SNC1W, SNC2D and SNC2P, with curriculum-aligned skills and MYP assessment support.",
+    "heading": "Ontario Junior Secondary Science Tutoring",
+    "subheading": "Grades 9 and 10 Science",
+    "strapline": "Building Scientific Understanding, Confidence and Independence",
+    "intro": [
+      "Develop strong foundations in science through personalized, one-to-one online tutoring aligned with the Ontario curriculum.",
+      "Whether a student is beginning Grade 9 Science or preparing for more specialized courses in Grades 11 and 12, I help make scientific concepts accessible through clear explanations, visual models, interactive simulations and guided problem-solving.",
+      "Lessons are tailored to the student's current course, individual learning needs and academic goals. The emphasis is on understanding scientific ideas, making connections and developing the confidence to apply knowledge independently."
+    ],
+    "courses": [
+      {
+        "title": "Grade 9 Science",
+        "code": "SNC1W · De-streamed",
+        "intro": "Ontario's de-streamed Grade 9 Science course introduces students to fundamental concepts in Biology, Chemistry, Physics, and Earth and Space Science.",
+        "topics": [
+          {
+            "title": "Biology: Sustainable Ecosystems and Climate Change",
+            "text": "Explore the relationships between organisms and their environments, including biodiversity, food webs, energy flow, cycles of matter, ecosystem stability and the effects of human activity. Students develop an understanding of how ecosystems function and how scientific evidence can be used to investigate environmental change."
+          },
+          {
+            "title": "Chemistry: The Nature of Matter",
+            "text": "Investigate the structure and properties of matter, including atoms, elements, compounds, the periodic table, physical and chemical properties, and changes in matter. Students learn to recognize patterns, interpret chemical representations and explain the behaviour of substances using scientific models."
+          },
+          {
+            "title": "Physics: Electricity",
+            "text": "Explore static and current electricity, electrical circuits, current, voltage, resistance, electrical energy and energy efficiency. Students develop confidence in interpreting circuit diagrams, understanding electrical relationships and applying scientific principles to practical situations."
+          },
+          {
+            "title": "Earth and Space Science: Space Exploration",
+            "text": "Investigate the solar system, the universe, astronomical phenomena and technologies used in space exploration. Students examine how scientific discoveries contribute to our understanding of space and how developments in space technology influence life on Earth."
+          }
+        ]
+      },
+      {
+        "title": "Grade 10 Science",
+        "code": "SNC2D · Academic | SNC2P · Applied",
+        "intro": "Grade 10 Science builds on the foundations established in Grade 9, allowing students to develop a deeper understanding of scientific concepts and strengthen their investigation and problem-solving skills. Support is adapted to the expectations, learning approaches and assessment requirements of the student's specific course.",
+        "topics": [
+          {
+            "title": "Biology: Tissues, Organs and Systems",
+            "text": "Understand cell specialization, tissues, organs and organ systems, including how structures and functions are connected within living organisms. Students learn to interpret biological diagrams, explain interactions between body systems and connect scientific understanding to health and technology."
+          },
+          {
+            "title": "Chemistry: Chemical Reactions",
+            "text": "Develop an understanding of chemical formulas, compounds, chemical reactions and the conservation of matter. Students receive support with writing and balancing equations, identifying reaction types and understanding chemical changes through particle models and practical examples."
+          },
+          {
+            "title": "Physics: Light and Optics",
+            "text": "Investigate the properties and behaviour of light, including reflection, refraction, mirrors, lenses and optical technologies. Students learn to interpret ray diagrams, explain image formation and apply the principles of optics to familiar situations."
+          },
+          {
+            "title": "Earth and Space Science: Climate Change",
+            "text": "Examine Earth's climate systems, factors that influence climate, scientific evidence of climate change and the effects of environmental changes on natural and human systems. Students develop skills in interpreting evidence, evaluating information and making connections between scientific processes and real-world issues."
+          }
+        ]
+      }
+    ],
+    "skillsHeading": "Developing Essential Scientific Skills",
+    "skillsIntro": "Science learning involves much more than remembering facts and definitions. Throughout Grades 9 and 10, I help students develop the skills needed to investigate scientific questions, interpret evidence and communicate their understanding. In keeping with Ontario's achievement framework, lessons strengthen four interconnected areas:",
+    "skills": [
+      {
+        "title": "Knowledge and Understanding",
+        "text": "Develop accurate scientific knowledge and a clear understanding of scientific concepts, principles and processes."
+      },
+      {
+        "title": "Thinking and Investigation",
+        "text": "Investigate scientific questions, analyse and interpret data, and use scientific evidence to draw well-supported conclusions."
+      },
+      {
+        "title": "Communication",
+        "text": "Explain scientific ideas clearly using appropriate terminology, diagrams, graphs, equations and organized written responses."
+      },
+      {
+        "title": "Application",
+        "text": "Apply scientific understanding to unfamiliar situations, solve problems and make connections between concepts and the world around us."
+      }
+    ],
+    "assessment": [
+      "Students receive targeted support with the knowledge, understanding and scientific skills required for their classroom assessments. Lessons can address tests, scientific investigations, experimental data, assignments, written explanations and examinations where applicable.",
+      "Deconstruct questions to identify what is being asked, apply relevant scientific knowledge and reasoning, and construct clear, evidence-based responses.",
+      "Students develop an understanding of Ontario's achievement criteria and how to demonstrate their knowledge and scientific skills effectively. Their assessed work remains their own."
+    ],
+    "conclusionHeading": "Building Foundations for Senior Science",
+    "conclusion": [
+      "Grades 9 and 10 provide important foundations for future learning in Biology, Chemistry and other scientific disciplines.",
+      "By developing strong conceptual understanding and independent problem-solving skills, students become better prepared for the increasing demands of senior secondary science."
+    ],
+    "ctaHeading": "Getting Started",
+    "cta": "Every student begins with a free Meet & Greet to discuss their current course, learning needs and goals. Lessons are then designed around the individual student, supporting both immediate classroom learning and longer-term scientific understanding.",
+    "ctaText": "Enquire About Grades 9–10 Science Tutoring",
+    "related": [
+      [
+        "Ontario Senior Secondary Biology and Chemistry",
+        "/ontario-grade-11-12-biology-chemistry-tutoring/"
+      ],
+      [
+        "IB Biology tutoring",
+        "/ib-biology-tutoring/"
+      ]
+    ],
+    "mypSupport": {
+      "title": "MYP Science Support",
+      "code": "IB Middle Years Programme · Assessment-specific",
+      "intro": "Students following the IB Middle Years Programme receive support with the scientific content taught at their school, just as they would with any other science curriculum. Where relevant, lessons also address the MYP assessment criteria in relation to a student's specific assessment task. This helps students understand the expectations, develop appropriate scientific skills and communicate their understanding effectively while completing their own work independently.",
+      "topics": []
+    }
+  },
+  {
+    "slug": "ontario-grade-11-12-biology-chemistry-tutoring",
+    "title": "Ontario Grade 11 & 12 Biology and Chemistry Tutoring | Auxesis",
+    "description": "Personalized online Ontario Grade 11 and 12 Biology and Chemistry tutoring. Support for university and college preparation courses and assessment skills.",
+    "heading": "Ontario Senior Secondary Biology and Chemistry Tutoring",
+    "subheading": "Grades 11 and 12 Biology and Chemistry",
+    "strapline": "Deepening Scientific Understanding and Developing Analytical Confidence",
+    "intro": [
+      "Senior secondary science introduces students to increasingly complex biological and chemical systems, requiring deeper conceptual understanding, stronger analytical skills and greater independence.",
+      "I provide personalized, one-to-one online tutoring aligned with the Ontario curriculum, supporting students through university and college preparation pathways.",
+      "Using interactive models, visual simulations, guided investigations and structured problem-solving, I help students connect scientific ideas, understand underlying principles and apply their knowledge to unfamiliar situations. Rather than focusing solely on memorizing information or following procedures, lessons emphasize the reasoning behind scientific processes and the development of transferable academic skills."
+    ],
+    "courseGroups": [
+      {
+        "heading": "Ontario Biology Tutoring",
+        "courses": [
+          {
+            "title": "Grade 11 Biology",
+            "code": "SBI3U · University Preparation",
+            "intro": "Grade 11 Biology introduces students to the diversity and complexity of living organisms, exploring how biological systems function, change and interact.",
+            "topics": [
+              {
+                "title": "Diversity of Living Things",
+                "text": "Classification, biodiversity and evolutionary relationships."
+              },
+              {
+                "title": "Evolution",
+                "text": "Natural selection, adaptation, speciation and evidence supporting evolutionary change."
+              },
+              {
+                "title": "Genetic Processes",
+                "text": "Cell division, inheritance, chromosomes and genetic variation."
+              },
+              {
+                "title": "Animals: Structure and Function",
+                "text": "The organization and function of animal tissues, organs and systems."
+              },
+              {
+                "title": "Plants: Anatomy, Growth and Function",
+                "text": "Plant structures, physiological processes and their relationships to environmental conditions."
+              }
+            ],
+            "ending": "Lessons develop the ability to interpret biological diagrams, explain complex processes, analyse information and apply scientific reasoning."
+          },
+          {
+            "title": "Grade 11 Biology",
+            "code": "SBI3C · College Preparation",
+            "intro": "College-preparation Biology focuses on understanding biological systems and their applications in everyday life, health, technology and the environment.",
+            "topics": [
+              {
+                "title": "Areas of study",
+                "text": "Cellular biology, microbiology, genetics, mammalian anatomy and plants in the natural environment."
+              }
+            ],
+            "ending": "Tutoring supports conceptual understanding, practical scientific skills, interpretation of information and the application of biological knowledge to real-world situations."
+          },
+          {
+            "title": "Grade 12 Biology",
+            "code": "SBI4U · University Preparation",
+            "intro": "Grade 12 Biology examines biological processes at the molecular, cellular and systems levels.",
+            "topics": [
+              {
+                "title": "Biochemistry",
+                "text": "Biological molecules, enzymes and biochemical interactions."
+              },
+              {
+                "title": "Metabolic Processes",
+                "text": "Cellular respiration, photosynthesis and energy transformations."
+              },
+              {
+                "title": "Molecular Genetics",
+                "text": "DNA, gene expression, protein synthesis and biotechnology."
+              },
+              {
+                "title": "Homeostasis",
+                "text": "Regulation and coordination of physiological processes."
+              },
+              {
+                "title": "Population Dynamics",
+                "text": "Population growth, interactions and ecological relationships."
+              }
+            ],
+            "ending": "Through visual models, guided analysis and structured explanations, students develop a deeper understanding of biological systems and the relationships between their structures and functions. Particular attention is given to interpreting experimental evidence, analysing data, constructing scientific explanations and applying biological concepts to unfamiliar scenarios."
+          }
+        ]
+      },
+      {
+        "heading": "Ontario Chemistry Tutoring",
+        "courses": [
+          {
+            "title": "Grade 11 Chemistry",
+            "code": "SCH3U · University Preparation",
+            "intro": "Grade 11 Chemistry establishes the foundation for understanding chemical behaviour, quantitative relationships and the interactions between substances.",
+            "topics": [
+              {
+                "title": "Structure and Bonding",
+                "text": "Atomic structure, periodic trends and chemical bonding."
+              },
+              {
+                "title": "Chemical Reactions",
+                "text": "Chemical reactions and balancing equations."
+              },
+              {
+                "title": "Quantitative Chemistry",
+                "text": "The mole concept, stoichiometry and quantitative chemical calculations."
+              },
+              {
+                "title": "Solutions",
+                "text": "Solutions, concentration and solubility."
+              },
+              {
+                "title": "Gases and Atmosphere",
+                "text": "Gases and atmospheric chemistry."
+              }
+            ],
+            "ending": "Students learn to move confidently between chemical representations, explain reactions at the particle level and approach calculations through logical, structured reasoning."
+          },
+          {
+            "title": "Grade 12 Chemistry",
+            "code": "SCH4U · University Preparation",
+            "intro": "Grade 12 Chemistry develops a more advanced understanding of chemical structures, reactions and systems.",
+            "topics": [
+              {
+                "title": "Organic Chemistry",
+                "text": "Functional groups, nomenclature, structures and reactions."
+              },
+              {
+                "title": "Structure and Properties of Matter",
+                "text": "Bonding, molecular structure and intermolecular forces."
+              },
+              {
+                "title": "Energy Changes and Rates of Reaction",
+                "text": "Thermochemistry, kinetics and factors affecting reaction rates."
+              },
+              {
+                "title": "Chemical Systems and Equilibrium",
+                "text": "Equilibrium principles, acids and bases, and quantitative relationships."
+              },
+              {
+                "title": "Electrochemistry",
+                "text": "Oxidation and reduction, electrochemical cells and electrolysis."
+              }
+            ],
+            "ending": "Lessons combine conceptual explanations, worked examples, visual representations and opportunities to apply learning independently. Students develop confidence in interpreting chemical systems, constructing explanations and solving multi-step problems."
+          },
+          {
+            "title": "Grade 12 Chemistry",
+            "code": "SCH4C · College Preparation",
+            "intro": "College-preparation Chemistry develops practical chemical knowledge and problem-solving skills with applications in industry, technology, health and the environment.",
+            "topics": [
+              {
+                "title": "Areas of study",
+                "text": "Matter and qualitative analysis, organic chemistry, electrochemistry, chemical calculations and chemistry in the environment."
+              }
+            ],
+            "ending": "Tutoring is tailored to the course expectations and the student's learning goals, with an emphasis on understanding scientific principles and applying them accurately in practical contexts."
+          }
+        ]
+      }
+    ],
+    "skillsHeading": "Developing Advanced Scientific Skills",
+    "skillsIntro": "Senior Biology and Chemistry require students to work with increasingly complex information, connect concepts and communicate scientific reasoning precisely. Aligned with Ontario's achievement framework, tutoring supports four interconnected areas:",
+    "skills": [
+      {
+        "title": "Knowledge and Understanding",
+        "text": "Establish a clear understanding of scientific principles and the relationships between processes, structures and systems."
+      },
+      {
+        "title": "Thinking and Investigation",
+        "text": "Investigate scientific questions, analyse and interpret data, and use scientific evidence to draw well-supported conclusions. Evaluate evidence, identify relationships, recognize limitations and justify explanations."
+      },
+      {
+        "title": "Communication",
+        "text": "Construct clear, logically organized scientific responses using appropriate terminology, calculations, diagrams, graphs, equations and evidence."
+      },
+      {
+        "title": "Application",
+        "text": "Apply scientific knowledge to unfamiliar problems, make connections between concepts and interpret scientific situations in real-world contexts."
+      }
+    ],
+    "assessment": [
+      "Students receive targeted support with classroom assessments throughout their course. This may include scientific investigations, laboratory analysis, assignments, tests, written responses and end-of-course examinations.",
+      "Deconstruct questions to identify what is being asked, apply relevant scientific knowledge and reasoning, and construct clear, evidence-based responses.",
+      "Students develop the ability to interpret assessment instructions, select relevant scientific evidence and communicate their reasoning with precision. The aim is lasting scientific understanding and independent academic skills, not simply preparation for individual assessments. Their assessed work remains their own."
+    ],
+    "conclusionHeading": "Preparing for Further Study",
+    "conclusion": [
+      "Biology and Chemistry provide foundations for a wide range of postsecondary programmes, including health sciences, life sciences, environmental studies, laboratory sciences and related fields.",
+      "Whether a student plans to attend university or college, tutoring is tailored to the requirements of their current course and intended academic pathway. Students are supported in developing the scientific knowledge, analytical confidence and independent learning skills needed for their next stage of education."
+    ],
+    "ctaHeading": "Getting Started",
+    "cta": "Begin with a free Meet & Greet to discuss the student's course, current challenges and learning goals. Lessons are then tailored to their individual needs, whether they are building understanding of difficult concepts, strengthening analytical skills or developing greater confidence in Biology or Chemistry.",
+    "ctaText": "Enquire About Grades 11–12 Biology and Chemistry Tutoring",
+    "related": [
+      [
+        "Ontario Junior Secondary Science",
+        "/ontario-grade-9-10-science-tutoring/"
+      ],
+      [
+        "IB Chemistry tutoring",
+        "/ib-chemistry-tutoring/"
+      ]
+    ]
+  }
+]

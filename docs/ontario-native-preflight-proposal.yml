@@ -1,0 +1,188 @@
+name: Phase 2 native preflight without deployment
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/international-native-preflight.yml]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    if: github.event.head_commit.message == '[CF-Pages-Skip] Phase 2 protected preflight only'
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Recover and verify private runtime without deployment
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Preserve clean temporary runtime for dry run
+        run: cp -a work/staging-deployment/runtime /tmp/auxesis-clean-runtime
+      - name: Compare current immutable release with recorded public source
+        run: |
+          node --input-type=module <<'JS'
+          import {createHash} from 'node:crypto';
+          import {readFileSync,mkdtempSync,readdirSync,statSync,rmSync} from 'node:fs';
+          import {join,relative} from 'node:path';
+          import {tmpdir} from 'node:os';
+          import {applyPublicCopy} from './scripts/approved-public-copy.mjs';
+          const expected='0bcf8624a4f0b7b92ec5a4ebdeb0ca963712a910';
+          const api='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/pages/projects/auxesis-education';
+          const req=async()=>{const r=await fetch(api,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw Error('Cloudflare project HTTP '+r.status);const data=await r.json();if(!data.success)throw Error('Cloudflare project rejected');return data.result;};
+          const before=await req(),dep=before.canonical_deployment;
+          if(!dep?.id||dep.deployment_trigger?.metadata?.commit_hash!==expected)throw Error('Current production deployment differs from recorded baseline');
+          const origin=new URL(dep.url).origin;
+          if(!origin.endsWith('.auxesis-education.pages.dev'))throw Error('Unexpected deployment host');
+          const cfg=before.deployment_configs.production;
+          if(cfg.env_vars.PRODUCTION_SYNC_ENABLED?.value!=='false'||cfg.env_vars.PRODUCTION_AUTOMATION_ENABLED?.value!=='false')throw Error('Production automation guard differs');
+          const hash=b=>createHash('sha256').update(b).digest('hex');
+          const tmp=mkdtempSync(join(tmpdir(),'auxesis-seo-preflight-'));
+          try{
+            applyPublicCopy(tmp);
+            const files=d=>readdirSync(d).flatMap(n=>{const p=join(d,n);return statSync(p).isDirectory()?files(p):[p]});
+            for(const file of files(tmp)){
+              const path='/'+relative(tmp,file).replaceAll('\\','/').replace(/index\.html$/,'');
+              let url=origin+path,response;
+              for(let n=0;n<4;n++){response=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});if(![301,302,303,307,308].includes(response.status))break;const next=new URL(response.headers.get('location'),url);if(next.origin!==origin)throw Error('Unexpected asset redirect '+path);url=next.href}
+              if(!response.ok && !(path==='/404.html'&&response.status===404))throw Error('Asset unavailable '+path+' '+response.status);
+              if(hash(Buffer.from(await response.arrayBuffer()))!==hash(readFileSync(file)))throw Error('Released page differs from regenerated baseline: '+path);
+            }
+            const after=await req();
+            if(after.canonical_deployment?.id!==dep.id||JSON.stringify(after.deployment_configs)!==JSON.stringify(before.deployment_configs)||JSON.stringify(after.source)!==JSON.stringify(before.source))throw Error('Production changed during preflight');
+            console.log(JSON.stringify({productionCommit:expected,deploymentId:dep.id,immutableOrigin:origin,publicPagesCompared:files(tmp).length,packageChecksumVerified:true,automationDisabled:true,productionUnchanged:true,providerWrites:0}));
+          }finally{rmSync(tmp,{recursive:true,force:true})}
+          JS
+
+      - name: Checkout exact SEO candidate for isolated tests
+        uses: actions/checkout@v4
+        with:
+          ref: da552748e1888e1c592fb9fbb92d96302c964778
+          path: seo-candidate
+          persist-credentials: false
+      - name: Install isolated test dependencies
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0 playwright@1.56.0
+      - name: Test recovered private runtime and mocked enquiry
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          (cd work/staging-deployment/runtime && node tests/website-reviews.test.mjs)
+          node tests/inquiry-runtime.mjs
+      - name: Verify reconstructed production static assets
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          node --input-type=module <<'JS'
+          import {cpSync,mkdtempSync,readFileSync,writeFileSync,readdirSync,statSync,rmSync} from 'node:fs';
+          import {resolve,relative,join} from 'node:path';
+          import {tmpdir} from 'node:os';
+          import {createHash} from 'node:crypto';
+          import {build} from 'esbuild';
+          import {prepareNativeInquiry} from './scripts/prepare-native-inquiry.mjs';
+          import {applyPublicCopy} from './scripts/approved-public-copy.mjs';
+          const tmp=mkdtempSync(join(tmpdir(),'auxesis-native-baseline-')),root=join(tmp,'runtime');
+          const sha=b=>createHash('sha256').update(b).digest('hex');
+          try{
+           cpSync('work/staging-deployment/runtime',root,{recursive:true});
+           await build({entryPoints:[root+'/staging-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
+           prepareNativeInquiry(root);
+           const app=root+'/dist/app.js';
+           writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
+           applyPublicCopy(root+'/dist');
+           const css=root+'/dist/styles.css';
+           writeFileSync(css,readFileSync(css,'utf8')+'\n.field select{min-width:0;max-width:100%}.field-hint{font-weight:400;font-size:.85rem}\n');
+           await build({entryPoints:['lib/time-zones.js'],bundle:true,format:'iife',globalName:'AuxesisTimeZones',outfile:root+'/dist/time-zones.js'});
+           for(const name of ['robots.txt','sitemap.xml']){
+            let t=readFileSync(root+'/dist/'+name,'utf8').replaceAll('https://auxesis-education.pages.dev','https://auxedu.com');
+            if(name==='robots.txt')t=t.replace('Disallow: /api/','Disallow: /api/\nDisallow: /portal/\nDisallow: /resources/');
+            writeFileSync(root+'/dist/'+name,t);
+           }
+           const files=d=>readdirSync(d).flatMap(n=>{const p=resolve(d,n);return statSync(p).isDirectory()?files(p):[p]});
+           let count=0,manifest={};
+           for(const file of files(root+'/dist')){
+            let path=relative(root+'/dist',file).replaceAll('\\\\','/');
+            if(['_worker.js','_headers','_redirects','_routes.json'].includes(path)||path.startsWith('.'))continue;
+            let url='https://332ab895.auxesis-education.pages.dev/'+path.replace(/index\.html$/,'');
+            let r;for(let hop=0;hop<4;hop++){
+             r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
+             if(![301,302,303,307,308].includes(r.status))break;
+             const n=new URL(r.headers.get('location'),url);
+             if(n.origin!=='https://332ab895.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
+             url=n.href;
+            }
+            if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
+            const actual=Buffer.from(await r.arrayBuffer()),expected=readFileSync(file);
+            if(sha(actual)!==sha(expected)){if(path==='robots.txt')console.log(JSON.stringify({actual:actual.toString(),expected:expected.toString()}));throw Error('Asset differs from production: '+path);}
+            manifest[path]=sha(expected);count++;
+           }
+           console.log('PUBLIC_ASSET_MANIFEST '+JSON.stringify(manifest));
+           console.log('PASS: '+count+' reconstructed static assets match the immutable production deployment.');
+          }finally{rmSync(tmp,{recursive:true,force:true})}
+          JS
+      - name: Combine verified runtime with pinned candidate without deploying
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {resolve} from 'node:path';
+          import {createHash} from 'node:crypto';
+          import {prepareNativeInquiry} from './scripts/prepare-native-inquiry.mjs';
+          import {build} from 'esbuild';
+          const root=resolve('work/staging-deployment/runtime');
+          const hash=x=>createHash('sha256').update(x).digest('hex');
+          const nativeBefore=hash(readFileSync(root+'/staging-entry.js'));
+          await build({entryPoints:[root+'/staging-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
+          prepareNativeInquiry(root);
+          let app=root+'/dist/app.js';
+          writeFileSync(app,readFileSync(app,'utf8').replace('Amanda will be in touch to discuss the student’s needs and tutoring arrangements, usually within 24–48 hours.','Amanda normally replies within 24 hours on business days, excluding Canadian statutory holidays.'));
+          writeFileSync(root+'/inquiry/lib/time-zones.js',readFileSync('lib/time-zones.js'));
+          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',readFileSync('cloudflare/public-site-worker.js'));
+          writeFileSync(root+'/inquiry-entry.js',"import nativeWorker from './staging-entry.js';\nimport {withInquiry} from './inquiry/cloudflare/inquiry-worker.js';\nimport {withPublicSite} from './inquiry/cloudflare/public-site-worker.js';\nexport default withPublicSite(withInquiry(nativeWorker));\n");
+          process.chdir('seo-candidate');
+          const {applyPublicCopy}=await import('./seo-candidate/scripts/approved-public-copy.mjs');
+          applyPublicCopy(root+'/dist');
+          const {addInternationalRoutes,addOntarioRoutes}=await import('./seo-candidate/scripts/international-public-wrapper.mjs');
+          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',addOntarioRoutes(addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))),JSON.parse(readFileSync('content/ontario-pages.json','utf8'))));
+          if(hash(readFileSync(root+'/staging-entry.js'))!==nativeBefore)throw Error('Native source changed');
+          const home=readFileSync(root+'/dist/index.html','utf8');
+          if(!home.includes('<title>IB Biology &amp; Chemistry Tutoring | Auxesis Education</title>'))throw Error('Candidate SEO title missing');
+          const enquiry=readFileSync(root+'/dist/enquire/index.html','utf8');
+          if(!enquiry.includes('id="enquiry-form"'))throw Error('Enquiry form missing');
+          await build({entryPoints:[root+'/inquiry-entry.js'],bundle:true,format:'esm',outfile:root+'/dist/_worker.js'});
+          console.log('PASS: verified native source retained, candidate HTML assembled and native worker bundled locally; no deployment.');
+          JS
+
+      - name: Run candidate release guard in prepare-only mode
+        run: |
+          rm -rf work/staging-deployment/runtime
+          cp -a /tmp/auxesis-clean-runtime work/staging-deployment/runtime
+          ln -s ../work seo-candidate/work
+          cd seo-candidate
+          ../node_modules/.bin/esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
+          node --check scripts/approved-audit-release.mjs
+          node scripts/approved-audit-release.mjs prepare
+          node scripts/approved-audit-release.mjs check
+
+      - name: Test native candidate interface with intercepted enquiry
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+          QA_ORIGIN: http://127.0.0.1:8765
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory work/staging-deployment/runtime/dist >/tmp/auxesis-native-qa.log 2>&1 &
+          cd seo-candidate
+          node scripts/approved-audit-browser-qa.mjs
+

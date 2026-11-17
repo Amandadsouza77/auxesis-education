@@ -10,7 +10,7 @@ test('assembled pages retain one canonical and unique titles and descriptions',(
  try {
   applyPublicCopy(dir);
   const walk=d=>readdirSync(d).flatMap(n=>{const p=join(d,n);return statSync(p).isDirectory()?walk(p):[p]});
-  const pages=walk(dir).filter(p=>p.endsWith('.html')); assert.equal(pages.length,15);
+  const pages=walk(dir).filter(p=>p.endsWith('.html')); assert.equal(pages.length,17);
   const titles=new Set(),descriptions=new Set();
   for(const file of pages){
    const html=readFileSync(file,'utf8'); if(relative(dir,file)==='404.html')continue;
@@ -36,7 +36,7 @@ test('international pages are included in sitemap without adding private routes'
   writeFileSync(join(dir,'sitemap.xml'),'<?xml version="1.0"?><urlset><url><loc>https://auxedu.com/</loc></url></urlset>');
   applyPublicCopy(dir);
   const xml=readFileSync(join(dir,'sitemap.xml'),'utf8');
-  for(const slug of ['ib-biology-tutoring','ib-chemistry-tutoring','gcse-igcse-science-tutoring','a-level-biology-tutoring'])assert.equal(xml.split('https://auxedu.com/'+slug+'/').length,2);
+  for(const slug of ['ib-biology-tutoring','ib-chemistry-tutoring','gcse-igcse-science-tutoring','a-level-biology-tutoring','ontario-grade-9-10-science-tutoring','ontario-grade-11-12-biology-chemistry-tutoring'])assert.equal(xml.split('https://auxedu.com/'+slug+'/').length,2);
   for(const path of ['/portal/','/admin/','/api/','/resources/'])assert(!xml.includes('https://auxedu.com'+path));
  }finally{rmSync(dir,{recursive:true,force:true})}
 });

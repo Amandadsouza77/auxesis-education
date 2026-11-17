@@ -7,3 +7,12 @@ export function addInternationalRoutes(source,pages){
  const additions=names.map(n=>"'/" + n + "/',").join('');
  return source.replace(marker,additions+marker);
 }
+
+// Append only the two approved Ontario public routes; keep all existing guards intact.
+export function addOntarioRoutes(source,pages){
+ const marker="\'/404.html\'";
+ if(source.split(marker).length!==2)throw Error("Unexpected public worker route list");
+ const names=pages.map(p=>p.slug);
+ if(names.length!==2||new Set(names).size!==2||names.some(n=>!/^[a-z0-9-]+$/.test(n)))throw Error("Invalid Ontario route list");
+ return source.replace(marker,names.map(n=>"\'/"+n+"/\',").join("")+marker);
+}
