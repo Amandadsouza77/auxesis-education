@@ -1,0 +1,68 @@
+name: PR 23 protected native verification (test only)
+on:
+  push:
+    branches: [codex/cloudflare-backend-migration]
+    paths: [.github/workflows/pr23-native-isolated.yml]
+permissions:
+  contents: read
+concurrency:
+  group: auxesis-pr23-native-tests
+  cancel-in-progress: false
+jobs:
+  native-isolated:
+    runs-on: ubuntu-latest
+    environment: auxesis-migration-preview
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Verify test-only trusted branch change
+        run: |
+          test "$(git diff --name-only HEAD^ HEAD)" = '.github/workflows/pr23-native-isolated.yml'
+          test "$(git rev-parse HEAD:scripts/prelaunch-runtime-recover.mjs)" = "$(git rev-parse ed13220e20d9dc6b37fd8bccf7fcba0880eec876:scripts/prelaunch-runtime-recover.mjs)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Recover private checksum-pinned package read only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Verify existing native tests in isolated fixtures
+        working-directory: work/staging-deployment/runtime
+        run: node tests/website-reviews.test.mjs
+      - name: Checkout exact PR candidate without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: 93437dd56a2bb634cfcfcec5510bb4e59acb250b
+          path: candidate
+          persist-credentials: false
+      - name: Install test tools without provider credentials
+        working-directory: candidate
+        run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
+      - name: Assemble actual native candidate without release scripts
+        working-directory: candidate
+        env:
+          QA_NATIVE_ROOT: ${{ github.workspace }}/work/staging-deployment/runtime
+        run: node scripts/assemble-native-review-qa.mjs
+      - name: Test actual worker using ephemeral local D1
+        working-directory: candidate
+        env:
+          QA_NATIVE_ROOT: ${{ github.workspace }}/work/staging-deployment/runtime
+        run: node tests/native-review-isolated.mjs
+      - name: Test enquiry with mocked providers in actual workerd
+        working-directory: candidate
+        run: node tests/inquiry-runtime.mjs
+      - name: Publish bounded synthetic test evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr23-native-test-evidence
+          path: candidate/work/native-review-qa/*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Remove private recovery files
+        if: always()
+        run: rm -rf work/staging-deployment candidate/work/native-review-qa
