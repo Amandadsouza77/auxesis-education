@@ -13,24 +13,31 @@ function replaceExactlyOnce(source, search, replacement, label){
  if(matches.length!==1) throw Error('Expected exactly one '+label+', found '+matches.length);
  return source.replace(search,replacement);
 }
-function renderCourse(course){
+function renderCourse(course,senior=false){
+ const topicTag=senior?'h5':'h4';
  const body = '<p>'+escape(course.intro)+'</p>'+
-  (course.topics||[]).map(topic=>'<div class="ontario-topic"><h4>'+escape(topic.title)+'</h4><p>'+escape(topic.text)+'</p></div>').join('')+
+  (course.topics||[]).map(topic=>'<div class="ontario-topic"><'+topicTag+'>'+escape(topic.title)+'</'+topicTag+'><p>'+escape(topic.text)+'</p></div>').join('')+
   (course.ending?para(course.ending):'');
- return '<details class="ontario-course"><summary><span><strong>'+escape(course.title)+'</strong><span class="ontario-course-code">'+escape(course.code)+'</span></span></summary><div class="ontario-course-body">'+body+'</div></details>';
+ const heading=senior
+  ?'<h4 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h4>'
+  :'<span><strong>'+escape(course.title)+'</strong><span class="ontario-course-code">'+escape(course.code)+'</span></span>';
+ return '<details class="ontario-course"><summary>'+heading+'</summary><div class="ontario-course-body">'+body+'</div></details>';
 }
-function renderCourseGroup(heading,courses){
- return '<section class="section ontario-courses"><div class="wrap"><h2>'+escape(heading)+'</h2><div class="faq-list ontario-course-list">'+courses.map(renderCourse).join('')+'</div></div></section>';
+function renderCourseGroup(heading,courses,senior=false){
+ const tag=senior?'h3':'h2';
+ return '<section class="section ontario-courses"><div class="wrap"><'+tag+'>'+escape(heading)+'</'+tag+'><div class="faq-list ontario-course-list">'+courses.map(c=>renderCourse(c,senior)).join('')+'</div></div></section>';
 }
 function renderPage(page,template){
+ const senior=Array.isArray(page.courseGroups);
  const groups=page.courseGroups||[{heading:'Explore the Courses',courses:page.courses}];
- const courseMarkup=groups.map(g=>renderCourseGroup(g.heading,g.courses)).join('');
+ const courseHeading=senior?'<section class="section ontario-courses-intro"><div class="wrap"><h2>Ontario Courses Offered</h2></div></section>':'';
+ const courseMarkup=courseHeading+groups.map(g=>renderCourseGroup(g.heading,g.courses,senior)).join('');
  const skills='<section class="section ontario-skills"><div class="wrap"><h2>'+escape(page.skillsHeading)+'</h2>'+para(page.skillsIntro)+'<div class="ontario-skill-grid">'+page.skills.map(s=>'<article><h3>'+escape(s.title)+'</h3>'+para(s.text)+'</article>').join('')+'</div></div></section>';
  const assessmentSection='<section class="section ontario-assessment"><div class="wrap"><h2>Assessment Support</h2>'+paragraphs(page.assessment)+'</div></section>';
  const related='<section class="section ontario-related"><div class="wrap"><h2>Explore Related Support</h2><ul>'+page.related.map(([name,url])=>'<li><a href="'+escape(url)+'">'+escape(name)+'</a></li>').join('')+'</ul></div></section>';
  const conclusionSection='<section class="section"><div class="wrap"><h2>'+escape(page.conclusionHeading)+'</h2>'+paragraphs(page.conclusion)+'</div></section>';
  const mypSection=page.mypSupport?'<section class="section ontario-myp"><div class="wrap"><h2>Additional Support: IB MYP Science</h2><p class="eyebrow">'+escape(page.mypSupport.code)+'</p>'+para(page.mypSupport.intro)+'<p><a class="text-link" href="/subjects-programmes/">Explore the IB Middle Years Programme</a></p></div></section>':'';
- const contentSections=page.mypSupport?skills+assessmentSection+courseMarkup+conclusionSection+mypSection:courseMarkup+skills+assessmentSection+conclusionSection;
+ const contentSections=page.mypSupport?skills+assessmentSection+courseMarkup+conclusionSection+mypSection:skills+courseMarkup+assessmentSection+conclusionSection;
  const main='<main id="main"><section class="page-hero"><div class="wrap"><a class="back-link" href="/subjects-programmes/">Back to Subjects &amp; Programmes</a><p class="eyebrow">One-to-one online tutoring</p><h1>'+escape(page.heading)+'</h1><p class="lead">'+escape(page.subheading)+'</p><h2 class="ontario-tagline">'+escape(page.strapline)+'</h2>'+paragraphs(page.intro)+'</div></section>'+contentSections+related+'<section class="section"><div class="wrap"><h2>'+escape(page.ctaHeading)+'</h2>'+para(page.cta)+'<p><a class="button" href="/enquire/">'+escape(page.ctaText)+'</a></p><p><a href="/tutoring-policies/#academic-integrity">Read the academic-integrity policy</a></p></div></section></main>';
  let html=template;
  html=replaceExactlyOnce(html,/<title>[\s\S]*?<\/title>/gi,'<title>'+escape(page.title)+'</title>',page.slug+' title');
@@ -67,7 +74,8 @@ export function applyOntario(root){
 .ontario-course-code{display:block;color:var(--slate-violet);font:500 .9rem/1.5 var(--sans);margin-top:.3rem}
 .ontario-course-body{padding:0 1rem 1rem 0;max-width:850px}
 .ontario-topic{margin-top:1.2rem}
-.ontario-topic h4{font:600 1.05rem/1.4 var(--sans);margin:0}
+.ontario-topic h4,.ontario-topic h5{font:600 1.05rem/1.4 var(--sans);margin:0}
+.ontario-course-heading{font:600 1.1rem/1.4 var(--sans);margin:0}
 .ontario-topic p{margin-top:.35rem}
 .ontario-skill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem;margin-top:1.5rem}
 .ontario-skill-grid article{padding:1.5rem;border:1px solid var(--line);border-radius:12px}
