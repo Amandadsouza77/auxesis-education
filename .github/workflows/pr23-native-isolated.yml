@@ -30,6 +30,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: node scripts/prelaunch-runtime-recover.mjs
+      - name: Inspect native binding interface names only
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,readdirSync,statSync} from 'node:fs';
+          const root='work/staging-deployment/runtime';
+          const files=d=>readdirSync(d).flatMap(n=>{const p=d+'/'+n;return statSync(p).isDirectory()?files(p):[p]});
+          const keys=new Set();
+          for(const file of [root+'/staging-entry.js',...files(root+'/cloudflare')].filter(f=>f.endsWith('.js'))){for(const m of readFileSync(file,'utf8').matchAll(/\.([A-Z][A-Z0-9_]{2,})\b/g))keys.add(m[1]);}
+          console.log('Native binding interface names (no values): '+JSON.stringify([...keys].sort()));
+          JS
       - name: Verify existing native tests in isolated fixtures
         working-directory: work/staging-deployment/runtime
         run: node tests/website-reviews.test.mjs
