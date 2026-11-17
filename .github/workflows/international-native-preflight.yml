@@ -33,7 +33,7 @@ jobs:
           import {join,relative} from 'node:path';
           import {tmpdir} from 'node:os';
           import {applyPublicCopy} from './scripts/approved-public-copy.mjs';
-          const expected='30d97bef00054b752db0dc1b32582d60a297bf4c';
+          const expected='0bcf8624a4f0b7b92ec5a4ebdeb0ca963712a910';
           const api='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/pages/projects/auxesis-education';
           const req=async()=>{const r=await fetch(api,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw Error('Cloudflare project HTTP '+r.status);const data=await r.json();if(!data.success)throw Error('Cloudflare project rejected');return data.result;};
           const before=await req(),dep=before.canonical_deployment;
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout exact SEO candidate for isolated tests
         uses: actions/checkout@v4
         with:
-          ref: 73ba2ef703ce320db27f07ac31a6b8f8e9046b74
+          ref: da552748e1888e1c592fb9fbb92d96302c964778
           path: seo-candidate
           persist-credentials: false
       - name: Install isolated test dependencies
@@ -113,12 +113,12 @@ jobs:
            for(const file of files(root+'/dist')){
             let path=relative(root+'/dist',file).replaceAll('\\\\','/');
             if(['_worker.js','_headers','_redirects','_routes.json'].includes(path)||path.startsWith('.'))continue;
-            let url='https://efe1f29d.auxesis-education.pages.dev/'+path.replace(/index\.html$/,'');
+            let url='https://332ab895.auxesis-education.pages.dev/'+path.replace(/index\.html$/,'');
             let r;for(let hop=0;hop<4;hop++){
              r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});
              if(![301,302,303,307,308].includes(r.status))break;
              const n=new URL(r.headers.get('location'),url);
-             if(n.origin!=='https://efe1f29d.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
+             if(n.origin!=='https://332ab895.auxesis-education.pages.dev')throw Error('Unexpected redirect '+path);
              url=n.href;
             }
             if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Asset unavailable: '+path+' HTTP '+r.status);
@@ -154,8 +154,8 @@ jobs:
           process.chdir('seo-candidate');
           const {applyPublicCopy}=await import('./seo-candidate/scripts/approved-public-copy.mjs');
           applyPublicCopy(root+'/dist');
-          const {addInternationalRoutes}=await import('./seo-candidate/scripts/international-public-wrapper.mjs');
-          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))));
+          const {addInternationalRoutes,addOntarioRoutes}=await import('./seo-candidate/scripts/international-public-wrapper.mjs');
+          writeFileSync(root+'/inquiry/cloudflare/public-site-worker.js',addOntarioRoutes(addInternationalRoutes(readFileSync('cloudflare/public-site-worker.js','utf8'),JSON.parse(readFileSync('content/international-pages.json','utf8'))),JSON.parse(readFileSync('content/ontario-pages.json','utf8'))));
           if(hash(readFileSync(root+'/staging-entry.js'))!==nativeBefore)throw Error('Native source changed');
           const home=readFileSync(root+'/dist/index.html','utf8');
           if(!home.includes('<title>IB Biology &amp; Chemistry Tutoring | Auxesis Education</title>'))throw Error('Candidate SEO title missing');
