@@ -16,7 +16,9 @@ async function cf(path,sql){
  require(r.ok,'Runtime recovery provider HTTP '+r.status+(codes?' (API codes '+codes+')':''));require(j.success,'Runtime recovery request rejected.');return j.result;
 }
 async function prepare(){
- require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected staging deployment branch.');
+ const releaseBranch=process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration';
+ const isolatedQa=process.argv.includes('--review-qa')&&process.env.GITHUB_REF==='refs/heads/codex/programme-form-quality'&&process.env.GITHUB_WORKFLOW==='Programme and form QA (no deployment)';
+ require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&(releaseBranch||isolatedQa),'Unexpected read-only recovery branch.');
  require(!!process.env.CLOUDFLARE_API_TOKEN?.trim(),'GitHub environment CLOUDFLARE_API_TOKEN is missing; configure it in auxesis-migration-preview.');
  const live=await cf('/pages/projects/auxesis-education'),stage=await cf('/pages/projects/'+project),vars=stage.deployment_configs.preview.env_vars;
  require(!stage.source&&!stage.canonical_deployment&&stage.deployment_configs.preview.d1_databases.PORTAL_DB.id===db&&vars.PRODUCTION_SYNC_ENABLED.value==='false'&&vars.PRODUCTION_AUTOMATION_ENABLED.value==='false','Unsafe staging deployment target.');

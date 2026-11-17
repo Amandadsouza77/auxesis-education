@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {applySeoMetadata} from './seo-metadata.mjs';
 import {applyInternational} from './international-pages.mjs';
 import {applyOntario} from './ontario-pages.mjs';
+import {applyProgrammeFormCorrections} from './programme-form-corrections.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -24,6 +25,7 @@ export function applyPublicCopy(root){
  }
  applyInternational(root);
  applyOntario(root);
+ applyProgrammeFormCorrections(root);
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
 
