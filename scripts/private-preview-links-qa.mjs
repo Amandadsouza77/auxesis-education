@@ -18,7 +18,7 @@ const server=createServer((req,res)=>{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
-const expected=[['Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry','https://apps.oct.ca/FindATeacher/memberdetail?id=496538'],['View my LinkedIn profile','https://www.linkedin.com/in/adsouza35/']];
+const expected=[['Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry','https://apps.oct.ca/FindATeacher/memberdetail?id=496538'],['LinkedIn profile','https://www.linkedin.com/in/adsouza35/']];
 const output=resolve('work/qa-evidence');mkdirSync(output,{recursive:true});
 try{
  for(const width of [320,390,768,1440]){
@@ -70,12 +70,14 @@ try{
    await page.goto(origin+'/about-amanda/');await page.locator('.credentials-panel').screenshot({path:output+'/credential-links-'+width+'.png'});
   }
   await page.goto(origin+'/');
-  const introduction=page.locator('section').filter({has:page.getByRole('heading',{name:'Meet Amanda.',exact:true})});
+  const introduction=page.locator('section').filter({has:page.getByRole('heading',{name:'Amanda D’Souza',exact:true})});
   assert.equal(await introduction.count(),1,'One brief homepage introduction');
   assert((await introduction.locator('p:not(.eyebrow)').innerText()).split(/\s+/).length<=40,'Homepage biography is a brief teaser');
   assert(!(await introduction.innerText()).includes('Assistant Examiner'),'Detailed credentials are on About Amanda');
   if(width===390||width===1440)await introduction.screenshot({path:output+'/home-amanda-summary-'+width+'.png'});
-  await introduction.getByRole('link',{name:'About Amanda',exact:true}).click();
+  assert.equal(await introduction.locator('.eyebrow').textContent(),'Your tutor');
+  assert(!(await introduction.locator('p:not(.eyebrow)').innerText()).includes('Amanda'),'Homepage introduction avoids repeating the name');
+  await introduction.getByRole('link',{name:'Experience & qualifications',exact:true}).click();
   await page.waitForLoadState('domcontentloaded');
   assert.equal(new URL(page.url()).pathname,'/about-amanda/');
   assert.equal(await page.getByRole('heading',{name:'More than 25 years in science education.',level:1}).count(),1,'Dedicated biography H1 retained');

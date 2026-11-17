@@ -25,11 +25,16 @@ try{
    for(const summary of await page.locator('.programme-disclosure>summary').all()){await summary.focus();await page.keyboard.press('Enter');}
    assert.equal(await page.locator('.programme-disclosure[open]').count(),5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' programme overflow '+width);
-   const background=page.locator('.programme-experience');
-   const text=(await page.locator('main').innerText()).replace(await background.count()?await background.innerText():'\u0000','');if(state==='before')programmeText=text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n');else assert.equal(text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n'),programmeText,'Programme wording preserved');
+   const copy=await page.locator('main').evaluate(e=>{const clone=e.cloneNode(true);clone.querySelectorAll('a,.programme-experience').forEach(n=>n.remove());return [...clone.querySelectorAll('p,h1,h2,h3')].map(n=>n.textContent.trim()).filter(Boolean);});
+   const text=copy.map(s=>s.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE & IGCSE').replaceAll('AS and A-Level','AS & A-Level').replace('Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.','Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.')).sort().join('\n');if(state==='before')programmeText=text;else assert.equal(text,programmeText,'Programme body copy preserved except explicit owner wording changes');
    if(state==='after'){
     assert.equal(await page.locator('.programme-links').count(),5);
-    assert.equal(await page.locator('.programme-experience').count(),1);assert((await page.locator('.programme-experience').innerText()).includes('IB Biology Assistant Examiner'));assert.equal(await page.locator('.programme-experience a').getAttribute('href'),'/about-amanda/');
+    assert.equal(await page.locator('.programme-experience').count(),1);assert((await page.locator('.programme-experience').innerText()).includes('IB Biology Assistant Examiner'));assert.equal(await page.locator('.programme-experience a').count(),0);
+    const supportLinks=page.locator('.programme-support-links>a');assert.equal(await supportLinks.count(),2);
+    assert.deepEqual(await supportLinks.allTextContents(),['Experience & qualifications','Academic integrity policy']);
+    const linkStyles=await supportLinks.evaluateAll(es=>es.map(e=>{const s=getComputedStyle(e);return [s.fontSize,s.lineHeight,s.fontWeight].join('/');}));assert.equal(linkStyles[0],linkStyles[1],'Support links have identical typography');
+    assert(await supportLinks.nth(1).evaluate(e=>e.getBoundingClientRect().top>=e.previousElementSibling.getBoundingClientRect().bottom+11),'Support links occupy separate rows with a clear gap');
+    if(width===390||width===1440)await page.locator('.programme-support').screenshot({path:output+'/programme-support-links-'+width+'.png'});
     assert(await page.locator('.programme-support').evaluate(e=>Boolean(e.compareDocumentPosition(document.querySelector('.programme-nav'))&Node.DOCUMENT_POSITION_FOLLOWING)),'Support introduction precedes programme navigation');
     assert.equal(await page.locator('.programme-support h2').evaluate(e=>getComputedStyle(e).fontSize),await page.locator('#ib summary h2').evaluate(e=>getComputedStyle(e).fontSize),'Shared support heading uses the programme heading scale');
 
@@ -52,7 +57,7 @@ try{
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),slug+' overflow '+width);
    for(const heading of await page.locator('main>.section h2').all())assert.equal(await heading.evaluate(e=>getComputedStyle(e).fontSize),referenceHeadingSize,slug+' matches parent heading scale');
    if(slug==='a-level-biology-tutoring'){
-    assert.equal(await page.locator('main h1').innerText(),'Online AS and A-Level Biology tutoring');
+    assert.equal(await page.locator('main h1').innerText(),'Online AS & A-Level Biology tutoring');
     const intact=await page.locator('main h1 .keep-together').evaluate(e=>{const range=document.createRange();range.selectNodeContents(e);return e.textContent==='A-Level'&&getComputedStyle(e).whiteSpace==='nowrap'&&range.getClientRects().length===1;});
     assert(intact,'A-Level stays intact on one line at '+width+'px');
     await page.screenshot({path:output+'/a-level-title-after-'+width+'.png'});
@@ -141,6 +146,11 @@ try{
  for(const path of paths){
   await page.goto('http://127.0.0.1:8767'+path,{waitUntil:'domcontentloaded'});
   assert.equal(await page.locator('main h1').count(),1,path);
+  const displayed=await page.locator('body').innerText();
+  assert(!/GCSE\s*(?:\/|and)\s*IGCSE/i.test(displayed),path+' GCSE & IGCSE naming is consistent');
+  assert(!/AS and A-Level/i.test(displayed),path+' AS & A-Level naming is consistent');
+  const labels=await page.locator('a[href]').allTextContents();
+  assert(!labels.some(s=>/^(See (current )?subjects and programmes|Read the academic-integrity policy|Read the full tutoring policies|View my LinkedIn profile)$/.test(s.trim())),path+' concise destination labels');
   for(const href of await page.locator('a[href]').evaluateAll(es=>es.map(e=>e.getAttribute('href')).filter(h=>h.startsWith('/')||h.startsWith('#')))){
    const url=new URL(href,page.url());if(/^\/(api|portal|admin)\//.test(url.pathname))continue;
    let file=resolve('work/after','.'+url.pathname+(url.pathname.endsWith('/')?'index.html':''));assert(existsSync(file),path+' broken link '+href);
@@ -155,5 +165,6 @@ try{
  assert(await page.locator('#myp .programme-details').isVisible());
  results.push('PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure');
  results.push('PASS: internal destinations and fragments across 16 public pages; seven existing recommendation cards intact');
+ results.push('PASS: concise destination links and consistent AS & A-Level / GCSE & IGCSE names across all 16 public pages');
  writeFileSync(output+'/results.txt',results.join('\n')+'\n');console.log(results.join('\n'));
 }finally{await browser.close();for(const s of servers)await new Promise(r=>s.close(r));}

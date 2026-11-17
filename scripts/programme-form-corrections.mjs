@@ -13,10 +13,11 @@ export function applyProgrammeFormCorrections(root){
  const support=supportSections[0][0];html=html.replace(support,'');
  const experience=JSON.parse(readFileSync('content/programme-experience.json'));
  const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
- const backgroundNote='<aside class="programme-experience" aria-label="Teaching experience"><p><strong>Teaching experience.</strong> '+escape(experience.summary).replaceAll('A-Level','<span class="keep-together">A-Level</span>')+' <a class="text-link" href="/about-amanda/">'+escape(experience.linkText)+'</a></p></aside>';
- const policy='<p><a class="text-link" href="/tutoring-policies/#academic-integrity">';
+ const backgroundNote='<aside class="programme-experience" aria-label="Teaching experience"><p><strong>Teaching experience.</strong> '+escape(experience.summary).replaceAll('A-Level','<span class="keep-together">A-Level</span>')+'</p></aside>';
+ const policy='<p><a class="text-link" href="/tutoring-policies/#academic-integrity">Read the academic-integrity policy</a></p>';
  if(!support.includes(policy))throw Error('Expected support policy link');
- const intro=support.replace(/<section class="[^"]*"/,'<section class="section programme-support"').replace(policy,backgroundNote+policy);
+ const supportLinks='<nav class="programme-support-links" aria-label="Programme information"><a class="text-link" href="/about-amanda/">'+escape(experience.linkText)+'</a><a class="text-link" href="/tutoring-policies/#academic-integrity">Academic integrity policy</a></nav>';
+ const intro=support.replace(/<section class="[^"]*"/,'<section class="section programme-support"').replace(policy,backgroundNote+supportLinks);
  const nav='<nav class="programme-nav wrap"';
  if(html.split(nav).length!==2)throw Error('Expected one programme navigation');
  html=html.replace(nav,intro+nav);
@@ -26,6 +27,8 @@ export function applyProgrammeFormCorrections(root){
 .programme-support{padding-block:2rem 0}
 .programme-experience{font-size:.95rem;margin-block:1rem}
 .programme-experience p{margin:0}
+.programme-support-links{display:flex;flex-direction:column;align-items:flex-start;gap:.75rem;margin-block:1rem 0;font-size:1rem}
+.programme-support-links .text-link{font-size:inherit;line-height:1.5}
 .programme-support h2{font-size:clamp(1.45rem,3vw,2rem);margin-bottom:.75rem}
 .programme-accordion-section{padding-block:0 2rem}
 .programme-disclosure{margin:0}

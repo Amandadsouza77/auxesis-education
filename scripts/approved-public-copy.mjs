@@ -5,6 +5,7 @@ import {applySeoMetadata} from './seo-metadata.mjs';
 import {applyInternational} from './international-pages.mjs';
 import {applyOntario} from './ontario-pages.mjs';
 import {applyProgrammeFormCorrections} from './programme-form-corrections.mjs';
+import {applyPublicLinkLabels} from './public-link-labels.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -23,6 +24,11 @@ export function applyPublicCopy(root){
    if(links.length!==1||[...html.matchAll(credential)].length!==1)throw Error('Expected one OCT credential and one register link');
    html=html.replace(credential,(_,text)=>'<li><a href="'+links[0][1]+'" rel="noopener noreferrer" target="_blank">'+text+'</a></li>').replace(register,'');
   }
+  if(file==='home.html'){
+   const summary=/<div class="actions"><a class="button secondary" href="\/about-amanda\/">About Amanda<\/a><\/div>/g;
+   if([...html.matchAll(summary)].length!==1)throw Error('Expected one home biography link');
+   html=html.replace(summary,'<div class="actions"><a class="button secondary" href="/about-amanda/">Experience &amp; qualifications</a></div>');
+  }
   if(file==='how-tutoring-works.html'){
    let removed=0;html=html.replace(/<article\b[^>]*>[\s\S]*?<\/article>/g,a=>{if(/Parent conversation|Your Auxesis Portal/.test(a)){removed++;return '';}return a;});if(removed!==2)throw Error('Unexpected process steps');
    let i=0;html=html.replace(/(<article><span>)\d{2}(<\/span>)/g,(_,a,b)=>a+String(++i).padStart(2,'0')+b);if(i!==4)throw Error('Expected four process steps');
@@ -37,6 +43,8 @@ export function applyPublicCopy(root){
  applyInternational(root);
  applyOntario(root);
  applyProgrammeFormCorrections(root);
+ const detailPages=[...JSON.parse(readFileSync('content/international-pages.json')), ...JSON.parse(readFileSync('content/ontario-pages.json'))];
+ applyPublicLinkLabels(root,[...Object.keys(edits).map(file=>file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html')),...detailPages.map(p=>p.slug+'/index.html')]);
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
 
