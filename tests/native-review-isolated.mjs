@@ -38,10 +38,6 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const wait=c=>new Promise(r=>setTimeout(r,c.notBefore+50));
  const valid={review:'Synthetic isolated runtime review. Never production.',public_label:'Ephemeral QA',rating:5,consent:true};
  const ip='192.0.2.'+(++ipIndex),cfg=await config(ip);console.log('Native minimum delay milliseconds: '+cfg.notBefore);
- console.log('Isolated form/review tables: '+JSON.stringify((await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE '%form%' OR name LIKE '%review%') ORDER BY name").all()).results));
- for(const part of cfg.token.split('.')){try{const data=JSON.parse(Buffer.from(part,'base64url').toString());console.log('Synthetic token claim interface: '+JSON.stringify({keys:Object.keys(data),numeric:Object.fromEntries(Object.entries(data).filter(([,v])=>typeof v==='number'))}));}catch{}}
- try{const {open}=await import(root+'/cloudflare/crypto.js');const data=JSON.parse(await open('0000000000000000000000000000000000000000000000000000000000000000',cfg.token));console.log('Synthetic decrypted token claim interface: '+JSON.stringify({keys:Object.keys(data),numeric:Object.fromEntries(Object.entries(data).filter(([,v])=>typeof v==='number'))}));}catch{console.log('Synthetic token uses a different envelope; no contents logged.');}
-
  await wait(cfg);
  const response=await send('',{method:'POST',ip,body:{...valid,form_token:cfg.token}});const body=await json(response);assert.equal(response.status,200,JSON.stringify(body));assert.equal(body.ok,true);
  const stored=(await db.prepare('SELECT id,status,comment FROM website_reviews').all()).results;assert.equal(stored.length,1);assert.equal(stored[0].status,'pending');assert.equal(stored[0].comment,valid.review);
@@ -53,11 +49,11 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
   const payload={...valid,review:'Synthetic isolated '+scenario+' case. Never production.',form_token:c.token};let origin=custom,source=custom;
   if(scenario==='invalid')payload.review='';if(scenario==='missing-consent')payload.consent=false;if(scenario==='missing-token')delete payload.form_token;if(scenario==='honeypot')payload.website='synthetic-bot.invalid';if(scenario==='cross-origin')source='https://unapproved.example';if(scenario==='unapproved-host'){origin='https://unapproved.example';source=origin;}
   const r=await send('',{origin,source,method:'POST',ip,body:payload});
-  if(['honeypot','too-fast'].includes(scenario))assert(r.status===200||r.status>=400,'Native spam decoy or rejection');
+  if(scenario==='honeypot')assert(r.status===200||r.status>=400,'Native spam decoy or rejection');
   else assert(r.status>=400,scenario+' must reject (HTTP '+r.status+')');
   assert.equal(await count(),1,scenario+' created no record');
   negativeEvidence.push({scenario,httpStatus:r.status,storedRecordsAdded:0});
-  outcomes.push(['honeypot','too-fast'].includes(scenario)&&r.status===200?'PASS '+scenario+' silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
+  outcomes.push(scenario==='honeypot'&&r.status===200?'PASS '+scenario+' silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
  }
  for(const origin of [legacy,custom]){
   const manage=await send('/manage',{origin});assert(manage.status===401||manage.status===403);const moderate=await send('/moderate',{origin,method:'POST',body:{id,decision:'approve'}});assert(moderate.status===401||moderate.status===403);

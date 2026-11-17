@@ -20,3 +20,15 @@ test('public review adapter checks original origin and retains native bindings a
  }
  for(const bindings of [{...env,SITE_URL:''},{...env,SITE_URL:'https://evil.example'},{...env,PRODUCTION_ORIGIN:'https://evil.example'}]){const request=new Request(site+'/api/reviews');await worker.fetch(request,bindings,ctx);assert.equal(calls.at(-1).request,request);assert.equal(calls.at(-1).bindings,bindings);}
 });
+test('authenticated native token age is enforced without consuming it or changing native validation',async()=>{
+ const {seal}=await import('../cloudflare/crypto.js');
+ const key='synthetic-test-only-key',env={SITE_URL:legacy,PRODUCTION_ORIGIN:legacy,PORTAL_TOKEN_KEY:key};let calls=0;
+ const worker=withPublicSite({fetch:()=>{calls++;return Response.json({ok:true});}});
+ const post=token=>new Request(site+'/api/reviews',{method:'POST',headers:{Origin:site,'Content-Type':'application/json'},body:JSON.stringify({review:'Synthetic test only',form_token:token})});
+ const fresh=await seal(key,JSON.stringify({nonce:'test-nonce',origin:legacy,expires:Date.now()+1800000}));
+ const early=await worker.fetch(post(fresh),env);assert.equal(early.status,429);assert.match((await early.json()).error,/wait a moment/);assert.equal(calls,0);
+ const mature=await seal(key,JSON.stringify({nonce:'test-nonce',origin:legacy,expires:Date.now()+1800000-2000}));
+ assert.equal((await worker.fetch(post(mature),env)).status,200);assert.equal(calls,1);
+ await worker.fetch(post('tampered-token'),env);assert.equal(calls,2,'Native handler still rejects invalid tokens');
+ const huge=await worker.fetch(new Request(site+'/api/reviews',{method:'POST',headers:{Origin:site},body:'x'.repeat(65537)}),env);assert.equal(huge.status,413);assert.equal(calls,2);
+});
