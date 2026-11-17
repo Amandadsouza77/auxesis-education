@@ -33,10 +33,34 @@ jobs:
       - name: Verify existing native tests in isolated fixtures
         working-directory: work/staging-deployment/runtime
         run: node tests/website-reviews.test.mjs
+      - name: Read current production identity and immutable public hashes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const sha=b=>createHash('sha256').update(b).digest('hex');
+          const api='https://api.cloudflare.com/client/v4/accounts/2ac862d7c1f865935d185df59e7bd719/pages/projects/auxesis-education';
+          const project=async()=>{const r=await fetch(api,{headers:{Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN},redirect:'error'});if(!r.ok)throw Error('Read-only production HTTP '+r.status);const d=await r.json();if(!d.success)throw Error('Production read rejected');return d.result;};
+          const live=await project(),dep=live.canonical_deployment;
+          if(dep?.deployment_trigger?.metadata?.commit_hash!=='ed13220e20d9dc6b37fd8bccf7fcba0880eec876'||new URL(dep.url).origin!=='https://b55b1719.auxesis-education.pages.dev')throw Error('Production identity changed; reconcile before release');
+          const vars=live.deployment_configs.production.env_vars;
+          if(vars.PRODUCTION_SYNC_ENABLED?.value!=='false'||vars.PRODUCTION_AUTOMATION_ENABLED?.value!=='false')throw Error('Automation guard changed');
+          const origin=new URL(dep.url).origin;
+          const decode=hex=>{if(hex.length<4||hex.length%2||!/^[a-f0-9]+$/i.test(hex))throw Error('Invalid email encoding');const k=parseInt(hex.slice(0,2),16);return Array.from({length:hex.length/2-1},(_,i)=>String.fromCharCode(parseInt(hex.slice(i*2+2,i*2+4),16)^k)).join('');};
+          const normalize=s=>s.replace(/<a href="\/cdn-cgi\/l\/email-protection#([a-f0-9]+)">/gi,(_,h)=>'<a href="mailto:'+decode(h)+'">').replace(/<span class="__cf_email__" data-cfemail="([a-f0-9]+)">\[email&#160;protected\]<\/span>/gi,(_,h)=>decode(h)).replace(/<script data-cfasync="false" src="\/cdn-cgi\/scripts\/[a-f0-9]+\/cloudflare-static\/email-decode\.min\.js"><\/script>/gi,'');
+          const paths=[...new Set([...Object.keys(JSON.parse(readFileSync('content/ontario-previous-baseline-hashes.json'))),...JSON.parse(readFileSync('content/ontario-pages.json')).map(p=>p.slug+'/index.html')])].sort();
+          const raw={},stable={};
+          for(const path of paths){let url=origin+'/'+path.replace(/index\.html$/,'');let r;for(let hop=0;hop<4;hop++){r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(30000)});if(![301,302,303,307,308].includes(r.status))break;const next=new URL(r.headers.get('location'),url);if(next.origin!==origin)throw Error('Unexpected asset redirect');url=next.href;}if(!r.ok&&!(path==='404.html'&&r.status===404))throw Error('Baseline asset HTTP '+r.status+' '+path);const bytes=Buffer.from(await r.arrayBuffer());raw[path]=sha(bytes);stable[path]=sha(path.endsWith('.html')?normalize(bytes.toString()):bytes);}
+          const after=await project();if(after.canonical_deployment.id!==dep.id||JSON.stringify(after.deployment_configs)!==JSON.stringify(live.deployment_configs)||JSON.stringify(after.source)!==JSON.stringify(live.source))throw Error('Production changed during read-only capture');
+          const report={productionCommit:dep.deployment_trigger.metadata.commit_hash,deploymentId:dep.id,immutableOrigin:origin,publicAssetHashes:stable,rawAssetHashes:raw,configHash:sha(JSON.stringify(live.deployment_configs)),sourceHash:sha(JSON.stringify(live.source)),automationDisabled:true,productionUnchanged:true,providerWrites:0};
+          mkdirSync('work/release-preflight',{recursive:true});writeFileSync('work/release-preflight/production-baseline.json',JSON.stringify(report,null,2));console.log(JSON.stringify({productionCommit:report.productionCommit,deploymentId:dep.id,immutableOrigin:origin,publicAssets:paths.length,productionUnchanged:true,providerWrites:0}));console.log('PUBLIC_RELEASE_BASELINE '+JSON.stringify(report));
+          JS
       - name: Checkout exact PR candidate without credentials
         uses: actions/checkout@v4
         with:
-          ref: 72c7f18332612f856388293d8d6c8a8e031d4e9f
+          ref: 8b29662bebb1518ca99b6eec4b7bbfd8153e4087
           path: candidate
           persist-credentials: false
       - name: Install test tools without provider credentials
@@ -65,7 +89,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pr23-native-test-evidence
-          path: candidate/work/native-review-qa/*.json
+          path: |
+            candidate/work/native-review-qa/*.json
+            work/release-preflight/*.json
           if-no-files-found: ignore
           retention-days: 14
       - name: Remove private recovery files
