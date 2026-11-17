@@ -1,8 +1,8 @@
 name: SEO candidate browser checks (no deployment)
 on:
   push:
-    branches: [codex/international-seo-phase2]
-    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, content/international-pages.json, content/international-previous-baseline-hashes.json, tests/seo-*.test.mjs]
+    branches: [codex/ontario-science-pages-review]
+    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, scripts/ontario-pages.mjs, content/ontario-pages.json, tests/ontario-pages.test.mjs, content/international-pages.json, content/international-previous-baseline-hashes.json, tests/seo-*.test.mjs]
 permissions:
   contents: read
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs tests/seo-international-wrapper.test.mjs
+      - run: node --test tests/seo-metadata.test.mjs tests/seo-release-safety.test.mjs tests/seo-international-wrapper.test.mjs tests/ontario-pages.test.mjs
       - name: Verify recorded Phase 1 immutable asset baseline
         run: |
           node --input-type=module <<'JS'
@@ -57,7 +57,7 @@ jobs:
           import {chromium} from 'playwright';
           import assert from 'node:assert/strict';
           const browser=await chromium.launch({headless:true});
-          const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/','/ib-biology-tutoring/','/ib-chemistry-tutoring/','/gcse-igcse-science-tutoring/','/a-level-biology-tutoring/'];
+          const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/','/ib-biology-tutoring/','/ib-chemistry-tutoring/','/gcse-igcse-science-tutoring/','/a-level-biology-tutoring/','/ontario-grade-9-10-science-tutoring/','/ontario-grade-11-12-biology-chemistry-tutoring/'];
           try {
            for(const width of [320,390,768,1440]){
             const page=await browser.newPage({viewport:{width,height:900}});
@@ -97,6 +97,24 @@ jobs:
              assert.equal(await link.isVisible(),true);
              await link.click();
              assert.equal(new URL(page.url()).pathname,href);
+            }
+            for(const [path,count] of [['/ontario-grade-9-10-science-tutoring/',2],['/ontario-grade-11-12-biology-chemistry-tutoring/',6]]){
+             await page.goto('http://127.0.0.1:8765'+path,{waitUntil:'domcontentloaded'});
+             const sections=page.locator('details.ontario-course');
+             assert.equal(await sections.count(),count);
+             for(let i=0;i<count;i++){
+              const d=sections.nth(i), summary=d.locator('summary');
+              assert.equal(await d.getAttribute('open'),null);
+              await summary.focus(); await page.keyboard.press('Enter');
+              assert.notEqual(await d.getAttribute('open'),null);
+              assert.equal(await d.locator('.ontario-course-body').isVisible(),true);
+              await page.keyboard.press('Enter'); assert.equal(await d.getAttribute('open'),null);
+             }
+             const heads=await page.locator('main h1, main h2, main h3, main h4, main h5').evaluateAll(es=>es.map(e=>Number(e.tagName.slice(1))));
+             assert.equal(heads[0],1);
+             for(let i=1;i<heads.length;i++)assert.ok(heads[i]<=heads[i-1]+1,JSON.stringify({path,previous:heads[i-1],current:heads[i]}));
+             const sitemap=await (await page.request.get('http://127.0.0.1:8765/sitemap.xml')).text();
+             assert.ok(sitemap.includes('https://auxedu.com'+path),path);
             }
             await page.goto('http://127.0.0.1:8765/enquire/',{waitUntil:'domcontentloaded'});
             assert.equal(await page.locator('#enquiry-form').count(),1);
