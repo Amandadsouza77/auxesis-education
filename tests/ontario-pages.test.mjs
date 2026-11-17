@@ -10,7 +10,7 @@ const pages=JSON.parse(readFileSync('content/ontario-pages.json','utf8'));
 test('two distinctive complete Ontario pages with approved skills',()=>{
  assert.equal(pages.length,2);
  assert.equal(new Set(pages.map(p=>p.slug)).size,2);
- assert.equal(pages[0].courses.length,3);
+ assert.equal(pages[0].courses.length,2);
  assert.equal(pages[1].courseGroups.flatMap(g=>g.courses).length,6);
  for(const page of pages){
   assert(page.skills.some(s=>s.text.includes('analyse and interpret data')));
@@ -20,7 +20,7 @@ test('two distinctive complete Ontario pages with approved skills',()=>{
  }
  assert(pages[0].courses.some(c=>c.code.includes('SNC1W')&&c.code.includes('De-streamed')));
  assert(pages[0].courses.some(c=>c.code.includes('SNC2D')&&c.code.includes('SNC2P')));
- assert(pages[0].courses.find(c=>c.title==='MYP Science Support').intro.includes('specific assessment task'));
+ assert(pages[0].mypSupport.intro.includes('specific assessment task'));
  for(const code of ['SBI3U','SBI3C','SBI4U','SCH3U','SCH4U','SCH4C'])
   assert(pages[1].courseGroups.flatMap(g=>g.courses).some(c=>c.code.includes(code)),code);
 });
@@ -47,8 +47,18 @@ test('builds accessible collapsed course sections from existing public design',(
   }
   const junior=readFileSync(resolve(root,pages[0].slug,'index.html'),'utf8');
   const senior=readFileSync(resolve(root,pages[1].slug,'index.html'),'utf8');
-  assert.equal((junior.match(/<details class="ontario-course">/g)||[]).length,3);
+  assert.equal((junior.match(/<details class="ontario-course">/g)||[]).length,2);
   assert.equal((senior.match(/<details class="ontario-course">/g)||[]).length,6);
+  // General teaching approach precedes both Ontario courses; MYP stays distinct near the end.
+  const juniorSections=['<h2>Developing Essential Scientific Skills</h2>','<h2>Assessment Support</h2>','<h2>Explore the Courses</h2>','<span class="ontario-course-code">SNC1W','<span class="ontario-course-code">SNC2D','<h2>Building Foundations for Senior Science</h2>','<h2>Additional Support: IB MYP Science</h2>','<h2>Getting Started</h2>'];
+  let last=-1;
+  for(const section of juniorSections){
+    const current=junior.indexOf(section);
+    assert(current>last,'Junior section out of order or missing: '+section);
+    last=current;
+  }
+  assert(!junior.includes('<strong>MYP Science Support</strong>'));
+  assert(junior.includes('Explore the IB Middle Years Programme'));
   assert(senior.includes('SCH4C'));
   assert(junior.includes('specific assessment task'));
   const sitemap=readFileSync(resolve(root,'sitemap.xml'),'utf8');
