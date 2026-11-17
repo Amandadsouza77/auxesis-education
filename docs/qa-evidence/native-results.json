@@ -8,6 +8,7 @@
     "PASS too-fast rejected",
     "PASS cross-origin rejected",
     "PASS unapproved-host rejected",
+    "PASS legacy hostname cannot bypass minimum token age",
     "PASS replay rejected after delay with unique content and no new record",
     "PASS anonymous and non-owner management denied; local owner approves/rejects; publication follows moderation"
   ],
@@ -46,6 +47,11 @@
       "scenario": "unapproved-host",
       "httpStatus": 403,
       "storedRecordsAdded": 0
+    },
+    {
+      "scenario": "legacy-too-fast",
+      "httpStatus": 429,
+      "storedRecordsAdded": 0
     }
   ],
   "isolatedDatabase": true,
@@ -54,7 +60,7 @@
   "finalStatuses": [
     "rejected"
   ],
-  "isolatedDataHash": "75ac5453fe1e91b3d7d2c073517d69aa1a4d3d09c88a0a651b4224d87ef082ff",
+  "isolatedDataHash": "063562cb799032833feeaa025917627412a028b6e741be61654c49bd4841b009",
   "privateAccountsUnchanged": true,
   "outboundRequests": 0,
   "productionD1Used": false
