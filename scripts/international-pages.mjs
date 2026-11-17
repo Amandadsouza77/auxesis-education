@@ -4,7 +4,7 @@ const pages=JSON.parse(readFileSync('content/international-pages.json','utf8'));
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const once=(s,old,replacement,label)=>{if(s.split(old).length!==2)throw Error('Expected one '+label);return s.replace(old,replacement)};
 export function applyInternational(root){
- const programmes=resolve(root,'subjects-programmes/index.html'),about=resolve(root,'about-amanda/index.html');
+ const programmes=resolve(root,'subjects-programmes/index.html');
  let template=readFileSync(programmes,'utf8');
  const cardLinks=[
   ['<h3>Biology — Standard & Higher Level</h3><p>We work on understanding how biological ideas connect, interpreting data, evaluating investigations and applying knowledge in unfamiliar contexts. I also provide ethical guidance for Biology Internal Assessments and Extended Essays.</p>', '<p><a class="text-link" href="/ib-biology-tutoring/">Explore IB Biology tutoring</a></p>'],
@@ -14,9 +14,6 @@ export function applyInternational(root){
  ];
  for(const [anchor,link] of cardLinks) template=once(template,anchor,anchor+link,'programme detail link');
  writeFileSync(programmes,template);
- let biography=readFileSync(about,'utf8');
- biography=once(biography,'<h3>Professional credentials</h3>','<h3>Professional credentials</h3><p>An Ontario Certified Teacher holding Qualified Teacher Status (QTS) in the United Kingdom.</p>','qualification heading');
- writeFileSync(about,biography);
  for(const p of pages){
   let html=template.replace(/<title>[\s\S]*?<\/title>/i,'<title>'+escape(p.title)+'</title>')
    .replace(/<meta name="description" content="[^"]*">/i,'<meta name="description" content="'+escape(p.description)+'">')

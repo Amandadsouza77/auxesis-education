@@ -31,6 +31,13 @@ try{
   });
   const page=await context.newPage();
   await page.goto(origin+'/about-amanda/');await page.evaluate(()=>document.fonts.ready);
+  const qualifications=page.locator('.credentials-panel');
+  for(const name of ['Academic qualifications','Professional credentials']){
+   assert.equal(await qualifications.getByRole('heading',{name,exact:true}).evaluate(e=>e.nextElementSibling.tagName),'UL','Qualifications go directly from heading to list');
+  }
+  assert(!(await qualifications.innerText()).includes('My academic background is in Biology.'),'Redundant academic sentence removed');
+  assert(!(await qualifications.innerText()).includes('An Ontario Certified Teacher holding'),'Redundant certification summary removed');
+  assert.equal(await qualifications.locator('li').count(),5,'Both degrees and all three credentials preserved');
   assert.equal(((await page.locator('main').innerText()).match(/OCT #496538/g)||[]).length,1,'OCT number appears once, within its linked credential');
   assert.equal(await page.getByText('Ontario College of Teachers public register (OCT #496538)',{exact:true}).count(),0,'Separate repeated register line removed');
   for(const [name,url] of expected){

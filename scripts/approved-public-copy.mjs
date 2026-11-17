@@ -13,6 +13,9 @@ export function applyPublicCopy(root){
   let html=readFileSync('content/approved-baseline/'+file,'utf8');
   for(const {before,after} of changes){let count=0;html=html.replace(/<(p|h1|h2|h3)\b([^>]*)>([\s\S]*?)<\/\1>/g,(all,tag,attrs,inner)=>{if(decode(inner)!==before)return all;count++;return '<'+tag+attrs+'>'+escape(after)+'</'+tag+'>';});if(count!==1)throw Error(file+': expected one copy match, found '+count+' for '+before.slice(0,75));}
   if(file==='about-amanda.html'){
+   const academic='<p>My academic background is in Biology.</p>';
+   if(html.split(academic).length!==2)throw Error('Expected one redundant academic introduction');
+   html=html.replace(academic,'');
    // Link the existing credential itself instead of repeating the OCT number below.
    const register=/<p><a class="text-link" href="(https:\/\/apps\.oct\.ca\/FindATeacher\/memberdetail\?id=496538)" rel="noopener noreferrer" target="_blank">Ontario College of Teachers public register \(OCT #496538\)<\/a><\/p>/g;
    const credential=/<li>(Ontario Certified Teacher \(OCT #496538\)[^<]*)<\/li>/g;
