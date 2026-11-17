@@ -46,7 +46,7 @@ jobs:
       - name: Checkout exact PR candidate without credentials
         uses: actions/checkout@v4
         with:
-          ref: b5cec1c9b23973e97a2ec02b56560b318181aef6
+          ref: c4b6dc67f3cee033c91696c99b35b3ff8c209c28
           path: candidate
           persist-credentials: false
       - name: Install test tools without provider credentials
