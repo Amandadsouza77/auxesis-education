@@ -8,7 +8,7 @@ import {spawnSync} from 'node:child_process';
 const root=resolve(process.env.QA_NATIVE_ROOT||'work/staging-deployment/runtime');
 const legacy='https://auxesis-education.pages.dev',custom='https://auxedu.com';
 const digest=s=>createHash('sha256').update(s).digest('hex');
-const outcomes=[];let outbound=0;
+const outcomes=[],negativeEvidence=[];let outbound=0;
 const options={workers:[{name:'native-candidate-review-qa',modules:true,script:readFileSync(root+'/dist/_worker.js','utf8'),compatibilityDate:'2026-07-30',d1Databases:{PORTAL_DB:'ephemeral-review-qa'},bindings:{SITE_URL:legacy,PORTAL_RUNTIME_MODE:'production',PRODUCTION_ORIGIN:legacy,PORTAL_DB_ID:'ephemeral-review-qa',ADMIN_EMAIL:'owner@example.invalid',PRODUCTION_SYNC_ENABLED:'false',PRODUCTION_AUTOMATION_ENABLED:'false',PORTAL_STAGING_ONLY:'false',SESSION_SECRET:'synthetic-local-secret-not-a-real-credential',PORTAL_TOKEN_KEY:'0000000000000000000000000000000000000000000000000000000000000000'},outboundService:()=>{outbound++;return new Response('External network disabled by QA',{status:599});}}],cf:false,d1Persist:false};
 const mf=new runtime.Miniflare(runtime.convertV4MiniflareOptions?runtime.convertV4MiniflareOptions(options):options);
 try{
@@ -44,26 +44,35 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const id=stored[0].id;assert.equal((await json(await send(''))).reviews.length,0);outcomes.push('PASS valid custom-domain review: explicit success, stored pending, absent publicly');
  const count=async()=>Number((await db.prepare('SELECT COUNT(*) AS n FROM website_reviews').first()).n);
  const replay=await send('',{method:'POST',ip,body:{...valid,form_token:cfg.token}});assert(replay.status>=400,'Replayed token rejected');assert.equal(await count(),1);outcomes.push('PASS replay rejected without new record');
- for(const scenario of ['invalid','missing-consent','honeypot','too-fast','cross-origin','unapproved-host']){
+ for(const scenario of ['invalid','missing-consent','missing-token','honeypot','too-fast','cross-origin','unapproved-host']){
   const ip='192.0.2.'+(++ipIndex),c=await config(ip);if(scenario!=='too-fast')await wait(c);
   const payload={...valid,form_token:c.token};let origin=custom,source=custom;
-  if(scenario==='invalid')payload.review='';if(scenario==='missing-consent')payload.consent=false;if(scenario==='honeypot')payload.website='synthetic-bot.invalid';if(scenario==='cross-origin')source='https://unapproved.example';if(scenario==='unapproved-host'){origin='https://unapproved.example';source=origin;}
+  if(scenario==='invalid')payload.review='';if(scenario==='missing-consent')payload.consent=false;if(scenario==='missing-token')delete payload.form_token;if(scenario==='honeypot')payload.website='synthetic-bot.invalid';if(scenario==='cross-origin')source='https://unapproved.example';if(scenario==='unapproved-host'){origin='https://unapproved.example';source=origin;}
   const r=await send('',{origin,source,method:'POST',ip,body:payload});
-  assert(r.status>=400,scenario+' must reject (HTTP '+r.status+')');assert.equal(await count(),1,scenario+' created no record');outcomes.push('PASS '+scenario+' rejected');
+  if(scenario==='honeypot')assert(r.status===200||r.status>=400,'Native honeypot decoy or rejection');
+  else assert(r.status>=400,scenario+' must reject (HTTP '+r.status+')');
+  assert.equal(await count(),1,scenario+' created no record');
+  negativeEvidence.push({scenario,httpStatus:r.status,storedRecordsAdded:0});
+  outcomes.push(scenario==='honeypot'&&r.status===200?'PASS honeypot silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
  }
  for(const origin of [legacy,custom]){
   const manage=await send('/manage',{origin});assert(manage.status===401||manage.status===403);const moderate=await send('/moderate',{origin,method:'POST',body:{id,decision:'approve'}});assert(moderate.status===401||moderate.status===403);
  }
+ const nonOwner=randomBytes(32).toString('base64url');
+ await db.prepare('INSERT INTO portal_accounts(id,email,name,role,enabled) VALUES(?1,?2,?3,?4,1)').bind('qa-parent','parent@example.invalid','Synthetic QA parent','parent').run();
+ await db.prepare("INSERT INTO portal_sessions(token_hash,account_id,expires_at) VALUES(?1,?2,datetime('now','+10 minutes'))").bind(createHash('sha256').update(nonOwner).digest('base64url'),'qa-parent').run();
+ for(const path of ['/manage','/moderate']){const r=await send(path,{origin:legacy,cookie:'__Host-auxesis_session='+nonOwner,...(path==='/moderate'?{method:'POST',body:{id,decision:'approve'}}:{})});assert.equal(r.status,403,'Non-owner management denied');}
+ await db.prepare('DELETE FROM portal_sessions WHERE account_id=?1').bind('qa-parent').run();await db.prepare('DELETE FROM portal_accounts WHERE id=?1').bind('qa-parent').run();
  const cookie='__Host-auxesis_session='+session;
  const queue=await send('/manage?status=pending',{origin:legacy,cookie});assert.equal(queue.status,200);assert((await json(queue)).reviews.some(r=>r.id===id));
  for(const decision of ['approve','reject']){
   const r=await send('/moderate',{origin:legacy,cookie,method:'POST',body:{id,decision}});assert.equal(r.status,200,decision+' permission');
   const list=await json(await send(''));assert.equal(list.reviews.some(r=>r.id===id),decision==='approve');
  }
- outcomes.push('PASS anonymous management denied; local owner approves/rejects; publication follows moderation');
+ outcomes.push('PASS anonymous and non-owner management denied; local owner approves/rejects; publication follows moderation');
  assert.equal(digest(JSON.stringify((await db.prepare('SELECT * FROM portal_accounts ORDER BY id').all()).results)),privateBefore);
  assert.equal(outbound,0,'Native review tests never call external providers');
  const finalRows=(await db.prepare('SELECT id,status FROM website_reviews ORDER BY id').all()).results;
- const evidence={outcomes,isolatedDatabase:true,initialReviews:0,finalReviews:finalRows.length,finalStatuses:finalRows.map(r=>r.status),isolatedDataHash:digest(JSON.stringify(finalRows)),privateAccountsUnchanged:true,outboundRequests:outbound,productionD1Used:false};
+ const evidence={outcomes,negativeEvidence,isolatedDatabase:true,initialReviews:0,finalReviews:finalRows.length,finalStatuses:finalRows.map(r=>r.status),isolatedDataHash:digest(JSON.stringify(finalRows)),privateAccountsUnchanged:true,outboundRequests:outbound,productionD1Used:false};
  mkdirSync('work/native-review-qa',{recursive:true});writeFileSync('work/native-review-qa/results.json',JSON.stringify(evidence,null,2));console.log(outcomes.join('\n'));console.log(JSON.stringify(evidence));
 }finally{await mf.dispose();}
