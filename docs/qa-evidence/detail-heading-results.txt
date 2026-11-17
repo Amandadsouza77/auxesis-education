@@ -8,4 +8,5 @@ PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hie
 PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at 1440px
 PASS: review required fields/consent, JSON validation errors, non-JSON hostname error, HTTP 200 ok:false, retained values, real-success-only confirmation (all intercepted)
 PASS: enquiry required fields, Other selections, consent, missing spam check, retained data on provider failure and business-day confirmation; two intercepted POSTs, zero real emails
+PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure
 PASS: internal destinations and fragments across 16 public pages; seven existing recommendation cards intact

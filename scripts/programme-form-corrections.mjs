@@ -8,8 +8,18 @@ export function applyProgrammeFormCorrections(root){
  let groups=0;
  html=html.replace(/(?:<p><a class="text-link" href="\/(?:ib-biology-tutoring|ib-chemistry-tutoring|a-level-biology-tutoring|gcse-igcse-science-tutoring|ontario-grade-9-10-science-tutoring|ontario-grade-11-12-biology-chemistry-tutoring)\/">[^<]+<\/a><\/p>)+/g,links=>{groups++;return '<div class="programme-links">'+links+'</div>';});
  if(groups!==5)throw Error('Expected five programme link groups; compare current source.');
+ const supportSections=[...html.matchAll(/<section\b[^>]*>[\s\S]*?<\/section>/g)].filter(m=>m[0].includes('<h2>What support can include.</h2>'));
+ if(supportSections.length!==1)throw Error('Expected one shared programme support introduction');
+ const support=supportSections[0][0];html=html.replace(support,'');
+ const intro=support.replace(/<section class="[^"]*"/,'<section class="section programme-support"');
+ const nav='<nav class="programme-nav wrap"';
+ if(html.split(nav).length!==2)throw Error('Expected one programme navigation');
+ html=html.replace(nav,intro+nav);
+
  const css=`<style id="programme-spacing">
 /* One spacing scale for every programme, including sections without links. */
+.programme-support{padding-block:2rem 0}
+.programme-support h2{font-size:clamp(1.45rem,3vw,2rem);margin-bottom:.75rem}
 .programme-accordion-section{padding-block:0 2rem}
 .programme-disclosure{margin:0}
 .programme-disclosure summary{padding-block:1.25rem}

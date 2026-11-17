@@ -25,9 +25,12 @@ try{
    for(const summary of await page.locator('.programme-disclosure>summary').all()){await summary.focus();await page.keyboard.press('Enter');}
    assert.equal(await page.locator('.programme-disclosure[open]').count(),5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' programme overflow '+width);
-   const text=await page.locator('main').innerText();if(state==='before')programmeText=text.replace(/\s+/g,' ');else assert.equal(text.replace(/\s+/g,' '),programmeText,'Programme wording preserved');
+   const text=await page.locator('main').innerText();if(state==='before')programmeText=text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n');else assert.equal(text.split('\n').map(s=>s.trim()).filter(Boolean).sort().join('\n'),programmeText,'Programme wording preserved');
    if(state==='after'){
     assert.equal(await page.locator('.programme-links').count(),5);
+    assert(await page.locator('.programme-support').evaluate(e=>Boolean(e.compareDocumentPosition(document.querySelector('.programme-nav'))&Node.DOCUMENT_POSITION_FOLLOWING)),'Support introduction precedes programme navigation');
+    assert.equal(await page.locator('.programme-support h2').evaluate(e=>getComputedStyle(e).fontSize),await page.locator('#ib summary h2').evaluate(e=>getComputedStyle(e).fontSize),'Shared support heading uses the programme heading scale');
+
     const spacing=await page.locator('.programme-disclosure').evaluateAll(es=>es.map(e=>({summary:getComputedStyle(e.querySelector('summary')).paddingTop,body:getComputedStyle(e.querySelector('.programme-details')).paddingBottom})));
     assert(spacing.every(v=>v.summary===spacing[0].summary&&v.body===spacing[0].body));
     const gaps=await page.locator('.programme-links').evaluateAll(es=>es.map(e=>getComputedStyle(e).gap));assert(gaps.every(g=>g==='8px'));
@@ -113,6 +116,13 @@ try{
    if(url.hash){const html=readFileSync(file,'utf8');assert(html.includes('id="'+decodeURIComponent(url.hash.slice(1))+'"'),path+' missing anchor '+href);}
   }
  }
+ await page.goto('http://127.0.0.1:8767/ontario-grade-9-10-science-tutoring/',{waitUntil:'domcontentloaded'});
+ await page.getByRole('link',{name:'Explore the IB Middle Years Programme',exact:true}).click();
+ assert.equal(new URL(page.url()).hash,'#myp');
+ await page.waitForFunction(()=>document.querySelector('#myp')?.open===true);
+ assert.equal(await page.locator('#myp').getAttribute('open'),'');
+ assert(await page.locator('#myp .programme-details').isVisible());
+ results.push('PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure');
  results.push('PASS: internal destinations and fragments across 16 public pages; seven existing recommendation cards intact');
  writeFileSync(output+'/results.txt',results.join('\n')+'\n');console.log(results.join('\n'));
 }finally{await browser.close();for(const s of servers)await new Promise(r=>s.close(r));}
