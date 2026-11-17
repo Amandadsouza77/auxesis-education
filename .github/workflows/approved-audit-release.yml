@@ -74,7 +74,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: approved-release-native-qa
-          path: work/native-review-qa/*.json
+          path: |
+            work/native-review-qa/*.json
+            work/approved-release-verification.json
           if-no-files-found: ignore
           retention-days: 14
       - name: Remove private recovery and isolated native files

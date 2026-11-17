@@ -102,6 +102,8 @@ async function verify(){
  for(const host of [origin,'https://auxedu.com']){
   const r=await fetch(host+'/api/enquiry',{headers:{'Cache-Control':'no-cache'},redirect:'error'});const d=await r.json();require(r.ok&&d.ready&&d.siteKey,'Inquiry readiness unavailable on '+host);
  }
+ const invalid=await fetch('https://auxedu.com/api/enquiry',{method:'POST',redirect:'error',headers:{Origin:'https://auxedu.com','Content-Type':'application/json'},body:JSON.stringify({consent:false})});
+ const invalidResult=await invalid.json();require(invalid.status===422&&invalidResult.ok!==true&&invalidResult.error,'Live enquiry validation failed');
  const deployed=await cf('/pages/projects/'+project);
  const deploymentOrigin=new URL(deployed.canonical_deployment.url).origin;
  for(const [path,digest] of Object.entries(b.publicFiles)){
@@ -122,6 +124,8 @@ async function verify(){
  require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash===process.env.GITHUB_SHA,'Unexpected production commit');
  require(JSON.stringify(live.deployment_configs)===b.config&&JSON.stringify(live.source)===b.source,'Production configuration changed');
  require(JSON.stringify(await businessDigest(b.db))===JSON.stringify(b.business),'Retained business records changed');
+ const checkpoint={commit:process.env.GITHUB_SHA,deploymentId:live.canonical_deployment.id,immutableOrigin:new URL(live.canonical_deployment.url).origin,rollbackDeployment:b.deployment,workerHash:sha(readFileSync(resolve(root,'dist/_worker.js'))),publicAssets:Object.keys(b.publicFiles).length,enquiryReadyBothDomains:true,invalidEnquiryRejected:true,recordsUnchanged:true,configurationUnchanged:true,realEmailsSent:0};
+ writeFileSync('work/approved-release-verification.json',JSON.stringify(checkpoint,null,2));console.log('APPROVED_RELEASE_CHECKPOINT '+JSON.stringify(checkpoint));
  console.log('::notice::Inquiry readiness verified on both domains; unrelated assets, native access boundaries, records and settings preserved. Prior end-to-end inbox receipt is retained; current provider integration is tested with mocked providers and live readiness without sending a duplicate enquiry.');
 }
 async function rollback(){
