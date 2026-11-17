@@ -54,23 +54,6 @@ jobs:
           name: public-production-baseline
           path: work/public-baseline
           retention-days: 7
-      - name: Diagnose review validation without creating records
-        run: |
-          node --input-type=module <<'JS'
-          for(const origin of ['https://auxedu.com','https://auxesis-education.pages.dev']){
-            const config=await fetch(origin+'/api/reviews/config');
-            const text=await config.text();let cfg;try{cfg=JSON.parse(text)}catch{cfg={error:text}};
-            console.log(JSON.stringify({origin,configStatus:config.status,configKeys:Object.keys(cfg),error:cfg.error}));
-            const r=await fetch(origin+'/api/reviews',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({review:'',public_label:'',consent:false})});
-            const invalidText=await r.text();let body;try{body=JSON.parse(invalidText)}catch{body={error:invalidText}};
-            if(r.ok)throw Error('Empty non-consenting review unexpectedly accepted');
-            console.log(JSON.stringify({origin,invalidStatus:r.status,error:body.error}));
-            const list=await fetch(origin+'/api/reviews');let reviews;try{reviews=await list.json()}catch{reviews={}};
-            console.log(JSON.stringify({origin,publicStatus:list.status,publishedCount:reviews.reviews?.length}));
-            const management=await fetch(origin+'/api/reviews/manage');
-            console.log(JSON.stringify({origin,managementStatus:management.status}));
-          }
-          JS
       - run: npm install --no-save --ignore-scripts esbuild@0.25
       - run: npm test
       - name: Install browser tools for isolated public fixtures
