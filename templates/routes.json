@@ -73,5 +73,15 @@
     "name": "a-level-biology-tutoring",
     "route": "/a-level-biology-tutoring/",
     "path": "a-level-biology-tutoring/index.html"
+  },
+  {
+    "name": "ontario-grade-9-10-science-tutoring",
+    "route": "/ontario-grade-9-10-science-tutoring/",
+    "path": "ontario-grade-9-10-science-tutoring/index.html"
+  },
+  {
+    "name": "ontario-grade-11-12-biology-chemistry-tutoring",
+    "route": "/ontario-grade-11-12-biology-chemistry-tutoring/",
+    "path": "ontario-grade-11-12-biology-chemistry-tutoring/index.html"
   }
 ]
