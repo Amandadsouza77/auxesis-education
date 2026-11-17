@@ -59,9 +59,17 @@ try{
 
    const gaps=await page.locator('.subject-detail-page>.section+.section').evaluateAll(es=>es.map(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-e.previousElementSibling.firstElementChild.lastElementChild.getBoundingClientRect().bottom));
    assert(gaps.length>0&&gaps.every(g=>g>=0&&g<=32),slug+' excessive section gaps '+JSON.stringify(gaps));
+   for(const course of await page.locator('details.ontario-course').all()){
+    await course.locator('summary').focus();await page.keyboard.press('Enter');
+    const gap=await course.evaluate(e=>e.querySelector('.ontario-course-body>p').getBoundingClientRect().top-e.querySelector('.ontario-course-code').getBoundingClientRect().bottom);
+    assert(gap>=12&&gap<=24,slug+' course code/description gap: '+gap);
+    assert((await course.locator('.ontario-course-body>p').first().innerText()).startsWith('This course '),'Course introduction avoids repeated grade/subject label');
+    if(width===1440&&(await course.innerText()).includes('SCH4U'))await course.screenshot({path:output+'/ontario-course-intro-after.png'});
+    await page.keyboard.press('Enter');
+   }
    if(slug==='gcse-igcse-science-tutoring')await page.screenshot({path:output+'/subject-detail-after-'+width+'.png',fullPage:true});
   }
-  results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact gaps (maximum 32px) and have no overflow at '+width+'px');
+  results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
  }
  const page=await browser.newPage({viewport:{width:390,height:900}});

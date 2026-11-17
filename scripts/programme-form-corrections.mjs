@@ -50,6 +50,8 @@ export function applyProgrammeFormCorrections(root){
 .subject-detail-page>.section>.wrap>:first-child{margin-top:0}
 .subject-detail-page>.section>.wrap>:last-child,.subject-detail-page .ontario-skill-grid article>:last-child,.subject-detail-page .ontario-course-body>:last-child,.subject-detail-page .ontario-topic>:last-child{margin-bottom:0}
 .subject-detail-page .ontario-topic{margin-top:.75rem}
+.subject-detail-page .ontario-course summary .ontario-course-heading{margin:0}
+.subject-detail-page .ontario-course-body{padding-top:.875rem}
 </style>`;
  for(const page of detailPages){
   const target=resolve(root,page.slug,'index.html');let detail=readFileSync(target,'utf8');

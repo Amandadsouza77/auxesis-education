@@ -15,7 +15,7 @@
       {
         "title": "Grade 9 Science",
         "code": "SNC1W · De-streamed",
-        "intro": "Ontario's de-streamed Grade 9 Science course introduces students to fundamental concepts in Biology, Chemistry, Physics, and Earth and Space Science.",
+        "intro": "This course introduces students to fundamental concepts in Biology, Chemistry, Physics, and Earth and Space Science.",
         "topics": [
           {
             "title": "Biology: Sustainable Ecosystems and Climate Change",
@@ -38,7 +38,7 @@
       {
         "title": "Grade 10 Science",
         "code": "SNC2D · Academic | SNC2P · Applied",
-        "intro": "Grade 10 Science builds on the foundations established in Grade 9, allowing students to develop a deeper understanding of scientific concepts and strengthen their investigation and problem-solving skills. Support is adapted to the expectations, learning approaches and assessment requirements of the student's specific course.",
+        "intro": "This course builds on the foundations established in Grade 9, allowing students to develop a deeper understanding of scientific concepts and strengthen their investigation and problem-solving skills. Support is adapted to the expectations, learning approaches and assessment requirements of the student's specific course.",
         "topics": [
           {
             "title": "Biology: Tissues, Organs and Systems",
@@ -128,7 +128,7 @@
           {
             "title": "Grade 11 Biology",
             "code": "SBI3U · University Preparation",
-            "intro": "Grade 11 Biology introduces students to the diversity and complexity of living organisms, exploring how biological systems function, change and interact.",
+            "intro": "This course introduces students to the diversity and complexity of living organisms, exploring how biological systems function, change and interact.",
             "topics": [
               {
                 "title": "Diversity of Living Things",
@@ -156,7 +156,7 @@
           {
             "title": "Grade 11 Biology",
             "code": "SBI3C · College Preparation",
-            "intro": "College-preparation Biology focuses on understanding biological systems and their applications in everyday life, health, technology and the environment.",
+            "intro": "This course focuses on understanding biological systems and their applications in everyday life, health, technology and the environment.",
             "topics": [
               {
                 "title": "Areas of study",
@@ -168,7 +168,7 @@
           {
             "title": "Grade 12 Biology",
             "code": "SBI4U · University Preparation",
-            "intro": "Grade 12 Biology examines biological processes at the molecular, cellular and systems levels.",
+            "intro": "This course examines biological processes at the molecular, cellular and systems levels.",
             "topics": [
               {
                 "title": "Biochemistry",
@@ -201,7 +201,7 @@
           {
             "title": "Grade 11 Chemistry",
             "code": "SCH3U · University Preparation",
-            "intro": "Grade 11 Chemistry establishes the foundation for understanding chemical behaviour, quantitative relationships and the interactions between substances.",
+            "intro": "This course establishes the foundation for understanding chemical behaviour, quantitative relationships and the interactions between substances.",
             "topics": [
               {
                 "title": "Structure and Bonding",
@@ -229,7 +229,7 @@
           {
             "title": "Grade 12 Chemistry",
             "code": "SCH4U · University Preparation",
-            "intro": "Grade 12 Chemistry develops a more advanced understanding of chemical structures, reactions and systems.",
+            "intro": "This course develops a more advanced understanding of chemical structures, reactions and systems.",
             "topics": [
               {
                 "title": "Organic Chemistry",
@@ -257,7 +257,7 @@
           {
             "title": "Grade 12 Chemistry",
             "code": "SCH4C · College Preparation",
-            "intro": "College-preparation Chemistry develops practical chemical knowledge and problem-solving skills with applications in industry, technology, health and the environment.",
+            "intro": "This course develops practical chemical knowledge and problem-solving skills with applications in industry, technology, health and the environment.",
             "topics": [
               {
                 "title": "Areas of study",
