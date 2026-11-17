@@ -11,7 +11,6 @@ import {normalizePublicEmail} from './public-baseline-normalize.mjs';
 const account='2ac862d7c1f865935d185df59e7bd719',project='auxesis-education';
 const root=resolve('work/staging-deployment/runtime'),state='work/approved-audit-release.json';
 const origin='https://auxesis-education.pages.dev';
-const baseline=JSON.parse(readFileSync('content/pr23-production-baseline.json','utf8'));
 const publicHash=(path,bytes)=>sha(path.endsWith('.html')?normalizePublicEmail(bytes.toString()):bytes);
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const require=(v,m)=>{if(!v)throw Error(m);};
@@ -34,6 +33,7 @@ async function liveBody(path,base=origin){
  require(r.ok||r.status===404&&path==='/404.html','Live baseline fetch failed: '+path+' HTTP '+r.status);return Buffer.from(await r.arrayBuffer());
 }
 async function prepare(){
+ const baseline=JSON.parse(readFileSync('content/pr23-production-baseline.json','utf8'));
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
  require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash===baseline.productionCommit,'Live source changed; reconcile approved corrections before deploying');
