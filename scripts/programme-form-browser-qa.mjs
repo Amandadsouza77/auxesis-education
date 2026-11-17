@@ -40,6 +40,14 @@ try{
    if(state==='after')assert(!(await page.content()).includes('adsouza35@gmail.com'));
    await page.screenshot({path:output+'/enquire-'+state+'-'+width+'.png',fullPage:true});
   }
+  for(const slug of ['ib-biology-tutoring','ib-chemistry-tutoring','a-level-biology-tutoring','gcse-igcse-science-tutoring','ontario-grade-9-10-science-tutoring','ontario-grade-11-12-biology-chemistry-tutoring']){
+   await page.goto('http://127.0.0.1:8767/'+slug+'/',{waitUntil:'domcontentloaded'});await page.evaluate(()=>document.fonts.ready);
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),slug+' overflow '+width);
+   const gaps=await page.locator('.subject-detail-page>.section+.section').evaluateAll(es=>es.map(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-e.previousElementSibling.firstElementChild.lastElementChild.getBoundingClientRect().bottom));
+   assert(gaps.length>0&&gaps.every(g=>g>=0&&g<=32),slug+' excessive section gaps '+JSON.stringify(gaps));
+   if(slug==='gcse-igcse-science-tutoring')await page.screenshot({path:output+'/subject-detail-after-'+width+'.png',fullPage:true});
+  }
+  results.push('PASS: all six subject/Ontario detail pages have compact section gaps (maximum 32px) and no overflow at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
  }
  const page=await browser.newPage({viewport:{width:390,height:900}});

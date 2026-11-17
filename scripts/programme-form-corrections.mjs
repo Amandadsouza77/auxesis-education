@@ -22,6 +22,26 @@ export function applyProgrammeFormCorrections(root){
 </style>`;
  if(!html.includes('</head>'))throw Error('Programme head missing');
  writeFileSync(file,html.replace('</head>',css+'</head>'));
+
+ // Detail pages used the global 4.5rem padding on both sides of every
+ // adjacent section. Scope compact spacing to all six subject/course pages.
+ const detailPages=[...JSON.parse(readFileSync('content/international-pages.json')), ...JSON.parse(readFileSync('content/ontario-pages.json'))];
+ const detailCss=`<style id="subject-detail-spacing">
+.subject-detail-page>.section{padding-block:1.5rem}
+.subject-detail-page>.section+.section{padding-top:0}
+.subject-detail-page>.page-hero+.section{padding-top:2rem}
+.subject-detail-page>.section h2,.subject-detail-page>.section h3{margin-bottom:.75rem}
+.subject-detail-page>.section p{margin-block:0 .75rem}
+.subject-detail-page>.section>.wrap>:first-child{margin-top:0}
+.subject-detail-page>.section>.wrap>:last-child,.subject-detail-page .ontario-skill-grid article>:last-child,.subject-detail-page .ontario-course-body>:last-child,.subject-detail-page .ontario-topic>:last-child{margin-bottom:0}
+.subject-detail-page .ontario-topic{margin-top:.75rem}
+</style>`;
+ for(const page of detailPages){
+  const target=resolve(root,page.slug,'index.html');let detail=readFileSync(target,'utf8');
+  if(detail.split('<main id="main">').length!==2)throw Error('Expected one detail main: '+page.slug);
+  detail=detail.replace('<main id="main">','<main id="main" class="subject-detail-page">').replace('</head>',detailCss+'</head>');
+  writeFileSync(target,detail);
+ }
  const enquiry=resolve(root,'enquire/index.html');
  html=readFileSync(enquiry,'utf8');
  let removed=0;
