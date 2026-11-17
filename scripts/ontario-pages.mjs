@@ -20,7 +20,7 @@ function renderCourse(course,senior=false){
   (course.ending?para(course.ending):'');
  const heading=senior
   ?'<h4 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h4>'
-  :'<span><strong>'+escape(course.title)+'</strong><span class="ontario-course-code">'+escape(course.code)+'</span></span>';
+  :'<h3 class="ontario-course-heading">'+escape(course.title)+'<span class="ontario-course-code">'+escape(course.code)+'</span></h3>';
  return '<details class="ontario-course"><summary>'+heading+'</summary><div class="ontario-course-body">'+body+'</div></details>';
 }
 function renderCourseGroup(heading,courses,senior=false){
@@ -84,6 +84,6 @@ export function applyOntario(root){
 .ontario-related li{margin:.45rem 0}
 @media(max-width:650px){.ontario-skill-grid{grid-template-columns:1fr}.ontario-course-body{padding-right:0}}
 `;
- writeFileSync(cssPath,readFileSync(cssPath,'utf8')+'\n'+css);
+ if(existsSync(cssPath))writeFileSync(cssPath,readFileSync(cssPath,'utf8')+'\n'+css);
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)&&process.argv[2])applyOntario(process.argv[2]);
