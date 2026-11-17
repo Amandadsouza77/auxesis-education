@@ -49,6 +49,12 @@ try{
    await page.goto('http://127.0.0.1:8767/'+slug+'/',{waitUntil:'domcontentloaded'});await page.evaluate(()=>document.fonts.ready);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),slug+' overflow '+width);
    for(const heading of await page.locator('main>.section h2').all())assert.equal(await heading.evaluate(e=>getComputedStyle(e).fontSize),referenceHeadingSize,slug+' matches parent heading scale');
+   if(slug==='a-level-biology-tutoring'){
+    assert.equal(await page.locator('main h1').innerText(),'Online AS and A-Level Biology tutoring');
+    const intact=await page.locator('main h1 .keep-together').evaluate(e=>{const range=document.createRange();range.selectNodeContents(e);return e.textContent==='A-Level'&&getComputedStyle(e).whiteSpace==='nowrap'&&range.getClientRects().length===1;});
+    assert(intact,'A-Level stays intact on one line at '+width+'px');
+    await page.screenshot({path:output+'/a-level-title-after-'+width+'.png'});
+   }
    if(await page.locator('.subject-topics').count()){
     assert.equal(await page.locator('.subject-topics>div>h2').innerText(),'Topics covered');
     const topicSizes=await page.locator('.subject-topic h3').evaluateAll(es=>es.map(e=>parseFloat(getComputedStyle(e).fontSize)));
