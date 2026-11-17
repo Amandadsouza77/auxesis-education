@@ -33,7 +33,7 @@ async function liveBody(path,base=origin){
 async function prepare(){
  require(process.env.GITHUB_REPOSITORY==='Amandadsouza77/auxesis-education'&&process.env.GITHUB_REF==='refs/heads/codex/cloudflare-backend-migration','Unexpected inquiry release branch');
  const live=await cf('/pages/projects/'+project),config=live.deployment_configs.production,v=config.env_vars;
- require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='30d97bef00054b752db0dc1b32582d60a297bf4c','Live source changed; reconcile approved corrections before deploying');
+ require(live.canonical_deployment?.deployment_trigger?.metadata?.commit_hash==='0bcf8624a4f0b7b92ec5a4ebdeb0ca963712a910','Live source changed; reconcile approved corrections before deploying');
  require(live.canonical_deployment?.id,'Rollback deployment unavailable');
  require(v.PRODUCTION_SYNC_ENABLED?.value==='false'&&v.PRODUCTION_AUTOMATION_ENABLED?.value==='false','Disabled automation guards required');
  require(v.SITE_URL?.value===origin,'Preserve verified initial inquiry origin');
@@ -44,9 +44,9 @@ async function prepare(){
  require(db!=='4f12fc1d-3e0d-4a11-bd65-e577ce906114','Production/staging isolation required');
  const before={deployment:live.canonical_deployment.id,config:JSON.stringify(live.deployment_configs),source:JSON.stringify(live.source),db,business:await businessDigest(db),publicFiles:{}};
  // Compare every independently verified current production asset before preparation.
- const captured=JSON.parse(readFileSync('content/international-previous-baseline-hashes.json'));
+ const captured=JSON.parse(readFileSync('content/ontario-previous-baseline-hashes.json'));
  const immutable=new URL(live.canonical_deployment.url).origin;
- require(immutable==='https://efe1f29d.auxesis-education.pages.dev','Unexpected immutable production deployment');
+ require(immutable==='https://332ab895.auxesis-education.pages.dev','Unexpected immutable production deployment');
  for(const [path,digest] of Object.entries(captured)){
   const url='/'+path.replace(/index\.html$/,'');
   const current=await liveBody(url,immutable);
@@ -76,7 +76,7 @@ async function prepare(){
   console.log('::notice::Retained restricted record inventory '+JSON.stringify({system:label,counts,recordWrites:0}));
  }
  const candidateAssets=files(resolve(root,'dist')).map(file=>relative(resolve(root,'dist'),file).replaceAll('\\\\','/')).filter(path=>!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.')).sort();
- const expectedAssets=[...Object.keys(captured),...JSON.parse(readFileSync('content/international-pages.json','utf8')).map(p=>p.slug+'/index.html'),...JSON.parse(readFileSync('content/ontario-pages.json','utf8')).map(p=>p.slug+'/index.html')].sort();
+ const expectedAssets=[...Object.keys(captured),...JSON.parse(readFileSync('content/ontario-pages.json','utf8')).map(p=>p.slug+'/index.html')].sort();
  require(JSON.stringify(candidateAssets)===JSON.stringify(expectedAssets),'Candidate asset inventory differs from approved international pages');
  for(const file of files(resolve(root,'dist'))){const path=relative(resolve(root,'dist'),file);if(!['_worker.js','_headers','_redirects','_routes.json'].includes(path)&&!path.startsWith('.'))before.publicFiles['/'+path.replace(/index\.html$/,'')]=sha(readFileSync(file));}
  writeFileSync(state,JSON.stringify(before),{mode:0o600});
