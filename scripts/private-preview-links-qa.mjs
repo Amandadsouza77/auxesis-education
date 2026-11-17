@@ -18,7 +18,7 @@ const server=createServer((req,res)=>{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
-const expected=[['Ontario College of Teachers public register (OCT #496538)','https://apps.oct.ca/FindATeacher/memberdetail?id=496538'],['View my LinkedIn profile','https://www.linkedin.com/in/adsouza35/']];
+const expected=[['Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry','https://apps.oct.ca/FindATeacher/memberdetail?id=496538'],['View my LinkedIn profile','https://www.linkedin.com/in/adsouza35/']];
 const output=resolve('work/qa-evidence');mkdirSync(output,{recursive:true});
 try{
  for(const width of [320,390,768,1440]){
@@ -31,6 +31,8 @@ try{
   });
   const page=await context.newPage();
   await page.goto(origin+'/about-amanda/');await page.evaluate(()=>document.fonts.ready);
+  assert.equal(((await page.locator('main').innerText()).match(/OCT #496538/g)||[]).length,1,'OCT number appears once, within its linked credential');
+  assert.equal(await page.getByText('Ontario College of Teachers public register (OCT #496538)',{exact:true}).count(),0,'Separate repeated register line removed');
   for(const [name,url] of expected){
    const link=page.getByRole('link',{name,exact:true});
    assert.equal(await link.getAttribute('href'),url);
@@ -67,6 +69,7 @@ try{
   assert(!(await introduction.innerText()).includes('Assistant Examiner'),'Detailed credentials are on About Amanda');
   if(width===390||width===1440)await introduction.screenshot({path:output+'/home-amanda-summary-'+width+'.png'});
   await introduction.getByRole('link',{name:'About Amanda',exact:true}).click();
+  await page.waitForLoadState('domcontentloaded');
   assert.equal(new URL(page.url()).pathname,'/about-amanda/');
   assert.equal(await page.getByRole('heading',{name:'More than 25 years in science education.',level:1}).count(),1,'Dedicated biography H1 retained');
   for(const fact of ['IB Biology Assistant Examiner','HL Paper 2','Internal Assessments','OCT #496538','Qualified Teacher Status'])assert((await page.locator('main').innerText()).includes(fact),'Detailed biography retains '+fact);

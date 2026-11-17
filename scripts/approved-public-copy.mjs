@@ -12,6 +12,14 @@ export function applyPublicCopy(root){
  for(const [file,changes] of Object.entries(edits)){
   let html=readFileSync('content/approved-baseline/'+file,'utf8');
   for(const {before,after} of changes){let count=0;html=html.replace(/<(p|h1|h2|h3)\b([^>]*)>([\s\S]*?)<\/\1>/g,(all,tag,attrs,inner)=>{if(decode(inner)!==before)return all;count++;return '<'+tag+attrs+'>'+escape(after)+'</'+tag+'>';});if(count!==1)throw Error(file+': expected one copy match, found '+count+' for '+before.slice(0,75));}
+  if(file==='about-amanda.html'){
+   // Link the existing credential itself instead of repeating the OCT number below.
+   const register=/<p><a class="text-link" href="(https:\/\/apps\.oct\.ca\/FindATeacher\/memberdetail\?id=496538)" rel="noopener noreferrer" target="_blank">Ontario College of Teachers public register \(OCT #496538\)<\/a><\/p>/g;
+   const credential=/<li>(Ontario Certified Teacher \(OCT #496538\)[^<]*)<\/li>/g;
+   const links=[...html.matchAll(register)];
+   if(links.length!==1||[...html.matchAll(credential)].length!==1)throw Error('Expected one OCT credential and one register link');
+   html=html.replace(credential,(_,text)=>'<li><a href="'+links[0][1]+'" rel="noopener noreferrer" target="_blank">'+text+'</a></li>').replace(register,'');
+  }
   if(file==='how-tutoring-works.html'){
    let removed=0;html=html.replace(/<article\b[^>]*>[\s\S]*?<\/article>/g,a=>{if(/Parent conversation|Your Auxesis Portal/.test(a)){removed++;return '';}return a;});if(removed!==2)throw Error('Unexpected process steps');
    let i=0;html=html.replace(/(<article><span>)\d{2}(<\/span>)/g,(_,a,b)=>a+String(++i).padStart(2,'0')+b);if(i!==4)throw Error('Expected four process steps');
