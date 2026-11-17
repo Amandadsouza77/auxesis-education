@@ -43,7 +43,6 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const stored=(await db.prepare('SELECT id,status,comment FROM website_reviews').all()).results;assert.equal(stored.length,1);assert.equal(stored[0].status,'pending');assert.equal(stored[0].comment,valid.review);
  const id=stored[0].id;assert.equal((await json(await send(''))).reviews.length,0);outcomes.push('PASS valid custom-domain review: explicit success, stored pending, absent publicly');
  const count=async()=>Number((await db.prepare('SELECT COUNT(*) AS n FROM website_reviews').first()).n);
- const replay=await send('',{method:'POST',ip,body:{...valid,form_token:cfg.token}});assert(replay.status>=400,'Replayed token rejected');assert.equal(await count(),1);outcomes.push('PASS replay rejected without new record');
  for(const scenario of ['invalid','missing-consent','missing-token','honeypot','too-fast','cross-origin','unapproved-host']){
   const ip='192.0.2.'+(++ipIndex),c=await config(ip);if(scenario!=='too-fast')await wait(c);
   const payload={...valid,review:'Synthetic isolated '+scenario+' case. Never production.',form_token:c.token};let origin=custom,source=custom;
@@ -55,6 +54,7 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
   negativeEvidence.push({scenario,httpStatus:r.status,storedRecordsAdded:0});
   outcomes.push(scenario==='honeypot'&&r.status===200?'PASS '+scenario+' silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
  }
+ const replay=await send('',{method:'POST',ip,body:{...valid,review:'Synthetic unique replay case. Never production.',form_token:cfg.token}});assert(replay.status>=400,'Replayed token rejected after other cases');assert.equal(await count(),1);outcomes.push('PASS replay rejected after delay with unique content and no new record');
  for(const origin of [legacy,custom]){
   const manage=await send('/manage',{origin});assert(manage.status===401||manage.status===403);const moderate=await send('/moderate',{origin,method:'POST',body:{id,decision:'approve'}});assert(moderate.status===401||moderate.status===403);
  }
@@ -67,7 +67,8 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  const queue=await send('/manage?status=pending',{origin:legacy,cookie});assert.equal(queue.status,200);assert((await json(queue)).reviews.some(r=>r.id===id));
  for(const decision of ['approve','reject']){
   const r=await send('/moderate',{origin:legacy,cookie,method:'POST',body:{id,decision}});assert.equal(r.status,200,decision+' permission');
-  const list=await json(await send(''));assert.equal(list.reviews.some(r=>r.id===id),decision==='approve');
+  const state=await db.prepare('SELECT status FROM website_reviews WHERE id=?1').bind(id).first();assert.equal(state.status,decision==='approve'?'approved':'rejected');
+  const list=await json(await send(''));assert.equal(list.reviews.some(r=>r.comment===valid.review&&r.public_label===valid.public_label),decision==='approve','Public API exposes the approved comment, without requiring private IDs');
  }
  outcomes.push('PASS anonymous and non-owner management denied; local owner approves/rejects; publication follows moderation');
  assert.equal(digest(JSON.stringify((await db.prepare('SELECT * FROM portal_accounts ORDER BY id').all()).results)),privateBefore);
