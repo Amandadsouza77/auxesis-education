@@ -60,7 +60,17 @@ try{
    await page.screenshot({path:output+'/senior-subtitle-'+width+'.png'});
    await page.goto(origin+'/about-amanda/');await page.locator('.credentials-panel').screenshot({path:output+'/credential-links-'+width+'.png'});
   }
-  console.log('PASS '+width+'px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1');
+  await page.goto(origin+'/');
+  const introduction=page.locator('section').filter({has:page.getByRole('heading',{name:'Meet Amanda.',exact:true})});
+  assert.equal(await introduction.count(),1,'One brief homepage introduction');
+  assert((await introduction.locator('p:not(.eyebrow)').innerText()).split(/\s+/).length<=40,'Homepage biography is a brief teaser');
+  assert(!(await introduction.innerText()).includes('Assistant Examiner'),'Detailed credentials are on About Amanda');
+  if(width===390||width===1440)await introduction.screenshot({path:output+'/home-amanda-summary-'+width+'.png'});
+  await introduction.getByRole('link',{name:'About Amanda',exact:true}).click();
+  assert.equal(new URL(page.url()).pathname,'/about-amanda/');
+  assert.equal(await page.getByRole('heading',{name:'More than 25 years in science education.',level:1}).count(),1,'Dedicated biography H1 retained');
+  for(const fact of ['IB Biology Assistant Examiner','HL Paper 2','Internal Assessments','OCT #496538','Qualified Teacher Status'])assert((await page.locator('main').innerText()).includes(fact),'Detailed biography retains '+fact);
+  console.log('PASS '+width+'px: LinkedIn/OCT mouse and keyboard new-tab destinations; noopener; isolated network/forms; compact subtitle and retained H1; brief home biography links to full preserved credentials');
   await context.close();
  }
 }finally{await browser.close();await new Promise(r=>server.close(r));}
