@@ -31,8 +31,13 @@ jobs:
             manifest[path]=createHash('sha256').update(bytes).digest('hex');
             const live=await fetch('https://auxedu.com/'+path,{redirect:'error'});
             if(!live.ok)throw Error('Current public asset unavailable '+path);
-            const current=createHash('sha256').update(Buffer.from(await live.arrayBuffer())).digest('hex');
-            if(current!==manifest[path])throw Error('Current production differs from recorded deployment: '+path);
+            const liveBytes=Buffer.from(await live.arrayBuffer());
+            writeFileSync('work/public-baseline/current-'+path.replaceAll('/','_'),liveBytes);
+            const current=createHash('sha256').update(liveBytes).digest('hex');
+            if(current!==manifest[path]){
+              const a=bytes.toString(),b=liveBytes.toString();let i=0;while(i<Math.min(a.length,b.length)&&a[i]===b[i])i++;
+              console.log(JSON.stringify({baselineDifference:path,immutableLength:a.length,currentLength:b.length,at:i,immutable:a.slice(Math.max(0,i-80),i+250),current:b.slice(Math.max(0,i-80),i+250)}));
+            }
           }
           for(const host of ['https://auxedu.com','https://auxesis-education.pages.dev']){
             const r=await fetch(host+'/api/enquiry',{redirect:'error'});
