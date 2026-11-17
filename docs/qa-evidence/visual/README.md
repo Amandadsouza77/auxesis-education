@@ -13,7 +13,7 @@ Baseline: `4e2ba62cc05e3a194b18b905074374b64456e75b`. Scope: all 16 public route
 
 ## Verification
 
-All 17 pages at 320, 390, 768 and 1440px (68 layouts): no horizontal overflow; preserved sections, true heading levels, form controls/values and brand tokens. Compare `baseline-contract.json` with the generated inventory. Only explicit callout wording and the SMART panel colour are permitted content/panel exceptions.
+All 17 pages at 320, 390, 768 and 1440px (68 layouts): no horizontal overflow; preserved sections, true heading levels, form controls/values and brand tokens. Compare `baseline-contract.json` with the generated inventory. Only explicit callout wording and the SMART panel colour are permitted authored-content/panel exceptions. Current UTC-offset labels are normalized because they are calculated for today by the browser time-zone database; every time-zone option value remains under exact comparison. Initial CI 44185288060 exposed this cross-browser offset difference; the preservation check was corrected without changing website time-zone behavior.
 
 68 representative desktop/mobile keyboard-focus and hover probes cover light, taupe, dark, turquoise, white-form and native-disclosure contexts. Button text contrast is at least 4.5:1 and targets at least 44px. Error text remains readable. All earlier programme/form/navigation checks pass. Unit suite: 137 passed, one pre-existing skip. Isolated private-preview checks also cover 1024px. No real submissions or provider calls were made by these visual tests.
 
