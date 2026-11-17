@@ -21,7 +21,9 @@ export function applyInternational(root){
   let html=template.replace(/<title>[\s\S]*?<\/title>/i,'<title>'+escape(p.title)+'</title>')
    .replace(/<meta name="description" content="[^"]*">/i,'<meta name="description" content="'+escape(p.description)+'">')
    .replace(/<link rel="canonical" href="[^"]*">/i,'<link rel="canonical" href="https://auxedu.com/'+p.slug+'/">');
-  const sections=p.sections.map(([h,t])=>'<section class="section"><div class="wrap"><h2>'+escape(h)+'</h2><p>'+escape(t)+'</p></div></section>').join('');
+  if(!Number.isInteger(p.topicCount)||p.topicCount<1||p.topicCount>=p.sections.length)throw Error('Expected explicit topic grouping for '+p.slug);
+  const topics=p.sections.slice(0,p.topicCount).map(([h,t])=>'<article class="subject-topic"><h3>'+escape(h)+'</h3><p>'+escape(t)+'</p></article>').join('');
+  const sections='<section class="section subject-topics"><div class="wrap"><h2>Topics covered</h2><div class="subject-topic-list">'+topics+'</div></div></section>'+p.sections.slice(p.topicCount).map(([h,t])=>'<section class="section"><div class="wrap"><h2>'+escape(h)+'</h2><p>'+escape(t)+'</p></div></section>').join('');
   const related=p.related.map(([name,url])=>'<li><a href="'+url+'">'+escape(name)+'</a></li>').join('');
   const main='<main id="main"><section class="page-hero"><div class="wrap"><a class="back-link" href="/subjects-programmes/">Back to Subjects &amp; Programmes</a><p class="eyebrow">One-to-one online tutoring</p><h1>'+escape(p.heading)+'</h1><p class="lead">'+escape(p.intro)+'</p></div></section>'+sections+'<section class="section"><div class="wrap"><h2>Explore related support</h2><ul>'+related+'</ul><p><a href="/tutoring-policies/">Read the academic-integrity policy</a></p></div></section><section class="section"><div class="wrap"><h2>Discuss the student’s needs</h2><p>Share the course, examination board where relevant, and the areas where support would help. We can discuss whether Auxesis is a good fit.</p><p><a class="button" href="/enquire/">Enquire about tutoring</a></p></div></section></main>';
   html=html.replace(/<main id="main">[\s\S]*?<\/main>/,main);

@@ -31,6 +31,11 @@ export function applyProgrammeFormCorrections(root){
 .subject-detail-page>.section+.section{padding-top:0}
 .subject-detail-page>.page-hero+.section{padding-top:2rem}
 .subject-detail-page>.section h2,.subject-detail-page>.section h3{margin-bottom:.75rem}
+/* Match the heading scale on the parent Subjects & Programmes page. */
+.subject-detail-page>.section h2{font-size:clamp(1.45rem,3vw,2rem)}
+.subject-detail-page .subject-topic h3,.subject-detail-page .ontario-courses>.wrap>h3{font-size:clamp(1.15rem,2.25vw,1.5rem);line-height:1.2;margin-bottom:.5rem}
+.subject-topic-list{display:grid;gap:1.25rem}
+.subject-detail-page .subject-topic>:last-child{margin-bottom:0}
 .subject-detail-page>.section p{margin-block:0 .75rem}
 .subject-detail-page>.section>.wrap>:first-child{margin-top:0}
 .subject-detail-page>.section>.wrap>:last-child,.subject-detail-page .ontario-skill-grid article>:last-child,.subject-detail-page .ontario-course-body>:last-child,.subject-detail-page .ontario-topic>:last-child{margin-bottom:0}

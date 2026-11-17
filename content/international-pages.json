@@ -52,7 +52,8 @@
         "AS and A-Level Biology tutoring",
         "/a-level-biology-tutoring/"
       ]
-    ]
+    ],
+    "topicCount": 4
   },
   {
     "slug": "ib-chemistry-tutoring",
@@ -99,7 +100,8 @@
         "GCSE and IGCSE science tutoring",
         "/gcse-igcse-science-tutoring/"
       ]
-    ]
+    ],
+    "topicCount": 2
   },
   {
     "slug": "gcse-igcse-science-tutoring",
@@ -154,7 +156,8 @@
         "AS and A-Level Biology tutoring",
         "/a-level-biology-tutoring/"
       ]
-    ]
+    ],
+    "topicCount": 2
   },
   {
     "slug": "a-level-biology-tutoring",
@@ -201,6 +204,7 @@
         "IB Biology tutoring",
         "/ib-biology-tutoring/"
       ]
-    ]
+    ],
+    "topicCount": 3
   }
 ]

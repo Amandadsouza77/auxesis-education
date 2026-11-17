@@ -40,14 +40,25 @@ try{
    if(state==='after')assert(!(await page.content()).includes('adsouza35@gmail.com'));
    await page.screenshot({path:output+'/enquire-'+state+'-'+width+'.png',fullPage:true});
   }
+  await page.goto('http://127.0.0.1:8767/subjects-programmes/');
+  const referenceHeadingSize=await page.locator('#ib summary h2').evaluate(e=>getComputedStyle(e).fontSize);
   for(const slug of ['ib-biology-tutoring','ib-chemistry-tutoring','a-level-biology-tutoring','gcse-igcse-science-tutoring','ontario-grade-9-10-science-tutoring','ontario-grade-11-12-biology-chemistry-tutoring']){
    await page.goto('http://127.0.0.1:8767/'+slug+'/',{waitUntil:'domcontentloaded'});await page.evaluate(()=>document.fonts.ready);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),slug+' overflow '+width);
+   for(const heading of await page.locator('main>.section h2').all())assert.equal(await heading.evaluate(e=>getComputedStyle(e).fontSize),referenceHeadingSize,slug+' matches parent heading scale');
+   if(await page.locator('.subject-topics').count()){
+    assert.equal(await page.locator('.subject-topics>div>h2').innerText(),'Topics covered');
+    const topicSizes=await page.locator('.subject-topic h3').evaluateAll(es=>es.map(e=>parseFloat(getComputedStyle(e).fontSize)));
+    assert(topicSizes.length>0&&topicSizes.every(n=>n<parseFloat(referenceHeadingSize)),slug+' subtopics are smaller H3s');
+   }
+   const hierarchy=await page.locator('main h1,main h2,main h3,main h4,main h5').evaluateAll(es=>es.map(e=>Number(e.tagName.slice(1))));
+   assert(hierarchy.every((n,i)=>i===0||n<=hierarchy[i-1]+1),slug+' accessible heading hierarchy');
+
    const gaps=await page.locator('.subject-detail-page>.section+.section').evaluateAll(es=>es.map(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-e.previousElementSibling.firstElementChild.lastElementChild.getBoundingClientRect().bottom));
    assert(gaps.length>0&&gaps.every(g=>g>=0&&g<=32),slug+' excessive section gaps '+JSON.stringify(gaps));
    if(slug==='gcse-igcse-science-tutoring')await page.screenshot({path:output+'/subject-detail-after-'+width+'.png',fullPage:true});
   }
-  results.push('PASS: all six subject/Ontario detail pages have compact section gaps (maximum 32px) and no overflow at '+width+'px');
+  results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact gaps (maximum 32px) and have no overflow at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
  }
  const page=await browser.newPage({viewport:{width:390,height:900}});
