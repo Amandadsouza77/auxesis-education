@@ -1,0 +1,48 @@
+name: Programme and form QA (no deployment)
+on:
+  push:
+    branches: [codex/programme-form-quality]
+permissions:
+  contents: read
+jobs:
+  public-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Capture public production baseline without submitting forms
+        run: |
+          mkdir -p work/public-baseline
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const origin='https://b55b1719.auxesis-education.pages.dev';
+          const paths=['styles.css','reviews.js','programmes.js','site-config.js','app.js','subjects-programmes/','enquire/','recommendations/'];
+          const manifest={};
+          for(const path of paths){
+            const r=await fetch(origin+'/'+path,{redirect:'error'});
+            if(!r.ok)throw Error('Public baseline HTTP '+r.status+' '+path);
+            const bytes=Buffer.from(await r.arrayBuffer());
+            writeFileSync('work/public-baseline/'+path.replaceAll('/','_'),bytes);
+            manifest[path]=createHash('sha256').update(bytes).digest('hex');
+          }
+          for(const host of ['https://auxedu.com','https://auxesis-education.pages.dev']){
+            const r=await fetch(host+'/api/enquiry',{redirect:'error'});
+            const data=await r.json();
+            if(!r.ok||!data.ready)throw Error('Enquiry readiness failed');
+            console.log(host+' enquiry ready: true');
+          }
+          writeFileSync('work/public-baseline/hashes.json',JSON.stringify(manifest,null,2));
+          console.log('Eight public assets captured. GET only; no submissions or provider writes.');
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-production-baseline
+          path: work/public-baseline
+          retention-days: 7
+      - run: npm test
+      - run: npm run build
