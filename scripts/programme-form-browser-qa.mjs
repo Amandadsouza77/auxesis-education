@@ -51,6 +51,10 @@ try{
    assert.equal(await page.locator('#enquiry-form').count(),1);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' enquiry overflow '+width);
    if(state==='after')assert(!(await page.content()).includes('adsouza35@gmail.com'));
+   if(state==='after'){
+    assert.equal(await page.getByRole('option',{name:'GCSE & IGCSE',exact:true}).getAttribute('value'),'GCSE / IGCSE','GCSE display name preserves submitted course value');
+    assert.equal(await page.getByRole('option',{name:'AS & A-Level',exact:true}).getAttribute('value'),'AS / A-Level','A-Level display name preserves submitted course value');
+   }
    await page.screenshot({path:output+'/enquire-'+state+'-'+width+'.png',fullPage:true});
   }
   await page.goto('http://127.0.0.1:8767/subjects-programmes/');
@@ -113,6 +117,17 @@ try{
   if(width===390||width===1440){await invitation.screenshot({path:output+'/review-invitation-'+width+'.png'});await page.locator('.recommendations-intro').screenshot({path:output+'/recommendations-inline-link-'+width+'.png'});}
   await reviewLink.focus();await page.keyboard.press('Enter');await page.waitForURL('**/#review-form');assert(await page.locator('#review-form').isVisible(),'Keyboard invitation reaches the existing review form');
   results.push('PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at '+width+'px');
+  await page.goto('http://127.0.0.1:8767/',{waitUntil:'domcontentloaded'});
+  const informationGap=await page.locator('.home-recommendations-section').evaluate(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-document.querySelector('.home-getting-started>.wrap').lastElementChild.getBoundingClientRect().bottom);
+  assert(informationGap>=40&&informationGap<=64,'Home information/recommendation gap is compact: '+informationGap);
+  for(const label of ['SMART goals','Communication & support'])assert.equal(await page.locator('.home-support-links').getByRole('link',{name:label,exact:true}).count(),1);
+  if(width===390||width===1440)await page.locator('.home-getting-started').screenshot({path:output+'/home-support-navigation-'+width+'.png'});
+  const menu=page.locator('.menu-toggle');if(await menu.isVisible()){await menu.focus();await page.keyboard.press('Enter');assert.equal(await menu.getAttribute('aria-expanded'),'true');}
+  const faqLink=page.locator('#main-navigation').getByRole('link',{name:'FAQs',exact:true});assert(await faqLink.isVisible());await faqLink.focus();await page.keyboard.press('Enter');await page.waitForURL('**/faq/');await page.waitForLoadState('domcontentloaded');
+  assert.equal(await page.locator('#main-navigation [aria-current="page"]').innerText(),'FAQs');
+  await page.getByRole('link',{name:'Next: Policies',exact:true}).click();await page.waitForURL('**/tutoring-policies/');await page.waitForLoadState('domcontentloaded');assert.equal(await page.locator('#main-navigation [aria-current="page"]').innerText(),'Policies');
+  await page.getByRole('link',{name:'Next: Enquire',exact:true}).click();await page.waitForURL('**/enquire/');
+  results.push('PASS: FAQs/Policies main-menu keyboard access, active-page labels, ordered Next links, visible homepage goals/communication links and 48px section gap at '+width+'px');
   results.push('PASS: all six detail pages match parent heading sizes, use valid H2/H3 topic hierarchy, retain compact section gaps, separate course descriptions from codes and have no overflow at '+width+'px');
   results.push('PASS: senior Biology/Chemistry teaching approach appears once before the course list; all six courses end with their actual topic, with no trailing general statement at '+width+'px');
   await page.close();results.push('PASS: programme/enquiry overflow, programme keyboard disclosures, consistent spacing and grouped links at '+width+'px');
@@ -159,10 +174,20 @@ try{
  await page.goto('http://127.0.0.1:8767/enquire/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('temporarily unavailable'));assert(!(await page.content()).includes('adsouza35@gmail.com'));assert(!(await page.locator('.delivery-note').innerText()).includes('email Amanda at'));
  results.push('PASS: enquiry required fields, Other selections, consent, missing spam check, retained data on provider failure and business-day confirmation; two intercepted POSTs, zero real emails');
  // Every existing same-site link must resolve in the assembled public candidate.
- const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/','/ib-biology-tutoring/','/ib-chemistry-tutoring/','/a-level-biology-tutoring/','/gcse-igcse-science-tutoring/','/ontario-grade-9-10-science-tutoring/','/ontario-grade-11-12-biology-chemistry-tutoring/'];
+ const paths=['/','/about-amanda/','/about-auxesis/','/enquire/','/faq/','/how-tutoring-works/','/privacy-consent/','/recommendations/','/subjects-programmes/','/tutoring-policies/','/ib-biology-tutoring/','/ib-chemistry-tutoring/','/a-level-biology-tutoring/','/gcse-igcse-science-tutoring/','/ontario-grade-9-10-science-tutoring/','/ontario-grade-11-12-biology-chemistry-tutoring/','/404.html'];
+ const journey=['/','/about-auxesis/','/about-amanda/','/how-tutoring-works/','/subjects-programmes/','/recommendations/','/faq/','/tutoring-policies/','/enquire/'];
  for(const path of paths){
   await page.goto('http://127.0.0.1:8767'+path,{waitUntil:'domcontentloaded'});
   assert.equal(await page.locator('main h1').count(),1,path);
+  const position=journey.indexOf(path);
+  if(position>=0){
+   const navigation=page.getByRole('navigation',{name:'Page navigation',exact:true});
+   if(position>0)assert.equal(await navigation.getByRole('link',{name:/^Previous:/}).getAttribute('href'),journey[position-1],path+' Previous follows the page order');
+   if(position<journey.length-1)assert.equal(await navigation.getByRole('link',{name:/^Next:/}).getAttribute('href'),journey[position+1],path+' Next follows the page order');
+  }
+  const levels=await page.locator('main h1,main h2,main h3,main h4,main h5').evaluateAll(es=>es.map(e=>Number(e.tagName.slice(1))));assert(levels.every((n,i)=>i===0||n<=levels[i-1]+1),path+' heading hierarchy');
+  assert(!(await page.content()).includes('adsouza35@gmail.com'),path+' personal address absent from public HTML');
+  for(const href of ['/faq/','/tutoring-policies/'])assert.equal(await page.locator('#main-navigation>a[href="'+href+'"]').count(),1,path+' important page in primary menu');
   const displayed=await page.locator('body').innerText();
   assert(!/GCSE\s*(?:\/|and)\s*IGCSE/i.test(displayed),path+' GCSE & IGCSE naming is consistent');
   assert(!/AS and A-Level/i.test(displayed),path+' AS & A-Level naming is consistent');
@@ -181,7 +206,7 @@ try{
  assert.equal(await page.locator('#myp').getAttribute('open'),'');
  assert(await page.locator('#myp .programme-details').isVisible());
  results.push('PASS: Ontario junior MYP link navigates directly to #myp and opens the correct programme disclosure');
- results.push('PASS: internal destinations and fragments across 16 public pages; seven existing recommendation cards intact');
- results.push('PASS: concise destination links and consistent AS & A-Level / GCSE & IGCSE names across all 16 public pages');
+ results.push('PASS: internal destinations, fragments, primary navigation, heading hierarchy and no personal address across 16 public pages plus 404; seven original review cards byte-for-byte intact');
+ results.push('PASS: concise destination links and consistent AS & A-Level / GCSE & IGCSE names across all public pages');
  writeFileSync(output+'/results.txt',results.join('\n')+'\n');console.log(results.join('\n'));
 }finally{await browser.close();for(const s of servers)await new Promise(r=>s.close(r));}

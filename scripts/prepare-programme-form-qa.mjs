@@ -13,7 +13,7 @@ cpSync('public/reviews.js','work/after/reviews.js');
 // Keep the captured native enquiry-only bootstrap, replacing only public fallback text.
 let app=readFileSync('work/after/app.js','utf8');
 app=app.replace('Online enquiries are temporarily unavailable. Please email adsouza35@gmail.com.','Online enquiries are temporarily unavailable. Please try again later.')
- .replace("if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please email Amanda at ';", "if(temporary)note.firstChild.textContent=kind==='enquiry'?'This form is temporarily unavailable. Please try again later.':'This form is temporarily unavailable. Please email Amanda at ';");
+ .replace("if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please email Amanda at ';", "if(temporary)note.firstChild.textContent='This form is temporarily unavailable. Please try again later.';");
 writeFileSync('work/after/app.js',app);
 console.log('Prepared public before/after fixtures only; native runtime not assembled.');
 

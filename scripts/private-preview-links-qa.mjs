@@ -21,7 +21,7 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.CH
 const expected=[['Ontario Certified Teacher (OCT #496538), with Intermediate and Senior qualifications in Biology and Chemistry','https://apps.oct.ca/FindATeacher/memberdetail?id=496538'],['LinkedIn profile','https://www.linkedin.com/in/adsouza35/']];
 const output=resolve('work/qa-evidence');mkdirSync(output,{recursive:true});
 try{
- for(const width of [320,390,768,1440]){
+ for(const width of [320,390,768,1024,1440]){
   const context=await browser.newContext({viewport:{width,height:900}});
   const requests=[];
   await context.route('**/*',r=>{
@@ -55,7 +55,8 @@ try{
    }
   }
   assert(requests.length===4&&requests.every(url=>expected.some(e=>e[1]===url)),'Only clicked public destinations requested');
-  assert(await page.locator('.footer [aria-disabled="true"]').count()>0,'Mail links stay disabled');
+  assert.equal(await page.locator('.footer a[href^="mailto:"]').count(),0,'Personal mail link removed from footer');
+  assert(!(await page.locator('.footer').innerText()).includes('adsouza35@gmail.com'),'Personal email is absent from footer');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow');
   assert.equal(await page.evaluate(()=>fetch('https://example.invalid/').then(()=>false,()=>true)),true,'External API requests stay blocked');
   assert((await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content')).includes("connect-src 'none'; form-action 'none'"));
@@ -68,6 +69,10 @@ try{
   if(width===390||width===1440){
    await page.screenshot({path:output+'/senior-subtitle-'+width+'.png'});
    await page.goto(origin+'/about-amanda/');await page.locator('.credentials-panel').screenshot({path:output+'/credential-links-'+width+'.png'});
+   if(await page.locator('.menu-toggle').isVisible()){
+    await page.locator('.menu-toggle').click();await page.locator('#main-navigation').screenshot({path:output+'/primary-menu-'+width+'.png'});await page.locator('.menu-toggle').click();
+   }else await page.locator('.header').screenshot({path:output+'/primary-menu-'+width+'.png'});
+   await page.locator('.footer').screenshot({path:output+'/footer-without-email-'+width+'.png'});
   }
   await page.goto(origin+'/');
   const introduction=page.locator('section').filter({has:page.getByRole('heading',{name:'Amanda D’Souza',exact:true})});

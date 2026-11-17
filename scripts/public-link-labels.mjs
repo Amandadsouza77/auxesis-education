@@ -24,9 +24,12 @@ export function applyPublicLinkLabels(root,files){
    html=html.replace(old,'Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.');
   }
   html=html.replace(/(<a\b[^>]*>)([^<]+)(<\/a>)/g,(all,start,text,end)=>labels.has(decode(text))?start+escape(labels.get(decode(text)))+end:all);
-  // Change displayed names, including metadata, without touching URL paths.
-  html=html.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE &amp; IGCSE')
-   .replace(/AS and (?=(?:<span class="keep-together">)?A-Level)/g,'AS &amp; ');
+  const displayName=text=>text.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE &amp; IGCSE').replace(/AS (?:and|\/) (?=A-Level|$)/g,'AS &amp; ');
+  // Preserve the existing submitted option values when changing visible labels.
+  html=html.replace(/<option([^>]*)>([^<]*)<\/option>/g,(all,attrs,text)=>displayName(text)!==text&&!/\bvalue=/.test(attrs)?'<option'+attrs+' value="'+escape(decode(text)).replaceAll('"','&quot;')+'">'+text+'</option>':all);
+  // URLs, configuration and genuine quoted recommendations are untouched.
+  html=html.split(/(<figure class="recommendation-card">[\s\S]*?<\/figure>)/g).map((part,i)=>i%2?part:part.replace(/>([^<]*)</g,(_,text)=>'>'+displayName(text)+'<')).join('');
+  html=html.replace(/(<meta name="description" content=")([^"]*)(")/g,(_,start,text,end)=>start+displayName(text)+end);
   writeFileSync(path,html);
  }
 }
