@@ -2,7 +2,7 @@ name: SEO candidate browser checks (no deployment)
 on:
   push:
     branches: [codex/ontario-science-pages-review]
-    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, scripts/ontario-pages.mjs, content/ontario-pages.json, tests/ontario-pages.test.mjs, content/international-pages.json, content/international-previous-baseline-hashes.json, tests/seo-*.test.mjs]
+    paths: [.github/workflows/seo-candidate-check.yml, scripts/seo-metadata.mjs, scripts/approved-public-copy.mjs, scripts/international-pages.mjs, scripts/ontario-pages.mjs, scripts/approved-audit-release.mjs, content/ontario-previous-baseline-hashes.json, content/ontario-pages.json, tests/ontario-pages.test.mjs, content/international-pages.json, content/international-previous-baseline-hashes.json, tests/seo-*.test.mjs]
 permissions:
   contents: read
 jobs:
@@ -60,6 +60,8 @@ jobs:
            manifest[path]=createHash('sha256').update(Buffer.from(await r.arrayBuffer())).digest('hex');
            if(old[path]&&!allowed.has(path)&&old[path]!==manifest[path])throw Error('Unexpected Phase 2 asset change: '+path);
           }
+          const recorded=JSON.parse(readFileSync('content/ontario-previous-baseline-hashes.json','utf8'));
+          if(JSON.stringify(recorded)!==JSON.stringify(manifest))throw Error('Recorded Phase 2 baseline differs');
           console.log('PHASE2_BASELINE_MANIFEST '+JSON.stringify(manifest));
           console.log('PASS: 55 immutable Phase 2 assets compared; only approved page, biography and sitemap changes allowed.');
           JS
