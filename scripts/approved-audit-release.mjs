@@ -103,7 +103,7 @@ async function verify(){
   const r=await fetch(host+'/api/enquiry',{headers:{'Cache-Control':'no-cache'},redirect:'error'});const d=await r.json();require(r.ok&&d.ready&&d.siteKey,'Inquiry readiness unavailable on '+host);
  }
  const invalid=await fetch('https://auxedu.com/api/enquiry',{method:'POST',redirect:'error',headers:{Origin:'https://auxedu.com','Content-Type':'application/json'},body:JSON.stringify({consent:false})});
- const invalidResult=await invalid.json();require(invalid.status===422&&invalidResult.ok!==true&&invalidResult.error,'Live enquiry validation failed');
+ const invalidResult=await invalid.json();require(invalid.status===400&&invalidResult.ok!==true&&invalidResult.error,'Live enquiry validation failed');
  const deployed=await cf('/pages/projects/'+project);
  const deploymentOrigin=new URL(deployed.canonical_deployment.url).origin;
  for(const [path,digest] of Object.entries(b.publicFiles)){
