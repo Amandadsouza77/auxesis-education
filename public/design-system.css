@@ -58,6 +58,8 @@
 .public-visual-system .button:not(.secondary):hover,.public-visual-system .section .button:not(.secondary):hover{background:var(--control-hover-bg);border-color:var(--control-hover-bg);color:var(--control-hover-fg);filter:none}
 .public-visual-system .button.secondary,.public-visual-system .section .button.secondary{background:transparent;border:1px solid var(--outline-ink);color:var(--outline-ink)}
 .public-visual-system .button.secondary:hover,.public-visual-system .section .button.secondary:hover{background:var(--outline-hover-bg);border-color:var(--outline-ink);color:var(--outline-hover-fg);transform:none}
+.public-visual-system .fees-panel .actions{display:grid;grid-template-columns:repeat(2,max-content);align-items:start}
+.public-visual-system .fees-panel .actions>.button:not(.secondary){grid-column:1/-1;justify-self:start}
 .public-visual-system .menu-toggle{border-color:var(--accent-bronze);color:var(--accent-bronze);border-radius:var(--component-radius)}
 .public-visual-system :is(a,button,input,select,textarea,summary):focus-visible{
  outline:3px solid var(--focus-ring);outline-offset:3px;box-shadow:0 0 0 2px var(--focus-gap);
@@ -91,6 +93,8 @@
 .public-visual-system :is(.ontario-course-heading,.ontario-skill-grid h3){font:600 1.1rem/1.4 var(--sans)}
 .public-visual-system .smart-goals-block h2{font:400 clamp(1.85rem,3.5vw,3rem)/1.14 var(--serif)}
 @media(max-width:560px){
+ .public-visual-system .fees-panel .actions{grid-template-columns:minmax(0,1fr)}
+ .public-visual-system .fees-panel .actions>.button{width:100%}
  .public-visual-system{--type-title:clamp(2.45rem,10vw,3.1rem);--type-home-title:clamp(1.85rem,8.2vw,2.3rem);--type-feature:clamp(1.9rem,8vw,2.25rem);--type-step:clamp(1.4rem,6.3vw,1.6rem)}
  .public-visual-system .public-title.compact-title{font-size:clamp(1.8rem,7.8vw,2.25rem)}
  .public-visual-system .public-title.privacy-title{font-size:clamp(1.75rem,7.6vw,2rem)}
