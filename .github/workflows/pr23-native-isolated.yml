@@ -39,6 +39,7 @@ jobs:
           const keys=new Set();
           for(const file of [root+'/staging-entry.js',...files(root+'/cloudflare')].filter(f=>f.endsWith('.js'))){for(const m of readFileSync(file,'utf8').matchAll(/\.([A-Z][A-Z0-9_]{2,})\b/g))keys.add(m[1]);}
           console.log('Native binding interface names (no values): '+JSON.stringify([...keys].sort()));
+          for(const file of files(root+'/cloudflare').filter(f=>f.endsWith('.js')&&/review|form/.test(f))){const source=readFileSync(file,'utf8');console.log(JSON.stringify({module:file.split('/').at(-1),exports:[...source.matchAll(/export\s+(?:async\s+)?(?:function|const|class)\s+(\w+)/g)].map(m=>m[1])}));}
           JS
       - name: Verify existing native tests in isolated fixtures
         working-directory: work/staging-deployment/runtime
@@ -46,7 +47,7 @@ jobs:
       - name: Checkout exact PR candidate without credentials
         uses: actions/checkout@v4
         with:
-          ref: a15e76b1c3fa741806a8bfc26bb5f1c819c6a7d6
+          ref: ded767822f1a098368cabccc9a8776504812e3c1
           path: candidate
           persist-credentials: false
       - name: Install test tools without provider credentials
