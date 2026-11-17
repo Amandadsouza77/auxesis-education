@@ -9,7 +9,7 @@ const root=resolve(process.env.QA_NATIVE_ROOT||'work/staging-deployment/runtime'
 const legacy='https://auxesis-education.pages.dev',custom='https://auxedu.com';
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const outcomes=[];let outbound=0;
-const options={workers:[{name:'native-candidate-review-qa',modules:true,script:readFileSync(root+'/dist/_worker.js','utf8'),compatibilityDate:'2026-07-30',d1Databases:{PORTAL_DB:'ephemeral-review-qa'},bindings:{SITE_URL:legacy,PRODUCTION_SYNC_ENABLED:'false',PRODUCTION_AUTOMATION_ENABLED:'false',PORTAL_STAGING_ONLY:'false',SESSION_SECRET:'synthetic-local-secret-not-a-real-credential'},outboundService:()=>{outbound++;return new Response('External network disabled by QA',{status:599});}}],cf:false,d1Persist:false};
+const options={workers:[{name:'native-candidate-review-qa',modules:true,script:readFileSync(root+'/dist/_worker.js','utf8'),compatibilityDate:'2026-07-30',d1Databases:{PORTAL_DB:'ephemeral-review-qa'},bindings:{SITE_URL:legacy,PRODUCTION_SYNC_ENABLED:'false',PRODUCTION_AUTOMATION_ENABLED:'false',PORTAL_STAGING_ONLY:'false',SESSION_SECRET:'synthetic-local-secret-not-a-real-credential',PORTAL_TOKEN_KEY:'0000000000000000000000000000000000000000000000000000000000000000'},outboundService:()=>{outbound++;return new Response('External network disabled by QA',{status:599});}}],cf:false,d1Persist:false};
 const mf=new runtime.Miniflare(runtime.convertV4MiniflareOptions?runtime.convertV4MiniflareOptions(options):options);
 try{
  const db=await mf.getD1Database('PORTAL_DB','native-candidate-review-qa');
@@ -34,7 +34,7 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  let ipIndex=1;
  const send=(path,{origin=custom,method='GET',body,ip='192.0.2.1',cookie,source=origin}={})=>mf.dispatchFetch(origin+'/api/reviews'+path,{method,headers:{Origin:source,'CF-Connecting-IP':ip,...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},...(body?{body:JSON.stringify(body)}:{})});
  const json=async r=>{const text=await r.text();try{return JSON.parse(text)}catch{throw Error('Native response HTTP '+r.status+' was not JSON: '+text.slice(0,80))}};
- const config=async ip=>{const r=await send('/config',{ip});assert.equal(r.status,200,'Custom-domain native config');const c=await json(r);assert.equal(c.ready,true);assert.equal(typeof c.token,'string');assert(Number.isFinite(c.notBefore)&&c.notBefore>=0&&c.notBefore<30000,'Bounded native delay expected');return c};
+ const config=async ip=>{const r=await send('/config',{ip});const c=await json(r);assert.equal(r.status,200,'Custom-domain native config: '+JSON.stringify(c));assert.equal(c.ready,true);assert.equal(typeof c.token,'string');assert(Number.isFinite(c.notBefore)&&c.notBefore>=0&&c.notBefore<30000,'Bounded native delay expected');return c};
  const wait=c=>new Promise(r=>setTimeout(r,c.notBefore+50));
  const valid={review:'Synthetic isolated runtime review. Never production.',public_label:'Ephemeral QA',rating:5,consent:true};
  const ip='192.0.2.'+(++ipIndex),cfg=await config(ip);console.log('Native minimum delay milliseconds: '+cfg.notBefore);
