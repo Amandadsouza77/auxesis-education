@@ -37,6 +37,19 @@ jobs:
         run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
       - name: Verify inquiry delivery in the actual Cloudflare runtime with mocked providers
         run: node tests/inquiry-runtime.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+      - name: Assemble and test the exact release candidate with isolated native storage and providers
+        env:
+          CLOUDFLARE_API_TOKEN: ''
+          GOOGLE_CLIENT_SECRET: ''
+          QA_NATIVE_ROOT: /tmp/auxesis-release-native-qa
+        run: |
+          cp -a work/staging-deployment/runtime /tmp/auxesis-release-native-qa
+          node scripts/assemble-native-review-qa.mjs
+          node tests/native-review-isolated.mjs
+          node tests/native-enquiry-isolated.mjs
       - name: Compile the verified native source required by the preparation guard
         run: npx esbuild work/staging-deployment/runtime/staging-entry.js --bundle --format=esm --outfile=work/staging-deployment/runtime/dist/_worker.js
       - name: Match current deployed source and prepare approved corrections
@@ -56,3 +69,14 @@ jobs:
       - name: Restore the prior production deployment on release failure
         if: failure()
         run: node scripts/approved-audit-release.mjs rollback
+      - name: Preserve bounded isolated verification evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-release-native-qa
+          path: work/native-review-qa/*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Remove private recovery and isolated native files
+        if: always()
+        run: rm -rf work/staging-deployment /tmp/auxesis-release-native-qa work/native-review-qa
