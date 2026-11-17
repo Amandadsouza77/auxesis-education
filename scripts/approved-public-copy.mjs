@@ -8,6 +8,8 @@ import {applyProgrammeFormCorrections} from './programme-form-corrections.mjs';
 import {applyPublicLinkLabels} from './public-link-labels.mjs';
 import {applyRecommendationsPresentation} from './recommendations-presentation.mjs';
 import {applyPublicNavigation} from './public-navigation.mjs';
+import {applyPublicVisualSystem} from './public-visual-system.mjs';
+import {applyPublicCallouts} from './public-callouts.mjs';
 const edits=JSON.parse(readFileSync('content/approved-public-corrections.json'));
 const decode=s=>s.replace(/<[^>]+>/g,'').replaceAll('&amp;','&').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&quot;','"').replaceAll('&nbsp;',' ').replace(/\s+/g,' ').trim();
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
@@ -50,6 +52,8 @@ export function applyPublicCopy(root){
  const publicFiles=[...Object.keys(edits).map(file=>file==='home.html'?'index.html':file==='404.html'?file:file.replace('.html','/index.html')),...detailPages.map(p=>p.slug+'/index.html')];
  applyPublicLinkLabels(root,publicFiles);
  applyPublicNavigation(root,publicFiles);
+ applyPublicCallouts(root);
+ applyPublicVisualSystem(root,publicFiles);
 }
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url) && process.argv[2])applyPublicCopy(process.argv[2]);
 

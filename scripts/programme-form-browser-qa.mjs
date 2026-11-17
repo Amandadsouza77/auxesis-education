@@ -5,6 +5,7 @@ import {readFileSync,existsSync,mkdirSync,writeFileSync} from 'node:fs';
 import {resolve,extname} from 'node:path';
 import assert from 'node:assert/strict';
 const output=resolve('work/qa-evidence');mkdirSync(output,{recursive:true});
+const programmeCallout=JSON.parse(readFileSync('content/public-callouts.json','utf8'))['subjects-programmes/index.html'];
 const cards=html=>html.match(/<figure class="recommendation-card">[\s\S]*?<\/figure>/g)||[];
 assert.equal(cards(readFileSync('work/after/recommendations/index.html','utf8')).length,7);
 assert.deepEqual(cards(readFileSync('work/after/recommendations/index.html','utf8')),cards(readFileSync('work/before/recommendations/index.html','utf8')),'All seven existing review excerpts, attribution and dates remain exactly intact');
@@ -29,7 +30,7 @@ try{
    assert.equal(await page.locator('.programme-disclosure[open]').count(),5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),state+' programme overflow '+width);
    const copy=await page.locator('main').evaluate(e=>{const clone=e.cloneNode(true);clone.querySelectorAll('a,.programme-experience').forEach(n=>n.remove());return [...clone.querySelectorAll('p,h1,h2,h3')].map(n=>n.textContent.trim()).filter(Boolean);});
-   const text=copy.map(s=>s.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE & IGCSE').replaceAll('AS and A-Level','AS & A-Level').replace('Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.','Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.').replace(' Adult students are welcome to enquire directly.','')).sort().join('\n');if(state==='before')programmeText=text;else assert.equal(text,programmeText,'Programme body copy preserved except explicit owner wording changes');
+   const text=copy.map(s=>s.replace(/GCSE\s*(?:\/|and)\s*IGCSE/g,'GCSE & IGCSE').replaceAll('AS and A-Level','AS & A-Level').replace('Because Combined and Coordinated Science structures vary, send the examination board or relevant topics with your enquiry so I can confirm suitability.','Combined and Coordinated Science courses vary by examination board. Please include the examination board and relevant topics in your enquiry so I can confirm suitability.').replace(' Adult students are welcome to enquire directly.','').replace(programmeCallout.beforeHeading,programmeCallout.heading).replace(programmeCallout.beforeText,programmeCallout.text)).sort().join('\n');if(state==='before')programmeText=text;else assert.equal(text,programmeText,'Programme body copy preserved except explicit owner wording changes');
    if(state==='after'){
     assert.equal(await page.locator('.programme-links').count(),5);
     assert.equal(await page.locator('.programme-experience').count(),1);assert((await page.locator('.programme-experience').innerText()).includes('IB Biology Assistant Examiner'));assert.equal(await page.locator('.programme-experience a').count(),0);

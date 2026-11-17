@@ -71,3 +71,15 @@ jobs:
           name: responsive-form-qa-evidence
           path: work/qa-evidence
           retention-days: 14
+      - name: Audit all public layouts and verify the visual system
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node scripts/visual-consistency-audit.mjs work/after work/visual-after
+          node scripts/visual-consistency-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-visual-consistency-evidence
+          path: work/visual-after
+          retention-days: 14

@@ -1,0 +1,100 @@
+/* Owner-review exploration: gold/bronze is proposed, not a production approval.
+   Keep brand turquoise/aubergine tokens and large feature backgrounds intact. */
+.public-visual-system{
+ --accent-gold:#A67C2E;
+ --accent-bronze:#6B4919;
+ --accent-bronze-hover:#513610;
+ --accent-on-dark:#D0AC66;
+ --accent-on-dark-hover:#E0BF7A;
+ --control-bg:var(--accent-bronze);
+ --control-fg:var(--alabaster);
+ --control-hover-bg:var(--accent-bronze-hover);
+ --control-hover-fg:var(--alabaster);
+ --outline-ink:var(--accent-bronze);
+ --outline-hover-bg:rgba(166,124,46,.08);
+ --outline-hover-fg:var(--accent-bronze);
+ --link-rule:var(--accent-gold);
+ --focus-ring:var(--accent-bronze);
+ --focus-gap:var(--alabaster);
+ --type-title:clamp(2.6rem,5.2vw,5rem);
+ --type-home-title:clamp(2.6rem,4.8vw,4.5rem);
+ --type-feature:clamp(2rem,3.5vw,3.55rem);
+ --type-compact-section:clamp(1.45rem,3vw,2rem);
+ --type-subsection:clamp(1.15rem,2.25vw,1.5rem);
+ --type-step:clamp(1.4rem,2.5vw,2rem);
+ --heading-leading:1.1;
+ --subheading-leading:1.2;
+ --component-radius:.35rem;
+ --component-height:3rem;
+}
+/* The same controls inherit their surface's palette. White forms reset it. */
+.public-visual-system :is(.home-hero,.page-hero,.section.dark,.footer,.programme-cards article){
+ --control-bg:var(--teal-companion);--control-fg:var(--midnight-violet);
+ --control-hover-bg:var(--teal-companion);--control-hover-fg:var(--midnight-violet);
+ --outline-ink:var(--accent-on-dark);--outline-hover-bg:rgba(208,172,102,.12);--outline-hover-fg:var(--accent-on-dark);
+ --link-rule:var(--accent-on-dark);--focus-ring:var(--accent-on-dark);--focus-gap:var(--midnight-violet);
+}
+.public-visual-system .taupe{--link-rule:var(--accent-bronze)}
+.public-visual-system :is(.cta-band,.smart-goals-block){
+ --control-bg:var(--midnight-violet);--control-fg:var(--alabaster);
+ --control-hover-bg:#21182F;--control-hover-fg:var(--alabaster);
+ --outline-ink:var(--midnight-violet);--outline-hover-bg:var(--midnight-violet);--outline-hover-fg:var(--alabaster);
+ --link-rule:var(--midnight-violet);--focus-ring:var(--midnight-violet);--focus-gap:var(--teal-companion);
+}
+.public-visual-system :is(.enquiry-form,.review-form){
+ --control-bg:var(--accent-bronze);--control-fg:var(--alabaster);
+ --control-hover-bg:var(--accent-bronze-hover);--control-hover-fg:var(--alabaster);
+ --outline-ink:var(--accent-bronze);--outline-hover-bg:rgba(166,124,46,.08);--outline-hover-fg:var(--accent-bronze);
+ --link-rule:var(--accent-bronze);--focus-ring:var(--accent-bronze);--focus-gap:var(--alabaster);
+}
+.public-visual-system .button{
+ min-height:var(--component-height);border-radius:var(--component-radius);
+ font:700 .95rem/1.2 var(--sans);padding:.75rem 1.25rem;
+}
+.public-visual-system .button:not(.secondary),.public-visual-system .section .button:not(.secondary){background:var(--control-bg);border-color:var(--control-bg);color:var(--control-fg)}
+.public-visual-system .button:not(.secondary):hover,.public-visual-system .section .button:not(.secondary):hover{background:var(--control-hover-bg);border-color:var(--control-hover-bg);color:var(--control-hover-fg);filter:none}
+.public-visual-system .button.secondary,.public-visual-system .section .button.secondary{background:transparent;border:1px solid var(--outline-ink);color:var(--outline-ink)}
+.public-visual-system .button.secondary:hover,.public-visual-system .section .button.secondary:hover{background:var(--outline-hover-bg);border-color:var(--outline-ink);color:var(--outline-hover-fg);transform:none}
+.public-visual-system .menu-toggle{border-color:var(--accent-bronze);color:var(--accent-bronze);border-radius:var(--component-radius)}
+.public-visual-system :is(a,button,input,select,textarea,summary):focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;box-shadow:0 0 0 2px var(--focus-gap);
+}
+.public-visual-system .button:not(.secondary):focus-visible,.public-visual-system .button.secondary:focus-visible,.public-visual-system .section .button:not(.secondary):focus-visible,.public-visual-system .section .button.secondary:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px;box-shadow:0 0 0 2px var(--focus-gap)}
+.public-visual-system .field :is(input,select,textarea):focus-visible{border-color:var(--accent-bronze)}
+.public-visual-system :is(input[type=checkbox],input[type=radio]){accent-color:var(--accent-bronze)}
+.public-visual-system .skip-link{background:var(--midnight-violet);color:var(--alabaster)}
+.public-visual-system :is(.text-link,.page-navigation a,.back-link,.footer a){text-decoration-color:var(--link-rule)}
+.public-visual-system main a:not(.button):not(.back-link):not(.text-link){text-decoration-color:var(--link-rule)}
+.public-visual-system .main-navigation>a:not(.button):is(:hover,[aria-current=page]){text-decoration-color:var(--accent-gold)}
+.public-visual-system .eyebrow:before,.public-visual-system .section.dark .eyebrow:before,.public-visual-system .home-hero .eyebrow:before,.public-visual-system .page-hero .eyebrow:before{background:var(--accent-gold)}
+.public-visual-system .cta-band .eyebrow:before{background:var(--midnight-violet)}
+.public-visual-system .path-band span:before{color:var(--accent-bronze)}
+.public-visual-system .process-list article>span{color:var(--accent-bronze)}
+.public-visual-system :is(.faq-list summary:after,.programme-disclosure summary:after){color:var(--accent-bronze)}
+.public-visual-system .programme-nav a:hover{border-color:var(--accent-bronze);background:rgba(166,124,46,.08)}
+.public-visual-system .recommendation-card{border-top-color:var(--accent-gold);border-radius:var(--component-radius)}
+.public-visual-system .ontario-skill-grid article{border-radius:var(--component-radius)}
+.public-visual-system :is(.form-note,.delivery-note){border-left-color:var(--accent-gold)}
+.public-visual-system .review-stars{color:var(--accent-bronze)}
+/* Reuse approved display/section scales; compact process titles were outliers. */
+.public-visual-system .public-title{font-size:var(--type-title);line-height:var(--heading-leading)}
+.public-visual-system .public-home-title{font-size:var(--type-home-title);line-height:var(--heading-leading)}
+.public-visual-system main h2{font-size:var(--type-feature);line-height:var(--heading-leading)}
+.public-visual-system main h3{font-size:var(--type-subsection);line-height:var(--subheading-leading)}
+.public-visual-system .process-list h2{font-size:var(--type-step);line-height:var(--subheading-leading)}
+.public-visual-system :is(.subject-detail-page>.section h2,.programme-support h2,.programme-disclosure summary h2){font-size:var(--type-compact-section);line-height:var(--heading-leading)}
+.public-visual-system .credentials-panel h2{font-size:clamp(1.6rem,2.45vw,2.2rem)}
+.public-visual-system .ontario-tagline{font:500 1.35rem/1.5 var(--sans)}
+.public-visual-system :is(.ontario-course-heading,.ontario-skill-grid h3){font:600 1.1rem/1.4 var(--sans)}
+.public-visual-system .smart-goals-block h2{font:400 clamp(1.85rem,3.5vw,3rem)/1.14 var(--serif)}
+@media(max-width:560px){
+ .public-visual-system{--type-title:clamp(2.45rem,10vw,3.1rem);--type-home-title:clamp(1.85rem,8.2vw,2.3rem);--type-feature:clamp(1.9rem,8vw,2.25rem);--type-step:clamp(1.4rem,6.3vw,1.6rem)}
+ .public-visual-system .public-title.compact-title{font-size:clamp(1.8rem,7.8vw,2.25rem)}
+ .public-visual-system .public-title.privacy-title{font-size:clamp(1.75rem,7.6vw,2rem)}
+ .public-visual-system .public-title.recommendations-title{font-size:clamp(1.9rem,8.4vw,2.3rem)}
+ .public-visual-system .credentials-panel h2{font-size:1.6rem}
+}
+@media(max-width:350px){
+ .public-visual-system{--type-feature:1.75rem}
+ .public-visual-system .public-title:not(.compact-title):not(.privacy-title){font-size:2.1rem}
+}

@@ -1,0 +1,197 @@
+{
+  "pageCount": 17,
+  "overflows": [],
+  "headings": [
+    {
+      "tag": "H1",
+      "classes": "public-title",
+      "size": "74.88px",
+      "line": "82.368px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "50.4px",
+      "line": "55.44px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "13.12px",
+      "line": "normal",
+      "weight": "600"
+    },
+    {
+      "tag": "H1",
+      "classes": "public-home-title",
+      "size": "69.12px",
+      "line": "76.032px",
+      "weight": "400"
+    },
+    {
+      "tag": "H3",
+      "classes": "",
+      "size": "24px",
+      "line": "28.8px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "35.2px",
+      "line": "38.72px",
+      "weight": "400"
+    },
+    {
+      "tag": "H1",
+      "classes": "compact-title public-title",
+      "size": "74.88px",
+      "line": "82.368px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "32px",
+      "line": "38.4px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "48px",
+      "line": "54.72px",
+      "weight": "400"
+    },
+    {
+      "tag": "H1",
+      "classes": "recommendations-title public-title",
+      "size": "74.88px",
+      "line": "82.368px",
+      "weight": "400"
+    },
+    {
+      "tag": "H1",
+      "classes": "privacy-title public-title",
+      "size": "74.88px",
+      "line": "82.368px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "",
+      "size": "32px",
+      "line": "35.2px",
+      "weight": "400"
+    },
+    {
+      "tag": "H2",
+      "classes": "ontario-tagline",
+      "size": "21.6px",
+      "line": "32.4px",
+      "weight": "500"
+    },
+    {
+      "tag": "H3",
+      "classes": "",
+      "size": "17.6px",
+      "line": "24.64px",
+      "weight": "600"
+    },
+    {
+      "tag": "H3",
+      "classes": "ontario-course-heading",
+      "size": "17.6px",
+      "line": "24.64px",
+      "weight": "600"
+    },
+    {
+      "tag": "H4",
+      "classes": "",
+      "size": "16.8px",
+      "line": "23.52px",
+      "weight": "600"
+    },
+    {
+      "tag": "H4",
+      "classes": "ontario-course-heading",
+      "size": "17.6px",
+      "line": "24.64px",
+      "weight": "600"
+    },
+    {
+      "tag": "H5",
+      "classes": "",
+      "size": "16.8px",
+      "line": "23.52px",
+      "weight": "600"
+    }
+  ],
+  "buttons": [
+    {
+      "classes": "button",
+      "color": "rgb(248, 246, 240)",
+      "ownBackground": "rgb(107, 73, 25)",
+      "border": "rgb(107, 73, 25)"
+    },
+    {
+      "classes": "button",
+      "color": "rgb(248, 246, 240)",
+      "ownBackground": "rgb(41, 33, 60)",
+      "border": "rgb(41, 33, 60)"
+    },
+    {
+      "classes": "button",
+      "color": "rgb(41, 33, 60)",
+      "ownBackground": "rgb(0, 157, 151)",
+      "border": "rgb(0, 157, 151)"
+    },
+    {
+      "classes": "button secondary",
+      "color": "rgb(208, 172, 102)",
+      "ownBackground": "rgba(0, 0, 0, 0)",
+      "border": "rgb(208, 172, 102)"
+    },
+    {
+      "classes": "button secondary",
+      "color": "rgb(107, 73, 25)",
+      "ownBackground": "rgba(0, 0, 0, 0)",
+      "border": "rgb(107, 73, 25)"
+    },
+    {
+      "classes": "button secondary small-button",
+      "color": "rgb(107, 73, 25)",
+      "ownBackground": "rgba(0, 0, 0, 0)",
+      "border": "rgb(107, 73, 25)"
+    }
+  ],
+  "panels": [
+    {
+      "classes": "cta-band",
+      "ownBackground": "rgb(0, 157, 151)",
+      "color": "rgb(41, 33, 60)"
+    },
+    {
+      "classes": "enquiry-aside",
+      "ownBackground": "rgba(0, 0, 0, 0)",
+      "color": "rgb(248, 246, 240)"
+    },
+    {
+      "classes": "statement-band",
+      "ownBackground": "rgb(0, 140, 135)",
+      "color": "rgb(255, 255, 255)"
+    },
+    {
+      "classes": "statement-band smart-goals-block",
+      "ownBackground": "rgb(0, 157, 151)",
+      "color": "rgb(41, 33, 60)"
+    },
+    {
+      "classes": "cta-band review-invitation",
+      "ownBackground": "rgb(0, 157, 151)",
+      "color": "rgb(41, 33, 60)"
+    }
+  ]
+}
