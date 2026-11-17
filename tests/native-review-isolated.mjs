@@ -34,7 +34,7 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
  let ipIndex=1;
  const send=(path,{origin=custom,method='GET',body,ip='192.0.2.1',cookie,source=origin}={})=>mf.dispatchFetch(origin+'/api/reviews'+path,{method,headers:{Origin:source,'CF-Connecting-IP':ip,...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},...(body?{body:JSON.stringify(body)}:{})});
  const json=async r=>{const text=await r.text();try{return JSON.parse(text)}catch{throw Error('Native response HTTP '+r.status+' was not JSON: '+text.slice(0,80))}};
- const config=async ip=>{const r=await send('/config',{ip});const c=await json(r);assert.equal(r.status,200,'Custom-domain native config: '+JSON.stringify(c));assert.equal(c.ready,true);assert.equal(typeof c.token,'string');assert(Number.isFinite(c.notBefore)&&c.notBefore>=0&&c.notBefore<30000,'Bounded native delay expected');return c};
+ const config=async(ip,origin=custom)=>{const r=await send('/config',{ip,origin});const c=await json(r);assert.equal(r.status,200,'Custom-domain native config: '+JSON.stringify(c));assert.equal(c.ready,true);assert.equal(typeof c.token,'string');assert(Number.isFinite(c.notBefore)&&c.notBefore>=0&&c.notBefore<30000,'Bounded native delay expected');return c};
  const wait=c=>new Promise(r=>setTimeout(r,c.notBefore+50));
  const valid={review:'Synthetic isolated runtime review. Never production.',public_label:'Ephemeral QA',rating:5,consent:true};
  const ip='192.0.2.'+(++ipIndex),cfg=await config(ip);console.log('Native minimum delay milliseconds: '+cfg.notBefore);
@@ -54,6 +54,7 @@ print(json.dumps(statements))`],{input:readFileSync(migrations+'/'+file,'utf8'),
   negativeEvidence.push({scenario,httpStatus:r.status,storedRecordsAdded:0});
   outcomes.push(scenario==='honeypot'&&r.status===200?'PASS '+scenario+' silently discarded; native HTTP 200 decoy preserved':'PASS '+scenario+' rejected');
  }
+ const legacyIp='192.0.2.'+(++ipIndex),legacyCfg=await config(legacyIp,legacy);const legacyEarly=await send('',{origin:legacy,method:'POST',ip:legacyIp,body:{...valid,review:'Unique legacy too-fast case. Never production.',form_token:legacyCfg.token}});assert.equal(legacyEarly.status,429);assert.equal(await count(),1);negativeEvidence.push({scenario:'legacy-too-fast',httpStatus:legacyEarly.status,storedRecordsAdded:0});outcomes.push('PASS legacy hostname cannot bypass minimum token age');
  const replay=await send('',{method:'POST',ip,body:{...valid,review:'Synthetic unique replay case. Never production.',form_token:cfg.token}});assert(replay.status>=400,'Replayed token rejected after other cases');assert.equal(await count(),1);outcomes.push('PASS replay rejected after delay with unique content and no new record');
  for(const origin of [legacy,custom]){
   const manage=await send('/manage',{origin});assert(manage.status===401||manage.status===403);const moderate=await send('/moderate',{origin,method:'POST',body:{id,decision:'approve'}});assert(moderate.status===401||moderate.status===403);

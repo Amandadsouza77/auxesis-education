@@ -15,7 +15,7 @@ test('public review adapter checks original origin and retains native bindings a
   const before=calls.length;const r=await worker.fetch(new Request(site+'/api/reviews',{method:'POST',headers:source?{Origin:source}:{},body:'{}'}),env,ctx);assert.equal(r.status,403);assert.equal(calls.length,before,'Unapproved origin never reaches native code');
  }
  const before=calls.length;await worker.fetch(new Request(site+'/api/reviews/config'),env,ctx);assert.equal(calls.length,before+1,'Same-origin GET can omit Origin');
- for(const [origin,path,method] of [[site,'/api/reviews/manage','GET'],[site,'/api/reviews/moderate','POST'],[site,'/api/reviews/config','POST'],[site,'/api/reviews/','GET'],[site,'/api/enquiry','POST'],[site,'/api/portal/state','GET'],['https://evil.example','/api/reviews','POST'],[legacy,'/api/reviews','POST']]){
+ for(const [origin,path,method] of [[site,'/api/reviews/manage','GET'],[site,'/api/reviews/moderate','POST'],[site,'/api/reviews/config','POST'],[site,'/api/reviews/','GET'],[site,'/api/enquiry','POST'],[site,'/api/portal/state','GET'],['https://evil.example','/api/reviews','POST']]){
   const request=new Request(origin+path,{method});await worker.fetch(request,env,ctx);assert.equal(calls.at(-1).request,request);assert.equal(calls.at(-1).bindings,env);
  }
  for(const bindings of [{...env,SITE_URL:''},{...env,SITE_URL:'https://evil.example'},{...env,PRODUCTION_ORIGIN:'https://evil.example'}]){const request=new Request(site+'/api/reviews');await worker.fetch(request,bindings,ctx);assert.equal(calls.at(-1).request,request);assert.equal(calls.at(-1).bindings,bindings);}
@@ -27,6 +27,7 @@ test('authenticated native token age is enforced without consuming it or changin
  const post=token=>new Request(site+'/api/reviews',{method:'POST',headers:{Origin:site,'Content-Type':'application/json'},body:JSON.stringify({review:'Synthetic test only',form_token:token})});
  const fresh=await seal(key,JSON.stringify({nonce:'test-nonce',origin:legacy,expires:Date.now()+1800000}));
  const early=await worker.fetch(post(fresh),env);assert.equal(early.status,429);assert.match((await early.json()).error,/wait a moment/);assert.equal(calls,0);
+ const legacyEarly=await worker.fetch(new Request(legacy+'/api/reviews',{method:'POST',headers:{Origin:legacy},body:JSON.stringify({form_token:fresh})}),env);assert.equal(legacyEarly.status,429);assert.equal(calls,0,'Legacy endpoint cannot bypass minimum age');
  const mature=await seal(key,JSON.stringify({nonce:'test-nonce',origin:legacy,expires:Date.now()+1800000-2000}));
  assert.equal((await worker.fetch(post(mature),env)).status,200);assert.equal(calls,1);
  await worker.fetch(post('tampered-token'),env);assert.equal(calls,2,'Native handler still rejects invalid tokens');

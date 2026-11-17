@@ -10,7 +10,7 @@ export function withPublicSite(worker){return {...worker,async fetch(request,env
  // Tokens, body, D1 binding and all private routes remain with the native code.
  const publicReview=(url.pathname==='/api/reviews'&&['GET','POST'].includes(request.method))||
    (url.pathname==='/api/reviews/config'&&request.method==='GET');
- if(publicReview&&url.origin==='https://auxedu.com'&&
+ if(publicReview&&['https://auxedu.com','https://auxesis-education.pages.dev'].includes(url.origin)&&
     env?.PRODUCTION_ORIGIN==='https://auxesis-education.pages.dev'&&
     ['https://auxesis-education.pages.dev','https://auxedu.com'].includes((env.SITE_URL||'').replace(/\/$/,''))){
   const source=request.headers.get('Origin');
@@ -33,6 +33,7 @@ export function withPublicSite(worker){return {...worker,async fetch(request,env
     }
    }
   }
+  if(url.origin==='https://auxesis-education.pages.dev')return worker.fetch(request,env,ctx);
   const originalOrigin=url.origin;
   url.host='auxesis-education.pages.dev';
   const forwarded=new Request(url.href,request);
