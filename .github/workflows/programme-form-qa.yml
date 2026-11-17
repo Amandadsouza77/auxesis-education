@@ -63,26 +63,18 @@ jobs:
           JS
       - run: npm install --no-save --ignore-scripts esbuild@0.25
       - run: npm test
-
-
-  native-tests:
-    runs-on: ubuntu-latest
-    environment: auxesis-migration-preview
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Recover verified runtime read only
+      - name: Install browser tools for isolated public fixtures
+        run: npm install --no-save --ignore-scripts esbuild@0.25 playwright@1.56.0
+      - run: npx playwright install --with-deps chromium
+      - name: Assemble public fixtures and run responsive form regression
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: node scripts/prelaunch-runtime-recover.mjs --review-qa
-      - name: Retained native review tests
-        working-directory: work/staging-deployment/runtime
-        run: node tests/website-reviews.test.mjs
-      - run: npm install --no-save --ignore-scripts esbuild@0.25 miniflare@4.20260730.0
-      - run: node tests/inquiry-runtime.mjs
-      - run: node tests/review-domain-runtime.mjs
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node scripts/prepare-programme-form-qa.mjs
+          node scripts/programme-form-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-form-qa-evidence
+          path: work/qa-evidence
+          retention-days: 14

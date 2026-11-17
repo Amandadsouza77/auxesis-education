@@ -1,6 +1,7 @@
 // Public presentation corrections only. Native form handlers and private settings stay intact.
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 export function applyProgrammeFormCorrections(root){
  const file=resolve(root,'subjects-programmes/index.html');
  let html=readFileSync(file,'utf8');
@@ -31,4 +32,5 @@ export function applyProgrammeFormCorrections(root){
  html=html.replace(note,'<p class="delivery-note" hidden role="status">The enquiry form is temporarily unavailable. Please try again later.</p>');
  if(html.includes('adsouza35@gmail.com'))throw Error('Personal address still present on enquiry page.');
  writeFileSync(enquiry,html);
+ writeFileSync(resolve(root,'reviews.js'),readFileSync(fileURLToPath(new URL('../public/reviews.js',import.meta.url))));
 }
