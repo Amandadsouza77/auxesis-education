@@ -26,7 +26,9 @@ for(const page of after){
  assert.deepEqual(page.brand,{'--midnight-violet':'#29213c','--peacock-teal':'#008c87','--teal-companion':'#009d97','--alabaster':'#f8f6f0','--taupe':'#d6c9b8'},'Existing purple, turquoise and neutral branding retained');
  assert.equal(page.headings.filter(h=>h.tag==='H1').length,1);
  assert(page.labels.every(h=>!/^H[1-6]$/.test(h.tag)),'Decorative labels remain paragraphs');
- assert.deepEqual(page.panels.filter(p=>!p.classes.includes('smart-goals-block')).map(p=>[p.classes,p.ownBackground,p.image]),prior.panels.filter(p=>!p.classes.includes('smart-goals-block')).map(p=>[p.classes,p.ownBackground,p.image]),page.file+' approved feature colours preserved');
+ const unchangedPanel=p=>!p.classes.split(' ').includes('statement-band');
+ assert.deepEqual(page.panels.filter(unchangedPanel).map(p=>[p.classes,p.ownBackground,p.image]),prior.panels.filter(unchangedPanel).map(p=>[p.classes,p.ownBackground,p.image]),page.file+' other approved feature colours preserved');
+ for(const panel of page.panels.filter(p=>p.classes.split(' ').some(c=>['statement-band','cta-band'].includes(c))))assert.equal(panel.ownBackground,'rgb(0, 157, 151)','Every wide teal bar uses the brighter approved teal');
  for(const panel of page.panels.filter(p=>p.classes.includes('smart-goals-block'))){assert.equal(panel.ownBackground,'rgb(0, 157, 151)','Owner requested bright turquoise SMART goals panel');assert.equal(panel.color,'rgb(41, 33, 60)','Aubergine copy on bright turquoise');}
  assert.deepEqual(page.cards.map(p=>p.text),prior.cards.map(p=>p.text),page.file+' card content preserved');
  for(const button of page.buttons.filter(b=>b.visible)){
@@ -37,7 +39,7 @@ for(const page of after){
   assert(button.height>=44,'Button hit target stays at least 44px');
  }
 }
-results.push('PASS: all 17 public pages at 320/390/768/1440px: no overflow; section structure, form controls/values and true heading levels preserved. Copy changes are limited to explicit owner callout variants. Purple/turquoise brand tokens are unchanged; only SMART goals changes from dark green to bright turquoise at owner request.');
+results.push('PASS: all 17 public pages at 320/390/768/1440px: no overflow; section structure, form controls/values and true heading levels preserved. Copy changes are limited to explicit owner callout variants. Purple/neutral brand tokens are unchanged; every wide statement/CTA bar uses the owner-requested bright teal, including Less memorising and SMART goals.');
 results.push('PASS: visible button labels meet 4.5:1 text contrast and keep 44px-or-larger targets. Decorative gold is not used for normal-size text.');
 const root=resolve('work/after'),output=resolve('work/visual-after');mkdirSync(output,{recursive:true});
 const server=createServer((req,res)=>{let path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);if(path.endsWith('/'))path+='index.html';const file=resolve(root,'.'+path);if(!file.startsWith(root+'/')||!existsSync(file)){res.writeHead(404);return res.end();}res.setHeader('Content-Type',({'.html':'text/html','.css':'text/css','.js':'application/javascript','.ttf':'font/ttf','.png':'image/png','.svg':'image/svg+xml'})[extname(file)]||'application/octet-stream');res.end(readFileSync(file));});
@@ -54,6 +56,11 @@ try{
   const page=await context.newPage();
   for(const path of ['/','/how-tutoring-works/','/enquire/','/faq/','/subjects-programmes/','/recommendations/']){
    await page.goto(origin+path,{waitUntil:'domcontentloaded'});await page.evaluate(()=>document.fonts.ready);
+   for(const text of await page.locator('.statement-band :is(p,h2),.cta-band :is(p,h2)').all()){
+    const style=await text.evaluate(e=>{const s=getComputedStyle(e);return {color:s.color,size:parseFloat(s.fontSize),weight:parseFloat(s.fontWeight)};});
+    const required=style.size>=24||(style.size>=18.66&&style.weight>=700)?3:4.5;
+    assert(contrast(style.color,'#009D97')>=required,'Feature-bar text stays readable: '+path);
+   }
    for(const button of await page.locator('.button,.menu-toggle').all()){
     if(!await button.isVisible()||await button.isDisabled())continue;
     await button.hover();
