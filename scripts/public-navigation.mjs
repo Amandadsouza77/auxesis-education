@@ -15,6 +15,9 @@ export function applyPublicNavigation(root,files){
   if(menus!==1)throw Error('Expected one public primary menu: '+file);
   html=html.replace(/<footer\b[\s\S]*?<\/footer>/g,footer=>footer.replace(/<p><a href="mailto:adsouza35@gmail\.com">adsouza35@gmail\.com<\/a><\/p>/g,'').replace(/<nav aria-label="Footer navigation">[\s\S]*?<\/nav>/,nav=>nav.replace('<a href="/enquire/">Enquire</a>','').replace('<a href="/privacy-consent/">','<a href="/enquire/">Enquire</a><a href="/privacy-consent/">')));
   if(file==='index.html'){
+   const verification=/<p class="recommendation-verification">Selected excerpts from recommendations published on LinkedIn\. <a class="text-link" href="([^"]+)" rel="noopener noreferrer" target="_blank">LinkedIn recommendations<\/a><\/p>/g;
+   if([...html.matchAll(verification)].length!==1)throw Error('Expected one home recommendation verification sentence');
+   html=html.replace(verification,(_,url)=>'<p class="recommendation-verification">Selected excerpts from recommendations published on <a href="'+url+'" rel="noopener noreferrer" target="_blank">LinkedIn</a>.</p>');
    let getting=0,recommendations=0;
    html=html.replace(/<section\b[^>]*>[\s\S]*?<\/section>/g,section=>{
     if(section.includes('Tutoring starts with a conversation rather than a commitment.')){

@@ -75,6 +75,11 @@ try{
    await page.locator('.footer').screenshot({path:output+'/footer-without-email-'+width+'.png'});
   }
   await page.goto(origin+'/');
+  const verification=page.locator('.recommendation-verification');assert.equal(await verification.innerText(),'Selected excerpts from recommendations published on LinkedIn.');
+  const wordLink=verification.getByRole('link',{name:'LinkedIn',exact:true});assert.equal(await wordLink.getAttribute('href'),'https://www.linkedin.com/in/adsouza35/');
+  assert((await wordLink.evaluate(e=>getComputedStyle(e).textDecorationLine)).includes('underline'));
+  const linkedPage=context.waitForEvent('page');await wordLink.focus();await page.keyboard.press('Enter');const linkedPopup=await linkedPage;await linkedPopup.waitForLoadState();assert.equal(linkedPopup.url(),'https://www.linkedin.com/in/adsouza35/');await linkedPopup.close();
+  if(width===390||width===1440)await verification.screenshot({path:output+'/home-inline-linkedin-'+width+'.png'});
   const introduction=page.locator('section').filter({has:page.getByRole('heading',{name:'Amanda D’Souza',exact:true})});
   assert.equal(await introduction.count(),1,'One brief homepage introduction');
   assert((await introduction.locator('p:not(.eyebrow)').innerText()).split(/\s+/).length<=40,'Homepage biography is a brief teaser');

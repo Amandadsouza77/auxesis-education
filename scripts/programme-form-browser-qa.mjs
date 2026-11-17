@@ -119,6 +119,9 @@ try{
   results.push('PASS: full-width contrasting review invitation, 48px lead gap, keyboard form anchor and one inline LinkedIn context link at '+width+'px');
   await page.goto('http://127.0.0.1:8767/',{waitUntil:'domcontentloaded'});
   const informationGap=await page.locator('.home-recommendations-section').evaluate(e=>e.firstElementChild.firstElementChild.getBoundingClientRect().top-document.querySelector('.home-getting-started>.wrap').lastElementChild.getBoundingClientRect().bottom);
+  const verification=page.locator('.recommendation-verification');assert.equal(await verification.innerText(),'Selected excerpts from recommendations published on LinkedIn.');assert.equal(await verification.getByRole('link',{name:'LinkedIn',exact:true}).count(),1,'Home verification has one inline LinkedIn word link');
+  assert((await verification.locator('a').evaluate(e=>getComputedStyle(e).textDecorationLine)).includes('underline'),'Inline LinkedIn word is underlined');
+  if(width===390||width===1440)await verification.screenshot({path:output+'/home-inline-linkedin-'+width+'.png'});
   assert(informationGap>=40&&informationGap<=64,'Home information/recommendation gap is compact: '+informationGap);
   for(const label of ['SMART goals','Communication & support'])assert.equal(await page.locator('.home-support-links').getByRole('link',{name:label,exact:true}).count(),1);
   if(width===390||width===1440)await page.locator('.home-getting-started').screenshot({path:output+'/home-support-navigation-'+width+'.png'});
