@@ -1,0 +1,722 @@
+[
+  {
+    "file": "faq/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "enquire/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": {
+      "background": "rgb(248, 246, 240)",
+      "color": "rgb(41, 33, 60)"
+    }
+  },
+  {
+    "file": "index.html",
+    "width": 320,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "about-amanda/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "about-auxesis/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "tutoring-policies/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "how-tutoring-works/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "404.html",
+    "width": 320,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "recommendations/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "privacy-consent/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "subjects-programmes/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-biology-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-chemistry-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "gcse-igcse-science-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "a-level-biology-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-9-10-science-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-11-12-biology-chemistry-tutoring/index.html",
+    "width": 320,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "faq/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "enquire/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": {
+      "background": "rgb(248, 246, 240)",
+      "color": "rgb(41, 33, 60)"
+    }
+  },
+  {
+    "file": "index.html",
+    "width": 390,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "about-amanda/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "about-auxesis/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "tutoring-policies/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "how-tutoring-works/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "404.html",
+    "width": 390,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "recommendations/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "privacy-consent/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "subjects-programmes/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-biology-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-chemistry-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "gcse-igcse-science-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "a-level-biology-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-9-10-science-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-11-12-biology-chemistry-tutoring/index.html",
+    "width": 390,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "faq/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "enquire/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": {
+      "background": "rgb(248, 246, 240)",
+      "color": "rgb(41, 33, 60)"
+    }
+  },
+  {
+    "file": "index.html",
+    "width": 768,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "about-amanda/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "about-auxesis/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "tutoring-policies/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "how-tutoring-works/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "404.html",
+    "width": 768,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "recommendations/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "privacy-consent/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "subjects-programmes/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-biology-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-chemistry-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "gcse-igcse-science-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "a-level-biology-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-9-10-science-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-11-12-biology-chemistry-tutoring/index.html",
+    "width": 768,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "faq/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "enquire/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": {
+      "background": "rgb(248, 246, 240)",
+      "color": "rgb(41, 33, 60)"
+    }
+  },
+  {
+    "file": "index.html",
+    "width": 1440,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "about-amanda/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "about-auxesis/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "tutoring-policies/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "how-tutoring-works/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "404.html",
+    "width": 1440,
+    "heroes": [],
+    "enquirySection": null
+  },
+  {
+    "file": "recommendations/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "privacy-consent/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "subjects-programmes/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-biology-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ib-chemistry-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "gcse-igcse-science-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "a-level-biology-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-9-10-science-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  },
+  {
+    "file": "ontario-grade-11-12-biology-chemistry-tutoring/index.html",
+    "width": 1440,
+    "heroes": [
+      {
+        "background": "rgb(41, 33, 60)",
+        "image": "none"
+      }
+    ],
+    "enquirySection": null
+  }
+]

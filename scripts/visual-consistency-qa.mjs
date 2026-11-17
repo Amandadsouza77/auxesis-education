@@ -25,6 +25,12 @@ for(const page of after){
  assert.deepEqual(page.headings.map(h=>[h.tag,h.text]),prior.headings.map(h=>[h.tag,copy&&h.tag==='H2'&&h.text===copy.beforeHeading?copy.heading:h.text]),page.file+' heading structure preserved with owner-approved callout wording changes');
  assert.deepEqual(page.brand,{'--midnight-violet':'#29213c','--peacock-teal':'#008c87','--teal-companion':'#009d97','--alabaster':'#f8f6f0','--taupe':'#d6c9b8'},'Existing purple, turquoise and neutral branding retained');
  assert.equal(page.headings.filter(h=>h.tag==='H1').length,1);
+ assert(page.heroes.every(h=>h.ownBackground==='rgb(41, 33, 60)'&&h.image==='none'),'Page headers use solid aubergine');
+ if(page.file==='enquire/index.html'){
+  assert(page.enquirySection,'Enquiry section retains its explicit light-surface role');
+  assert.equal(page.enquirySection.background.color,'rgb(248, 246, 240)','Enquiry section is light');
+  assert.equal(page.enquirySection.color,'rgb(41, 33, 60)','Enquiry introduction uses aubergine text');
+ }
  assert(page.labels.every(h=>!/^H[1-6]$/.test(h.tag)),'Decorative labels remain paragraphs');
  const unchangedPanel=p=>!p.classes.split(' ').includes('statement-band');
  assert.deepEqual(page.panels.filter(unchangedPanel).map(p=>[p.classes,p.ownBackground,p.image]),prior.panels.filter(unchangedPanel).map(p=>[p.classes,p.ownBackground,p.image]),page.file+' other approved feature colours preserved');

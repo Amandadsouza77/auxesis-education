@@ -35,6 +35,7 @@
  --link-rule:var(--accent-on-dark);--focus-ring:var(--accent-on-dark);--focus-gap:var(--midnight-violet);
 }
 .public-visual-system .taupe{--link-rule:var(--accent-bronze)}
+.public-visual-system .page-hero{background:var(--midnight-violet)}
 /* Owner correction: every wide teal bar uses the brighter approved teal. */
 .public-visual-system :is(.statement-band,.cta-band){background:var(--teal-companion)}
 .public-visual-system :is(.cta-band,.smart-goals-block){
